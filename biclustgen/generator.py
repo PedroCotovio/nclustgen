@@ -21,6 +21,8 @@ from com.gtric.utils import QualitySettings
 from com.gtric.utils import TriclusterPattern
 from com.gtric.utils import TriclusterStructure
 
+from java.util import ArrayList
+
 
 class NumericGenerator:
 
@@ -30,9 +32,9 @@ class NumericGenerator:
                  percofoverlappingrows=1.0, percofoverlappingcolumns=1.0, percofoverlappingcontexts=1.0, **kwargs):
 
         if patterns is None:
-            patterns = [['constant', 'constant']]
+            patterns = [['CONSTANT', 'CONSTANT', 'CONSTANT']]
         if bicsdist is None:
-            bicsdist = [['UNIFORM', 4, 4], ['UNIFORM', 4, 4]]
+            bicsdist = [['UNIFORM', 4, 4], ['UNIFORM', 4, 4], ['UNIFORM', 4, 4]]
         if contiguity is None:
             contiguity = 'NONE'
 
@@ -70,12 +72,12 @@ class NumericGenerator:
             self.background = (bk, [float(prob) for prob in kwargs.get('probs')])
 
         else:
-            self.background = tuple(bk)
+            self.background = tuple([bk])
 
         # set bicluster patterns
 
-        self.patterns = [TriclusterPattern([getattr(PatternType, pattern_type)
-                                            for pattern_type in pattern]) for pattern in patterns]
+        self.patterns = [[getattr(PatternType, str(pattern_type).upper()) for pattern_type in pattern]
+                         for pattern in patterns]
 
         self.generatedDataset = None
 
@@ -90,13 +92,17 @@ class NumericGenerator:
         generator = NumericDatasetGenerator(self.realval, self.nrows, self.nrows, 1, self.nbics,
                                             background, self.minval, self.maxval)
 
+        # construct patterns
+
+        patterns = ArrayList()
+        [patterns.add(TriclusterPattern(*pattern)) for pattern in self.patterns]
+
         # construct bicluster structure
 
         structure = TriclusterStructure()
-        structure.setRownsSettings(getattr(Distribution, self.bicsdist[0][0]), self.bicsdist[0][1], self.bicsdist[0][2])
-        structure.setColumnsSettings(getattr(Distribution, self.bicsdist[1][0]), self.bicsdist[1][1],
-                                     self.bicsdist[1][2])
-        structure.setContextSettings(Distribution.UNIFORM, 8, 8)
+        structure.setRowsSettings(*self.bicsdist[0])
+        structure.setColumnsSettings(*self.bicsdist[1])
+        structure.setContextsSettings(*self.bicsdist[2])
         structure.setContiguity(self.contiguity)
 
         # construct bicluster overlapping
@@ -112,7 +118,7 @@ class NumericGenerator:
 
         # generate dataset
 
-        generatedDataset = generator.generate(self.patterns, structure, overlapping)
+        generatedDataset = generator.generate(patterns, structure, overlapping)
 
         # plant missing values, noise & errors
 

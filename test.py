@@ -1,4 +1,5 @@
 
 from biclustgen import NumericGenerator
 
-NumericGenerator()
+test = NumericGenerator()
+test.generate()
