@@ -1,10 +1,17 @@
 
+import numpy as np
+
+# Start JVM
+
 import jpype
 import jpype.imports
 from jpype.types import *
 
-# Loading G-Bic
-jpype.startJVM(classpath=['biclustgen/jars/G-Bic-1.0.0.jar'])
+if jpype.isJVMStarted():
+    pass
+else:
+    # Loading G-Bic
+    jpype.startJVM(classpath=['biclustgen/jars/G-Bic-1.0.0.jar'])
 
 # Import G-Bic's classes
 
@@ -22,6 +29,9 @@ from com.gbic.utils import InputValidation
 from com.gbic.utils import OverlappingSettings
 from com.gbic.utils import SingleBiclusterPattern
 from com.gbic.utils import BiclusterStructure
+from com.gbic.utils import IOUtils as io
+
+# Import java classes
 
 from java.util import ArrayList
 
@@ -31,7 +41,7 @@ from java.util import ArrayList
 
 class NumericGenerator:
 
-    def __init__(self, nrows=100, ncols=100, nbics=8, patterns=None, realval=False, minval=0, maxval=1,
+    def __init__(self, nrows=100, ncols=100, nbics=1, patterns=None, realval=False, minval=0, maxval=1,
                  bktype='UNIFORM', bicsdist=None, contiguity=None, plaidcoherency='NO_OVERLAPPING',
                  percofoverlappingbics=0, maxbicsperoverlappedarea=0, maxpercofoverlappingelements=0.0,
                  percofoverlappingrows=1.0, percofoverlappingcolumns=1.0, percofoverlappingcontexts=1.0, **kwargs):
@@ -85,6 +95,15 @@ class NumericGenerator:
                                                     for pattern_type in pattern] + [None] for pattern in patterns]
 
         self.generatedDataset = None
+        self.matrix = None
+
+    def to_numpy(self):
+
+        matrix = str(io.matrixToStringColOriented(self.generatedDataset, self.generatedDataset.getNumRows(), 0, False))
+
+        self.matrix = np.array([[int(val) for val in row.split('\t')[1:]] for row in matrix.split('\n')][:-1])
+
+        return self.matrix
 
     def generate(self):
 
@@ -136,9 +155,7 @@ class NumericGenerator:
 
         self.generatedDataset = generatedDataset
 
-        # TODO convert result to numpy array
-
-        return generatedDataset
+        return self.to_numpy()
 
 
 
