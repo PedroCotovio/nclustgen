@@ -94,7 +94,7 @@ class NumericGenerator:
 
         # initialise data generator
 
-        generator = NumericDatasetGenerator(self.realval, self.nrows, self.nrows, self.nbics,
+        generator = NumericDatasetGenerator(self.realval, self.nrows, self.ncols, self.nbics,
                                             background, self.minval, self.maxval)
 
         # construct patterns
