@@ -1,1 +1,1 @@
-from .generator import NumericGenerator
+from .Inicial import NumericGenerator
