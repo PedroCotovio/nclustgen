@@ -1,24 +1,15 @@
 
 import numpy as np
 
-# Start JVM
+# import jpype
 
 import jpype
 import jpype.imports
 from jpype.types import *
 
-if jpype.isJVMStarted():
-    pass
-else:
-    # Loading G-Bic
-    jpype.startJVM(classpath=['biclustgen/jars/*'])
-
-# TODO Refactor so that to allow for Heterogeneous and Symbolic data
-# TODO All references to dataset type specific operations and variables must run on init (to allow inheritance)
-# TODO Implement save method
-
 class Generator:
 
+    # TODO implement timeprofile
     def __init__(self, dstype='NUMERIC', patterns=None, bktype='UNIFORM', clusterdistribution=None,
                  contiguity=None, plaidcoherency='NO_OVERLAPPING', percofoverlappingclusters=0,
                  maxbicsperoverlappedarea=0, maxpercofoverlappingelements=0.0, percofoverlappingrows=1.0,
@@ -26,31 +17,37 @@ class Generator:
                  percmissingsonclusters=0.0, percnoiseonbackground=0.0, percnoiseonclusters=0.0,
                  percerroesonbackground=0.0, percerrorsonclusters=0.0, *args, **kwargs):
 
-        if contiguity is None:
-            contiguity = 'NONE'
-        if plaidcoherency is None:
-            plaidcoherency = 'NONE'
+        # Start JVM
+        self.__start()
+
+        if patterns is None:
+            patterns = [['CONSTANT']]
+        if clusterdistribution is None:
+            clusterdistribution = [['UNIFORM', 4, 4]]
 
         self.dstype = str(dstype).upper()
         self.patterns = [[str(pattern_type).upper() for pattern_type in pattern] for pattern in patterns]
-        self.clstdistribution = [(str(dist[0]).upper(), int(dist[1]), int(dist[2])) for dist in clusterdistribution]
+        self.clusterdistribution = [(str(dist[0]).upper(), int(dist[1]), int(dist[2])) for dist in clusterdistribution]
         self.contiguity = str(contiguity).upper()
 
-        # if self.dstype == 'NUMERIC':
-        #
-        #     self.realval = bool(kwargs.get('realval', True))
-        #     self.minval = int(kwargs.get('minval', -10))
-        #     self.maxval = int(kwargs.get('maxval', 10))
-        #
-        # elif self.dstype == 'SYMBOLIC':
-        #
-        #     try:
-        #         self.symbols = [str(symbol) for symbol in kwargs.get('symbols')]
-        #         self.nsymbols = len(self.symbols)
-        #
-        #     except TypeError:
-        #         self.nsymbols = kwargs.get('nsymbols', 10)
-        #         self.symbols = [str(symbol) for symbol in range(self.nsymbols)]
+        # Dataset type dependent parameters
+        self.realval = bool(kwargs.get('realval', True))
+        self.minval = int(kwargs.get('minval', -10))
+        self.maxval = int(kwargs.get('maxval', 10))
+
+        try:
+            self.symbols = [str(symbol) for symbol in kwargs.get('symbols')]
+            self.nsymbols = len(self.symbols)
+
+        except TypeError:
+            self.nsymbols = kwargs.get('nsymbols', 10)
+
+            if self.nsymbols:
+                self.symbols = [str(symbol) for symbol in range(self.nsymbols)]
+            else:
+                self.symbols = None
+
+        self.symmetries = kwargs.get('symmetries', False)
 
         # Overlapping Settings
         self.plaidcoherency = str(plaidcoherency).upper()
@@ -68,10 +65,10 @@ class Generator:
         # set background
         bktype = str(bktype).upper()
         if bktype == 'NORMAL':
-            self.background = (bktype, int(kwargs.get('mean', 14)), kwargs.get('sdev', 7))
+            self.background = [bktype, int(kwargs.get('mean', 14)), kwargs.get('sdev', 7)]
 
         elif bktype == 'DISCRETE':
-            self.background = (bktype, [float(prob) for prob in kwargs.get('probs')])
+            self.background = [bktype, [float(prob) for prob in kwargs.get('probs')]]
 
         else:
             self.background = tuple([bktype])
@@ -85,10 +82,29 @@ class Generator:
         self.Y = None
         self.in_memory = kwargs.get('in_memory')
 
+    def __get_dstype_vars(self, nrows, ncols, ncontexts, nclusters, background):
+
+        params = [nrows, ncols, ncontexts, nclusters, background]
+
+        if self.dstype == 'NUMERIC':
+
+            params = [self.realval] + params
+            params += [self.minval, self.maxval]
+            contexts_index = 3
+            class_call = 'NumericDatasetGenerator'
+
+        else:
+
+            params += [self.symbols, self.symmetries]
+            contexts_index = 2
+            class_call = 'SymbolicDatasetGenerator'
+
+        return class_call, params, contexts_index
+
     def __background(self):
         pass
 
-    def __generator(self, nrows, ncols, ncontexts, nclusters, background):
+    def __generator(self, class_call, params, contexts_index):
         pass
 
     def __patterns(self):
@@ -136,7 +152,8 @@ class Generator:
         background = self.__background()
 
         # initialise data generator
-        generator = self.__generator(nrows, ncols, ncontexts, nclusters, background)
+        params = self.__get_dstype_vars(nrows, ncols, ncontexts, nclusters, background)
+        generator = self.__generator(*params)
 
         # get patterns
         patterns = self.__patterns()
@@ -169,3 +186,21 @@ class Generator:
 
     def save(self, file_name='example_dataset', path=None, multiple_files=None):
         pass
+
+    @staticmethod
+    def __start():
+
+        if jpype.isJVMStarted():
+            pass
+        else:
+            # Loading G-Bic
+            jpype.startJVM(classpath=['biclustgen/jars/*'])
+
+
+    @staticmethod
+    def shutdown():
+
+        try:
+            jpype.shutdownJVM()
+        except RuntimeError:
+            pass

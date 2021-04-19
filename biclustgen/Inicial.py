@@ -46,8 +46,6 @@ class NumericGenerator:
             patterns = [['CONSTANT', 'CONSTANT']]
         if bicsdist is None:
             bicsdist = [['UNIFORM', 4, 4], ['UNIFORM', 4, 4]]
-        if contiguity is None:
-            contiguity = 'NONE'
 
         self.nrows = int(nrows)
         self.ncols = int(ncols)
