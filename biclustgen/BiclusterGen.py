@@ -1,5 +1,6 @@
 from Generator import Generator
 
+import os
 import numpy as np
 from scipy.sparse import csr_matrix
 
@@ -91,7 +92,14 @@ class BiclusterGenerator(Generator):
         # TODO implement
         pass
 
-    def save(self, file_name='example_dataset', path=None, multiple_files=None):
+    def save(self, file_name='example', path=None, single_file=None):
 
-        # TODO implement by calling from G-bic
-        pass
+        serv = GBicService()
+
+        if path is None:
+            path = os.getcwd()
+
+        serv.setPath(path)
+        serv.setSingleFileOutput(self.__asses_memory(single_file, gends=self.generatedDataset))
+        getattr(serv, 'save{}Result'.format(self.dstype.capitalize()))(self.generatedDataset, file_name +
+                                                                       'cluster_data', file_name + 'dataset')

@@ -1,4 +1,5 @@
 
+import os
 import numpy as np
 
 # Start JVM
@@ -153,3 +154,14 @@ class NumericGenerator:
         self.generatedDataset = generatedDataset
 
         return self.to_numpy()
+
+    def save(self, file_name='example', path=None, single_file=True):
+
+        serv = GBicService()
+
+        if path is None:
+            path = os.getcwd()
+
+        serv.setPath(path)
+        serv.setSingleFileOutput(single_file)
+        getattr(serv, 'saveNumericResult')(self.generatedDataset, file_name + 'cluster_data', file_name + 'dataset')
