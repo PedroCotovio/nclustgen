@@ -7,9 +7,9 @@ import jpype
 import jpype.imports
 from jpype.types import *
 
+
 class Generator:
 
-    # TODO implement timeprofile
     def __init__(self, dstype='NUMERIC', patterns=None, bktype='UNIFORM', clusterdistribution=None,
                  contiguity=None, plaidcoherency='NO_OVERLAPPING', percofoverlappingclusters=0,
                  maxbicsperoverlappedarea=0, maxpercofoverlappingelements=0.0, percofoverlappingrows=1.0,
@@ -24,6 +24,11 @@ class Generator:
             patterns = [['CONSTANT']]
         if clusterdistribution is None:
             clusterdistribution = [['UNIFORM', 4, 4]]
+
+        self.time_profile = kwargs.get('timeprofile')
+
+        if self.time_profile:
+            self.time_profile = str(self.time_profile).upper()
 
         self.dstype = str(dstype).upper()
         self.patterns = [[str(pattern_type).upper() for pattern_type in pattern] for pattern in patterns]
@@ -116,8 +121,11 @@ class Generator:
     def __overlapping(self):
         pass
 
-    def __plant_quality_settings(self):
-        pass
+    def __plant_quality_settings(self, generatedDataset):
+
+        generatedDataset.plantMissingElements(*self.missing)
+        generatedDataset.plantNoisyElements(*self.noise)
+        generatedDataset.plantErrors(*self.errors)
 
     def __asses_memory(self, in_memory=None, **kwargs):
 
@@ -168,7 +176,7 @@ class Generator:
         generatedDataset = generator.generate(patterns, structure, overlapping)
 
         # plant missing values, noise & errors
-        self.__plant_quality_settings()
+        self.__plant_quality_settings(generatedDataset)
 
         # return
         self.generatedDataset = generatedDataset
