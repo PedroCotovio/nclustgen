@@ -147,11 +147,16 @@ class Generator:
 
             return count < 10**5
 
-
     def to_numpy(self, generatedDataset):
         pass
 
     def to_sparse(self, generatedDataset):
+        pass
+
+    def to_graph(self, x, y, framework='netx'):
+
+        # TODO implement to graph
+
         pass
 
     def generate(self, nrows=100, ncols=100, ncontexts=None, nclusters=1, no_return=False, **kwargs):
