@@ -1,4 +1,4 @@
-from Generator import Generator
+from .Generator import Generator
 
 import os
 import numpy as np

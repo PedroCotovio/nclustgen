@@ -1,4 +1,4 @@
-from Generator import Generator
+from .Generator import Generator
 
 import os
 import numpy as np
@@ -34,39 +34,47 @@ class BiclusterGenerator(Generator):
         if len(self.clusterdistribution) == 1:
             self.clusterdistribution = self.clusterdistribution * 2
 
-    def __background(self):
+    def build_background(self):
 
         self.background[0] = getattr(BackgroundType, self.background[0])
 
         return Background(*self.background)
 
-    def __generator(self, class_call, params, contexts_index):
+    def build_generator(self, class_call, params, contexts_index):
 
         del params[contexts_index]
 
         return getattr(gen, class_call)(*params)
 
-    def __patterns(self):
+    def build_patterns(self):
 
         patterns = ArrayList()
 
-        [patterns.add(SingleBiclusterPattern([getattr(BiclusterType, self.dstype)] + [getattr(PatternType, pattern_type)
-                                                                                      for pattern_type in pattern] +
-                                             [self.time_profile])) for pattern in self.patterns]
+        if self.time_profile:
+            self.time_profile = getattr(TimeProfile, self.time_profile)
 
-    def __structure(self):
+        [patterns.add(SingleBiclusterPattern(*[getattr(BiclusterType, self.dstype)] +
+                                              [getattr(PatternType, pattern_type)
+                                               for pattern_type in pattern] + [self.time_profile]))
+         for pattern in self.patterns]
+
+        return patterns
+
+    def build_structure(self):
 
         structure = BiclusterStructure()
-        structure.setRowsSettings(*self.clusterdistribution[0])
-        structure.setColumnsSettings(*self.clusterdistribution[1])
-        structure.setContiguity(self.contiguity)
+        structure.setRowsSettings(getattr(Distribution, self.clusterdistribution[0][0]),
+                                  *self.clusterdistribution[0][1:])
+        structure.setColumnsSettings(getattr(Distribution, self.clusterdistribution[1][0]),
+                                     *self.clusterdistribution[1][1:])
+        structure.setContiguity(getattr(Contiguity, self.contiguity))
 
         return structure
 
-    def __overlapping(self):
+    def build_overlapping(self):
 
         overlapping = OverlappingSettings()
-        overlapping.setPlaidCoherency(self.plaidcoherency)
+        overlapping.setPlaidCoherency(getattr(PlaidCoherency, self.plaidcoherency))
         overlapping.setPercOfOverlappingBics(self.percofoverlappingbics)
         overlapping.setMaxBicsPerOverlappedArea(self.maxbicsperoverlappedarea)
         overlapping.setMaxPercOfOverlappingElements(self.maxpercofoverlappingelements)
@@ -80,12 +88,13 @@ class BiclusterGenerator(Generator):
         # TODO add biclusters array
         # TODO break into general to_matrix and specific methods for sparse or numpy
         # TODO add multiprocessing for chunk processing
+        # TODO deal with different types, eg: float-numeric&real-valued, str-symbolic&no_int
 
         matrix = str(io.matrixToStringColOriented(self.generatedDataset, self.generatedDataset.getNumRows(), 0, False))
 
-        self.matrix = np.array([[int(val) for val in row.split('\t')[1:]] for row in matrix.split('\n')][:-1])
+        self.matrix = np.array([[float(val) for val in row.split('\t')[1:]] for row in matrix.split('\n')][:-1])
 
-        return self.matrix
+        return self.matrix, None
 
     def to_sparse(self, generatedDataset):
 
@@ -100,6 +109,6 @@ class BiclusterGenerator(Generator):
             path = os.getcwd()
 
         serv.setPath(path)
-        serv.setSingleFileOutput(self.__asses_memory(single_file, gends=self.generatedDataset))
+        serv.setSingleFileOutput(self.asses_memory(single_file, gends=self.generatedDataset))
         getattr(serv, 'save{}Result'.format(self.dstype.capitalize()))(self.generatedDataset, file_name +
                                                                        'cluster_data', file_name + 'dataset')

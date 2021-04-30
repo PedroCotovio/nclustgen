@@ -1,24 +1,22 @@
-
+import abc
 import numpy as np
-
-# import jpype
 
 import jpype
 import jpype.imports
 from jpype.types import *
 
 
-class Generator:
+class Generator(metaclass=abc.ABCMeta):
 
     def __init__(self, dstype='NUMERIC', patterns=None, bktype='UNIFORM', clusterdistribution=None,
                  contiguity=None, plaidcoherency='NO_OVERLAPPING', percofoverlappingclusters=0,
                  maxbicsperoverlappedarea=0, maxpercofoverlappingelements=0.0, percofoverlappingrows=1.0,
                  percofoverlappingcolumns=1.0, percofoverlappingcontexts=1.0, percmissingsonbackground=0.0,
-                 percmissingsonclusters=0.0, percnoiseonbackground=0.0, percnoiseonclusters=0.0,
+                 percmissingsonclusters=0.0, percnoiseonbackground=0.0, percnoiseonclusters=0.0, percnoisedeviation=0.0,
                  percerroesonbackground=0.0, percerrorsonclusters=0.0, *args, **kwargs):
 
         # Start JVM
-        self.__start()
+        self.start()
 
         if patterns is None:
             patterns = [['CONSTANT']]
@@ -32,7 +30,7 @@ class Generator:
 
         self.dstype = str(dstype).upper()
         self.patterns = [[str(pattern_type).upper() for pattern_type in pattern] for pattern in patterns]
-        self.clusterdistribution = [(str(dist[0]).upper(), int(dist[1]), int(dist[2])) for dist in clusterdistribution]
+        self.clusterdistribution = [[str(dist[0]).upper(), int(dist[1]), int(dist[2])] for dist in clusterdistribution]
         self.contiguity = str(contiguity).upper()
 
         # Dataset type dependent parameters
@@ -64,8 +62,8 @@ class Generator:
         self.percofoverlappingcontexts = float(percofoverlappingcontexts)
         # Noise settings
         self.missing = (float(percmissingsonbackground), float(percmissingsonclusters))
-        self.noise = (float(percnoiseonbackground), float(percnoiseonclusters))
-        self.errors = (float(percerroesonbackground), float(percerrorsonclusters))
+        self.noise = (float(percnoiseonbackground), float(percnoiseonclusters), float(percnoisedeviation))
+        self.errors = (float(percerroesonbackground), float(percerrorsonclusters), float(percnoisedeviation))
 
         # set background
         bktype = str(bktype).upper()
@@ -76,7 +74,7 @@ class Generator:
             self.background = [bktype, [float(prob) for prob in kwargs.get('probs')]]
 
         else:
-            self.background = tuple([bktype])
+            self.background = [bktype]
 
         # set bicluster patterns
         self.patterns = [[str(pattern_type).upper() for pattern_type in pattern] for pattern in patterns]
@@ -87,7 +85,7 @@ class Generator:
         self.Y = None
         self.in_memory = kwargs.get('in_memory')
 
-    def __get_dstype_vars(self, nrows, ncols, ncontexts, nclusters, background):
+    def get_dstype_vars(self, nrows, ncols, ncontexts, nclusters, background):
 
         params = [nrows, ncols, ncontexts, nclusters, background]
 
@@ -106,28 +104,33 @@ class Generator:
 
         return class_call, params, contexts_index
 
-    def __background(self):
+    @abc.abstractmethod
+    def build_background(self):
         pass
 
-    def __generator(self, class_call, params, contexts_index):
+    @abc.abstractmethod
+    def build_generator(self, class_call, params, contexts_index):
         pass
 
-    def __patterns(self):
+    @abc.abstractmethod
+    def build_patterns(self):
         pass
 
-    def __structure(self):
+    @abc.abstractmethod
+    def build_structure(self):
         pass
 
-    def __overlapping(self):
+    @abc.abstractmethod
+    def build_overlapping(self):
         pass
 
-    def __plant_quality_settings(self, generatedDataset):
+    def plant_quality_settings(self, generatedDataset):
 
         generatedDataset.plantMissingElements(*self.missing)
         generatedDataset.plantNoisyElements(*self.noise)
         generatedDataset.plantErrors(*self.errors)
 
-    def __asses_memory(self, in_memory=None, **kwargs):
+    def asses_memory(self, in_memory=None, **kwargs):
 
         if in_memory is not None:
             self.in_memory = in_memory
@@ -140,48 +143,50 @@ class Generator:
             gends = kwargs.get('gends')
 
             try:
-                count = gends.numRows * gends.numCols * gends.numContexts
+                count = gends.getNumRows() * gends.getNumCols() * gends.getNumContexts()
 
             except AttributeError:
-                count = gends.numRows * gends.numCols
+                count = gends.getNumRows() * gends.getNumCols()
 
             return count < 10**5
 
+    @abc.abstractmethod
     def to_numpy(self, generatedDataset):
         pass
 
+    @abc.abstractmethod
     def to_sparse(self, generatedDataset):
         pass
 
     def to_graph(self, x, y, framework='netx'):
 
         # TODO implement to graph
-
         pass
 
     def generate(self, nrows=100, ncols=100, ncontexts=None, nclusters=1, no_return=False, **kwargs):
 
         # define background
-        background = self.__background()
+        background = self.build_background()
 
         # initialise data generator
-        params = self.__get_dstype_vars(nrows, ncols, ncontexts, nclusters, background)
-        generator = self.__generator(*params)
+        params = self.get_dstype_vars(nrows, ncols, ncontexts, nclusters, background)
+
+        generator = self.build_generator(*params)
 
         # get patterns
-        patterns = self.__patterns()
+        patterns = self.build_patterns()
 
         # get structure
-        structure = self.__structure()
+        structure = self.build_structure()
 
         # get overlapping
-        overlapping = self.__overlapping()
+        overlapping = self.build_overlapping()
 
         # generate dataset
         generatedDataset = generator.generate(patterns, structure, overlapping)
 
         # plant missing values, noise & errors
-        self.__plant_quality_settings(generatedDataset)
+        self.plant_quality_settings(generatedDataset)
 
         # return
         self.generatedDataset = generatedDataset
@@ -189,7 +194,7 @@ class Generator:
         if no_return:
             return None
 
-        if self.__asses_memory(kwargs.get('in_memory'), gends=generatedDataset):
+        if self.asses_memory(kwargs.get('in_memory'), gends=generatedDataset):
             self.X, self.Y = self.to_numpy(generatedDataset)
 
         else:
@@ -201,14 +206,13 @@ class Generator:
         pass
 
     @staticmethod
-    def __start():
+    def start():
 
         if jpype.isJVMStarted():
             pass
         else:
             # Loading G-Bic
-            jpype.startJVM(classpath=['biclustgen/jars/*'])
-
+            jpype.startJVM(classpath=['nclustgen/jars/*'])
 
     @staticmethod
     def shutdown():

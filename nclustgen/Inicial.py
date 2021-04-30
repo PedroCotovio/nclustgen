@@ -12,7 +12,7 @@ if jpype.isJVMStarted():
     pass
 else:
     # Loading G-Bic
-    jpype.startJVM(classpath=['biclustgen/jars/*'])
+    jpype.startJVM(classpath=['nclustgen/jars/*'])
 
 # Import G-Bic's classes
 
