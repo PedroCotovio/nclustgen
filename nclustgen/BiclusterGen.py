@@ -1,6 +1,7 @@
 from .Generator import Generator
 
 import os
+import json
 import numpy as np
 from scipy.sparse import csr_matrix
 
@@ -81,18 +82,33 @@ class BiclusterGenerator(Generator):
 
         return overlapping
 
-    def to_numpy(self, generatedDataset):
+    def to_numpy(self, generatedDataset, keys=None):
 
-        # TODO add biclusters array
         # TODO break into general to_matrix and specific methods for sparse or numpy
         # TODO add multiprocessing for chunk processing
-        # TODO deal with different types, eg: float-numeric&real-valued, str-symbolic&no_int
+
+        if keys is None:
+            keys = ['X', 'Y', 'Z']
+
+        # Get Tensor
 
         matrix = str(io.matrixToStringColOriented(self.generatedDataset, self.generatedDataset.getNumRows(), 0, False))
 
-        self.matrix = np.array([[float(val) for val in row.split('\t')[1:]] for row in matrix.split('\n')][:-1])
+        self.X = np.array([[float(val) for val in row.split('\t')[1:]] for row in matrix.split('\n')][:-1])
 
-        return self.matrix, None
+        # Get clusters
+
+        keys = keys[:self.n]
+
+        js = json.loads(
+            str(self.generatedDataset.getBicsInfoJSON(
+                self.generatedDataset, False
+            ).getJSONObject("biclusters").toString())
+        )
+
+        self.Y = [js[i][key] for i in js.keys() for key in keys]
+
+        return self.X, self.Y
 
     def to_sparse(self, generatedDataset):
 
