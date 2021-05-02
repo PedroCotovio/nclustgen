@@ -26,13 +26,7 @@ from java.util import ArrayList
 class BiclusterGenerator(Generator):
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        if len(self.patterns[0]) == 1:
-            self.patterns = [pattern * 2 for pattern in self.patterns]
-
-        if len(self.clusterdistribution) == 1:
-            self.clusterdistribution = self.clusterdistribution * 2
+        super().__init__(n=2, *args, **kwargs)
 
     def build_background(self):
 
@@ -53,20 +47,24 @@ class BiclusterGenerator(Generator):
         if self.time_profile:
             self.time_profile = getattr(TimeProfile, self.time_profile)
 
-        [patterns.add(SingleBiclusterPattern(*[getattr(BiclusterType, self.dstype)] +
-                                              [getattr(PatternType, pattern_type)
-                                               for pattern_type in pattern] + [self.time_profile]))
-         for pattern in self.patterns]
+        [patterns.add(
+            SingleBiclusterPattern(
+                *[getattr(BiclusterType, self.dstype)] + [getattr(PatternType, pattern_type)
+                                                          for pattern_type in pattern] + [self.time_profile]
+            )
+        ) for pattern in self.patterns]
 
         return patterns
 
     def build_structure(self):
 
         structure = BiclusterStructure()
-        structure.setRowsSettings(getattr(Distribution, self.clusterdistribution[0][0]),
-                                  *self.clusterdistribution[0][1:])
-        structure.setColumnsSettings(getattr(Distribution, self.clusterdistribution[1][0]),
-                                     *self.clusterdistribution[1][1:])
+        structure.setRowsSettings(
+            getattr(Distribution, self.clusterdistribution[0][0]), *self.clusterdistribution[0][1:]
+        )
+        structure.setColumnsSettings(
+            getattr(Distribution, self.clusterdistribution[1][0]), *self.clusterdistribution[1][1:]
+        )
         structure.setContiguity(getattr(Contiguity, self.contiguity))
 
         return structure
@@ -75,8 +73,8 @@ class BiclusterGenerator(Generator):
 
         overlapping = OverlappingSettings()
         overlapping.setPlaidCoherency(getattr(PlaidCoherency, self.plaidcoherency))
-        overlapping.setPercOfOverlappingBics(self.percofoverlappingbics)
-        overlapping.setMaxBicsPerOverlappedArea(self.maxbicsperoverlappedarea)
+        overlapping.setPercOfOverlappingBics(self.percofoverlappingclusts)
+        overlapping.setMaxBicsPerOverlappedArea(self.maxclustsperoverlappedarea)
         overlapping.setMaxPercOfOverlappingElements(self.maxpercofoverlappingelements)
         overlapping.setPercOfOverlappingRows(self.percofoverlappingrows)
         overlapping.setPercOfOverlappingColumns(self.percofoverlappingcolumns)
@@ -110,5 +108,7 @@ class BiclusterGenerator(Generator):
 
         serv.setPath(path)
         serv.setSingleFileOutput(self.asses_memory(single_file, gends=self.generatedDataset))
-        getattr(serv, 'save{}Result'.format(self.dstype.capitalize()))(self.generatedDataset, file_name +
-                                                                       'cluster_data', file_name + 'dataset')
+
+        getattr(serv, 'save{}Result'.format(self.dstype.capitalize()))(
+            self.generatedDataset, file_name + 'cluster_data', file_name + 'dataset'
+        )

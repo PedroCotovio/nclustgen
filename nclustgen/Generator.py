@@ -8,9 +8,9 @@ from jpype.types import *
 
 class Generator(metaclass=abc.ABCMeta):
 
-    def __init__(self, dstype='NUMERIC', patterns=None, bktype='UNIFORM', clusterdistribution=None,
+    def __init__(self, n, dstype='NUMERIC', patterns=None, bktype='UNIFORM', clusterdistribution=None,
                  contiguity=None, plaidcoherency='NO_OVERLAPPING', percofoverlappingclusters=0,
-                 maxbicsperoverlappedarea=0, maxpercofoverlappingelements=0.0, percofoverlappingrows=1.0,
+                 maxclustsperoverlappedarea=0, maxpercofoverlappingelements=0.0, percofoverlappingrows=1.0,
                  percofoverlappingcolumns=1.0, percofoverlappingcontexts=1.0, percmissingsonbackground=0.0,
                  percmissingsonclusters=0.0, percnoiseonbackground=0.0, percnoiseonclusters=0.0, percnoisedeviation=0.0,
                  percerroesonbackground=0.0, percerrorsonclusters=0.0, *args, **kwargs):
@@ -18,10 +18,12 @@ class Generator(metaclass=abc.ABCMeta):
         # Start JVM
         self.start()
 
+        self.n = n
+
         if patterns is None:
-            patterns = [['CONSTANT']]
+            patterns = [['CONSTANT'] * n]
         if clusterdistribution is None:
-            clusterdistribution = [['UNIFORM', 4, 4]]
+            clusterdistribution = [['UNIFORM', 4, 4]] * n
 
         self.time_profile = kwargs.get('timeprofile')
 
@@ -35,8 +37,8 @@ class Generator(metaclass=abc.ABCMeta):
 
         # Dataset type dependent parameters
         self.realval = bool(kwargs.get('realval', True))
-        self.minval = int(kwargs.get('minval', -10))
-        self.maxval = int(kwargs.get('maxval', 10))
+        self.minval = int(kwargs.get('minval', -10.0))
+        self.maxval = int(kwargs.get('maxval', 10.0))
 
         try:
             self.symbols = [str(symbol) for symbol in kwargs.get('symbols')]
@@ -54,8 +56,8 @@ class Generator(metaclass=abc.ABCMeta):
 
         # Overlapping Settings
         self.plaidcoherency = str(plaidcoherency).upper()
-        self.percofoverlappingbics = float(percofoverlappingclusters)
-        self.maxbicsperoverlappedarea = int(maxbicsperoverlappedarea)
+        self.percofoverlappingclusts = float(percofoverlappingclusters)
+        self.maxclustsperoverlappedarea = int(maxclustsperoverlappedarea)
         self.maxpercofoverlappingelements = float(maxpercofoverlappingelements)
         self.percofoverlappingrows = float(percofoverlappingrows)
         self.percofoverlappingcolumns = float(percofoverlappingcolumns)
@@ -163,7 +165,7 @@ class Generator(metaclass=abc.ABCMeta):
         # TODO implement to graph
         pass
 
-    def generate(self, nrows=100, ncols=100, ncontexts=None, nclusters=1, no_return=False, **kwargs):
+    def generate(self, nrows=100, ncols=100, ncontexts=3, nclusters=1, no_return=False, **kwargs):
 
         # define background
         background = self.build_background()
