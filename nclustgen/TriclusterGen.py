@@ -78,37 +78,52 @@ class TriclusterGenerator(Generator):
 
         return overlapping
 
-    def to_numpy(self, generatedDataset, keys=None):
+    def to_numpy(self, generatedDataset=None, keys=None):
+
+        if generatedDataset is None:
+            generatedDataset = self.generatedDataset
 
         if keys is None:
             keys = ['X', 'Y', 'Z']
 
         # Get Tensor
 
-        tensor = str(io.matrixToStringColOriented(self.generatedDataset, self.generatedDataset.getNumRows(), 0, False))
+        threshold = int(generatedDataset.getNumRows() / 10)
+        steps = [i for i in range(int(generatedDataset.getNumRows() / threshold))]
+        tensors = []
 
-        tensor = np.array(
-            [np.array_split([float(val) for val in row.split('\t')[1:]], self.n) for row in tensor.split('\n')][:-1]
-        )
+        for step in steps:
 
-        self.X = tensor.reshape(sorted(list(tensor.shape)))
+            tensor = str(io.matrixToStringColOriented(generatedDataset, threshold, step, False))
+
+            tensor = np.array(
+                [np.array_split([float(val) for val in row.split('\t')[1:]], self.n) for row in tensor.split('\n')][:-1]
+            )
+
+            tensor = tensor.reshape((generatedDataset.getNumContexts(), threshold, generatedDataset.getNumCols()))
+
+            tensors.append(tensor)
+
+        self.X = np.concatenate(tensors, axis=1)
 
         # Get clusters
 
         keys = keys[:self.n]
 
         js = json.loads(
-            str(self.generatedDataset.getTricsInfoJSON(self.generatedDataset).getJSONObject("Triclusters").toString())
+            str(generatedDataset.getTricsInfoJSON(generatedDataset).getJSONObject("Triclusters").toString())
         )
 
         self.Y = [js[i][key] for i in js.keys() for key in keys]
 
         return self.X, self.Y
 
-    def to_sparse(self, generatedDataset):
+    def to_sparse(self, generatedDataset=None):
 
-        # TODO implement
-        pass
+        # TODO implement sparse tensor for triclustring
+
+        if generatedDataset is None:
+            generatedDataset = self.generatedDataset
 
     def save(self, file_name='example', path=None, single_file=None):
 
