@@ -153,14 +153,14 @@ class Generator(metaclass=abc.ABCMeta):
             return count < 10**5
 
     @abc.abstractmethod
-    def to_numpy(self, generatedDataset):
+    def to_numpy(self, generatedDataset=None, keys=None):
         pass
 
     @abc.abstractmethod
-    def to_sparse(self, generatedDataset):
+    def to_sparse(self, generatedDataset=None):
         pass
 
-    def to_graph(self, x, y, framework='netx'):
+    def to_graph(self, x=None, y=None, framework='netx'):
 
         # TODO implement to graph
         pass
@@ -204,6 +204,7 @@ class Generator(metaclass=abc.ABCMeta):
 
         return self.X, self.Y
 
+    @abc.abstractmethod
     def save(self, file_name='example_dataset', path=None, multiple_files=None):
         pass
 
