@@ -1,9 +1,9 @@
+
 from .Generator import Generator
 
 import os
-import json
 import numpy as np
-from scipy.sparse import csr_matrix
+from sparse import concatenate, COO
 
 from com.gtric import generator as gen
 from com.gtric.service import GTricService
@@ -78,52 +78,38 @@ class TriclusterGenerator(Generator):
 
         return overlapping
 
-    def to_numpy(self, generatedDataset=None, keys=None):
+    @staticmethod
+    def java_to_numpy(generatedDataset, n):
 
-        if generatedDataset is None:
-            generatedDataset = self.generatedDataset
+        tensor = str(io.matrixToStringColOriented(generatedDataset, generatedDataset.getNumRows(), 0, False))
 
-        if keys is None:
-            keys = ['X', 'Y', 'Z']
+        tensor = np.array(
+            [np.array_split([float(val) for val in row.split('\t')[1:]], n) for row in tensor.split('\n')][:-1]
+        )
 
-        # Get Tensor
+        return tensor.reshape(
+            (generatedDataset.getNumContexts(), generatedDataset.getNumRows(), generatedDataset.getNumCols())
+        )
+
+    @staticmethod
+    def java_to_sparse(generatedDataset, n):
 
         threshold = int(generatedDataset.getNumRows() / 10)
         steps = [i for i in range(int(generatedDataset.getNumRows() / threshold))]
         tensors = []
 
         for step in steps:
-
             tensor = str(io.matrixToStringColOriented(generatedDataset, threshold, step, False))
 
-            tensor = np.array(
-                [np.array_split([float(val) for val in row.split('\t')[1:]], self.n) for row in tensor.split('\n')][:-1]
-            )
+            tensor = COO.from_numpy(np.array(
+                [np.array_split([float(val) for val in row.split('\t')[1:]], n) for row in tensor.split('\n')][:-1]
+            ))
 
             tensor = tensor.reshape((generatedDataset.getNumContexts(), threshold, generatedDataset.getNumCols()))
 
             tensors.append(tensor)
 
-        self.X = np.concatenate(tensors, axis=1)
-
-        # Get clusters
-
-        keys = keys[:self.n]
-
-        js = json.loads(
-            str(generatedDataset.getTricsInfoJSON(generatedDataset).getJSONObject("Triclusters").toString())
-        )
-
-        self.Y = [js[i][key] for i in js.keys() for key in keys]
-
-        return self.X, self.Y
-
-    def to_sparse(self, generatedDataset=None):
-
-        # TODO implement sparse tensor for triclustring
-
-        if generatedDataset is None:
-            generatedDataset = self.generatedDataset
+        return concatenate(tensors, axis=1)
 
     def save(self, file_name='example', path=None, single_file=None):
 

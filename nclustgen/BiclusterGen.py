@@ -3,7 +3,7 @@ from .Generator import Generator
 import os
 import json
 import numpy as np
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_matrix, vstack
 
 from com.gbic import generator as gen
 from com.gbic.service import GBicService
@@ -82,41 +82,28 @@ class BiclusterGenerator(Generator):
 
         return overlapping
 
-    def to_numpy(self, generatedDataset=None, keys=None):
+    @staticmethod
+    def java_to_numpy(generatedDataset, n):
 
-        # TODO break into general to_tensor and specific methods for sparse/numpy bi/triclustring
-        # TODO add multiprocessing for chunk processing
+        tensor = str(io.matrixToStringColOriented(generatedDataset, generatedDataset.getNumRows(), 0, False))
 
-        if generatedDataset is None:
-            generatedDataset = self.generatedDataset
+        return np.array([[float(val) for val in row.split('\t')[1:]] for row in tensor.split('\n')][:-1])
 
-        if keys is None:
-            keys = ['X', 'Y', 'Z']
+    @staticmethod
+    def java_to_sparse(generatedDataset, n):
 
-        # Get Tensor
+        threshold = int(generatedDataset.getNumRows() / 10)
+        steps = [i for i in range(int(generatedDataset.getNumRows() / threshold))]
+        tensors = []
 
-        matrix = str(io.matrixToStringColOriented(generatedDataset, generatedDataset.getNumRows(), 0, False))
+        for step in steps:
+            tensor = str(io.matrixToStringColOriented(generatedDataset, threshold, step, False))
 
-        self.X = np.array([[float(val) for val in row.split('\t')[1:]] for row in matrix.split('\n')][:-1])
+            tensor = csr_matrix([[float(val) for val in row.split('\t')[1:]] for row in tensor.split('\n')][:-1])
 
-        # Get clusters
+            tensors.append(tensor)
 
-        keys = keys[:self.n]
-
-        js = json.loads(
-            str(generatedDataset.getBicsInfoJSON(generatedDataset, False).getJSONObject("biclusters").toString())
-        )
-
-        self.Y = [js[i][key] for i in js.keys() for key in keys]
-
-        return self.X, self.Y
-
-    def to_sparse(self, generatedDataset=None):
-
-        # TODO implement sparse tensor
-
-        if generatedDataset is None:
-            generatedDataset = self.generatedDataset
+        return vstack(tensors)
 
     def save(self, file_name='example', path=None, single_file=None):
 

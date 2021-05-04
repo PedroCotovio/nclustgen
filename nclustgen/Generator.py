@@ -1,4 +1,6 @@
+
 import abc
+import json
 import numpy as np
 
 import jpype
@@ -152,13 +154,49 @@ class Generator(metaclass=abc.ABCMeta):
 
             return count < 10**5
 
+    @staticmethod
     @abc.abstractmethod
-    def to_numpy(self, generatedDataset=None, keys=None):
+    def java_to_numpy(generatedDataset, n):
         pass
 
+    @staticmethod
     @abc.abstractmethod
-    def to_sparse(self, generatedDataset=None):
+    def java_to_sparse(generatedDataset, n):
         pass
+
+    def to_tensor(self, generatedDataset=None, in_memory=None, keys=None):
+
+        if generatedDataset is None:
+            generatedDataset = self.generatedDataset
+
+        if in_memory is None:
+            in_memory = self.asses_memory(gends=generatedDataset)
+
+        if keys is None:
+            keys = ['X', 'Y', 'Z']
+
+        cluster_type = {2: 'bi', 3: 'Tri'}[self.n]
+
+        # Get Tensor
+
+        if bool(in_memory):
+            self.X = self.java_to_numpy(generatedDataset, self.n)
+
+        else:
+            self.X = self.java_to_sparse(generatedDataset, self.n)
+
+        # Get clusters
+
+        keys = keys[:self.n]
+
+        js = json.loads(
+            str(getattr(generatedDataset, 'get{}csInfoJSON'.format(cluster_type.capitalize()))
+                (generatedDataset).getJSONObject('{}clusters'.format(cluster_type)).toString())
+        )
+
+        self.Y = [js[i][key] for i in js.keys() for key in keys]
+
+        return self.X, self.Y
 
     def to_graph(self, x=None, y=None, framework='netx'):
 
@@ -196,13 +234,7 @@ class Generator(metaclass=abc.ABCMeta):
         if no_return:
             return None
 
-        if self.asses_memory(kwargs.get('in_memory'), gends=generatedDataset):
-            self.X, self.Y = self.to_numpy(generatedDataset)
-
-        else:
-            self.X, self.Y = self.to_sparse(generatedDataset)
-
-        return self.X, self.Y
+        return self.to_tensor(generatedDataset, in_memory=kwargs.get('in_memory'))
 
     @abc.abstractmethod
     def save(self, file_name='example_dataset', path=None, multiple_files=None):
