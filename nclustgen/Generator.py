@@ -1,13 +1,20 @@
 
 import abc
+import warnings
 import json
 import numpy as np
+from sparse import COO
+
+import dgl
+import torch as th
+import networkx as nx
 
 import jpype
 import jpype.imports
 from jpype.types import *
 
 
+# TODO docs
 class Generator(metaclass=abc.ABCMeta):
 
     def __init__(self, n, dstype='NUMERIC', patterns=None, bktype='UNIFORM', clusterdistribution=None,
@@ -87,26 +94,8 @@ class Generator(metaclass=abc.ABCMeta):
         self.generatedDataset = None
         self.X = None
         self.Y = None
+        self.graph = None
         self.in_memory = kwargs.get('in_memory')
-
-    def get_dstype_vars(self, nrows, ncols, ncontexts, nclusters, background):
-
-        params = [nrows, ncols, ncontexts, nclusters, background]
-
-        if self.dstype == 'NUMERIC':
-
-            params = [self.realval] + params
-            params += [self.minval, self.maxval]
-            contexts_index = 3
-            class_call = 'NumericDatasetGenerator'
-
-        else:
-
-            params += [self.symbols, self.symmetries]
-            contexts_index = 2
-            class_call = 'SymbolicDatasetGenerator'
-
-        return class_call, params, contexts_index
 
     @abc.abstractmethod
     def build_background(self):
@@ -128,31 +117,9 @@ class Generator(metaclass=abc.ABCMeta):
     def build_overlapping(self):
         pass
 
-    def plant_quality_settings(self, generatedDataset):
-
-        generatedDataset.plantMissingElements(*self.missing)
-        generatedDataset.plantNoisyElements(*self.noise)
-        generatedDataset.plantErrors(*self.errors)
-
-    def asses_memory(self, in_memory=None, **kwargs):
-
-        if in_memory is not None:
-            self.in_memory = in_memory
-            return in_memory
-
-        elif self.in_memory is not None:
-            return self.in_memory
-
-        else:
-            gends = kwargs.get('gends')
-
-            try:
-                count = gends.getNumRows() * gends.getNumCols() * gends.getNumContexts()
-
-            except AttributeError:
-                count = gends.getNumRows() * gends.getNumCols()
-
-            return count < 10**5
+    @abc.abstractmethod
+    def save(self, file_name='example_dataset', path=None, multiple_files=None):
+        pass
 
     @staticmethod
     @abc.abstractmethod
@@ -198,10 +165,118 @@ class Generator(metaclass=abc.ABCMeta):
 
         return self.X, self.Y
 
-    def to_graph(self, x=None, y=None, framework='netx'):
+    @staticmethod
+    def __dense_to_dgl(x, device):
 
-        # TODO implement to graph
+        # TODO implement
+        # graph_data = {
+        #    ('row', 'elem', 'col'): (th.tensor([0, 1]), th.tensor([1, 2])),
+        # }
         pass
+
+    @staticmethod
+    def __dense_to_netwrokx(x, device=None):
+
+        G = nx.Graph()
+
+        G.add_nodes_from(
+            (('row-{}'.format(i + 1), {'cluster': 0}) for i in range(x.shape[0])), bipartide=0)
+
+        G.add_nodes_from(
+            (('col-{}'.format(j + 1), {'cluster': 0}) for j in range(x.shape[1])), bipartide=1
+        )
+
+        G.add_weighted_edges_from(
+            [('row-{}'.format(i + 1), 'col-{}'.format(j + 1), elem)
+             for i, row in enumerate(x) for j, elem in enumerate(row)]
+        )
+
+        return G
+
+    def to_graph(self, x=None, framework='networkx', device='cpu'):
+
+        if x is None:
+            x = self.X
+
+        # Parse args
+        device = str(device).lower()
+
+        if device not in ['cpu', 'gpu']:
+            raise AttributeError(
+                '{} is not a compatible device, please use either cpu or gpu.'.format(device)
+            )
+
+        framework = str(framework).lower()
+
+        if framework not in ['networkx', 'dgl']:
+            raise AttributeError(
+                '{} is not a compatible framework, please use either dgl or networkx'.format(framework)
+            )
+
+        if x:
+
+            # if sparse matrix then densify
+            if isinstance(x, COO):
+                x = x.todense()
+
+            if device == 'gpu' and framework == 'networkx':
+
+                framework = 'dgl'
+
+                warnings.warn('The Networkx library is not compatible with gpu devices. '
+                              'DGL will be used instead.')
+
+            # call private method
+            return getattr(self, '__dense_to_{}'.format(framework))(x, device)
+
+        else:
+            raise AttributeError('No generated dataset exists. '
+                                 'Data must first be generated using the .generate() method.')
+
+    def get_dstype_vars(self, nrows, ncols, ncontexts, nclusters, background):
+
+        params = [nrows, ncols, ncontexts, nclusters, background]
+
+        if self.dstype == 'NUMERIC':
+
+            params = [self.realval] + params
+            params += [self.minval, self.maxval]
+            contexts_index = 3
+            class_call = 'NumericDatasetGenerator'
+
+        else:
+
+            params += [self.symbols, self.symmetries]
+            contexts_index = 2
+            class_call = 'SymbolicDatasetGenerator'
+
+        return class_call, params, contexts_index
+
+    def asses_memory(self, in_memory=None, **kwargs):
+
+        if in_memory is not None:
+            self.in_memory = in_memory
+            return in_memory
+
+        elif self.in_memory is not None:
+            return self.in_memory
+
+        else:
+            gends = kwargs.get('gends')
+
+            try:
+                count = gends.getNumRows() * gends.getNumCols() * gends.getNumContexts()
+
+            except AttributeError:
+                count = gends.getNumRows() * gends.getNumCols()
+
+            return count < 10**5
+
+    def plant_quality_settings(self, generatedDataset):
+
+        generatedDataset.plantMissingElements(*self.missing)
+        generatedDataset.plantNoisyElements(*self.noise)
+        generatedDataset.plantErrors(*self.errors)
 
     def generate(self, nrows=100, ncols=100, ncontexts=3, nclusters=1, no_return=False, **kwargs):
 
@@ -232,13 +307,9 @@ class Generator(metaclass=abc.ABCMeta):
         self.generatedDataset = generatedDataset
 
         if no_return:
-            return None
+            return None, None
 
         return self.to_tensor(generatedDataset, in_memory=kwargs.get('in_memory'))
-
-    @abc.abstractmethod
-    def save(self, file_name='example_dataset', path=None, multiple_files=None):
-        pass
 
     @staticmethod
     def start():
