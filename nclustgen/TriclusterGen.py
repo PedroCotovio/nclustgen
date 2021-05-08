@@ -5,6 +5,10 @@ import os
 import numpy as np
 from sparse import concatenate, COO
 
+import dgl
+import torch as th
+import networkx as nx
+
 from com.gtric import generator as gen
 from com.gtric.service import GTricService
 from com.gtric.types import Background
@@ -79,12 +83,12 @@ class TriclusterGenerator(Generator):
         return overlapping
 
     @staticmethod
-    def java_to_numpy(generatedDataset, n):
+    def java_to_numpy(generatedDataset):
 
         tensor = str(io.matrixToStringColOriented(generatedDataset, generatedDataset.getNumRows(), 0, False))
 
         tensor = np.array(
-            [np.array_split([float(val) for val in row.split('\t')[1:]], n) for row in tensor.split('\n')][:-1]
+            [np.array_split([float(val) for val in row.split('\t')[1:]], 3) for row in tensor.split('\n')][:-1]
         )
 
         return tensor.reshape(
@@ -92,7 +96,7 @@ class TriclusterGenerator(Generator):
         )
 
     @staticmethod
-    def java_to_sparse(generatedDataset, n):
+    def java_to_sparse(generatedDataset):
 
         threshold = int(generatedDataset.getNumRows() / 10)
         steps = [i for i in range(int(generatedDataset.getNumRows() / threshold))]
@@ -102,7 +106,7 @@ class TriclusterGenerator(Generator):
             tensor = str(io.matrixToStringColOriented(generatedDataset, threshold, step, False))
 
             tensor = COO.from_numpy(np.array(
-                [np.array_split([float(val) for val in row.split('\t')[1:]], n) for row in tensor.split('\n')][:-1]
+                [np.array_split([float(val) for val in row.split('\t')[1:]], 3) for row in tensor.split('\n')][:-1]
             ))
 
             tensor = tensor.reshape((generatedDataset.getNumContexts(), threshold, generatedDataset.getNumCols()))
@@ -110,6 +114,39 @@ class TriclusterGenerator(Generator):
             tensors.append(tensor)
 
         return concatenate(tensors, axis=1)
+
+    @staticmethod
+    def dense_to_dgl(x, device):
+
+        # TODO implement dense_to_dgl tric
+        # graph_data = {
+        #    ('row', 'elem', 'col'): (th.tensor([0, 1]), th.tensor([1, 2])),
+        # }
+        pass
+
+    @staticmethod
+    def dense_to_netwrokx(x, device=None):
+
+        G = nx.Graph()
+
+        for n, axis in enumerate(['ctx', 'row', 'col']):
+
+            G.add_nodes_from(
+                (('{}-{}'.format(axis, i), {'cluster': 0}) for i in range(x.shape[n])), bipartide=n)
+
+        edges = np.array(
+            [[('row-{}'.format(i), 'col-{}'.format(j), elem),
+              ('row-{}'.format(i), 'ctx-{}'.format(z), elem),
+              ('col-{}'.format(j), 'ctx-{}'.format(z), elem)]
+             for z, ctx in enumerate(x) for i, row in enumerate(ctx) for j, elem in enumerate(row)]
+        )
+
+        # reshape from (elements, n, edge) to (edges, edge)
+        edges = edges.reshape(edges.shape[0] * edges.shape[1], edges.shape[2])
+
+        G.add_weighted_edges_from(edges)
+
+        return G
 
     def save(self, file_name='example', path=None, single_file=None):
 

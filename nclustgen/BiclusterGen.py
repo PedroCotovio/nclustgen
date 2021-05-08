@@ -5,6 +5,10 @@ import json
 import numpy as np
 from scipy.sparse import csr_matrix, vstack
 
+import dgl
+import torch as th
+import networkx as nx
+
 from com.gbic import generator as gen
 from com.gbic.service import GBicService
 from com.gbic.types import Background
@@ -83,14 +87,14 @@ class BiclusterGenerator(Generator):
         return overlapping
 
     @staticmethod
-    def java_to_numpy(generatedDataset, n):
+    def java_to_numpy(generatedDataset):
 
         tensor = str(io.matrixToStringColOriented(generatedDataset, generatedDataset.getNumRows(), 0, False))
 
         return np.array([[float(val) for val in row.split('\t')[1:]] for row in tensor.split('\n')][:-1])
 
     @staticmethod
-    def java_to_sparse(generatedDataset, n):
+    def java_to_sparse(generatedDataset):
 
         threshold = int(generatedDataset.getNumRows() / 10)
         steps = [i for i in range(int(generatedDataset.getNumRows() / threshold))]
@@ -104,6 +108,32 @@ class BiclusterGenerator(Generator):
             tensors.append(tensor)
 
         return vstack(tensors)
+
+    @staticmethod
+    def dense_to_dgl(x, device):
+
+        # TODO implement dense_to_dgl bic
+        # graph_data = {
+        #    ('row', 'elem', 'col'): (th.tensor([0, 1]), th.tensor([1, 2])),
+        # }
+        pass
+
+    @staticmethod
+    def dense_to_netwrokx(x, device=None):
+
+        G = nx.Graph()
+
+        for n, axis in enumerate(['row', 'col']):
+
+            G.add_nodes_from(
+                (('{}-{}'.format(axis, i), {'cluster': 0}) for i in range(x.shape[n])), bipartide=n)
+
+        G.add_weighted_edges_from(
+            [('row-{}'.format(i), 'col-{}'.format(j), elem)
+             for i, row in enumerate(x) for j, elem in enumerate(row)]
+        )
+
+        return G
 
     def save(self, file_name='example', path=None, single_file=None):
 

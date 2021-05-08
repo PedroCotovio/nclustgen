@@ -5,10 +5,6 @@ import json
 import numpy as np
 from sparse import COO
 
-import dgl
-import torch as th
-import networkx as nx
-
 import jpype
 import jpype.imports
 from jpype.types import *
@@ -25,7 +21,7 @@ class Generator(metaclass=abc.ABCMeta):
                  percerroesonbackground=0.0, percerrorsonclusters=0.0, *args, **kwargs):
 
         # Start JVM
-        self.start()
+        self.__start()
 
         self.n = n
 
@@ -118,17 +114,17 @@ class Generator(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def save(self, file_name='example_dataset', path=None, multiple_files=None):
+    def save(self, file_name='example_dataset', path=None, single_file=None):
         pass
 
     @staticmethod
     @abc.abstractmethod
-    def java_to_numpy(generatedDataset, n):
+    def java_to_numpy(generatedDataset):
         pass
 
     @staticmethod
     @abc.abstractmethod
-    def java_to_sparse(generatedDataset, n):
+    def java_to_sparse(generatedDataset):
         pass
 
     def to_tensor(self, generatedDataset=None, in_memory=None, keys=None):
@@ -147,10 +143,10 @@ class Generator(metaclass=abc.ABCMeta):
         # Get Tensor
 
         if bool(in_memory):
-            self.X = self.java_to_numpy(generatedDataset, self.n)
+            self.X = self.java_to_numpy(generatedDataset)
 
         else:
-            self.X = self.java_to_sparse(generatedDataset, self.n)
+            self.X = self.java_to_sparse(generatedDataset)
 
         # Get clusters
 
@@ -166,32 +162,14 @@ class Generator(metaclass=abc.ABCMeta):
         return self.X, self.Y
 
     @staticmethod
-    def __dense_to_dgl(x, device):
-
-        # TODO implement
-        # graph_data = {
-        #    ('row', 'elem', 'col'): (th.tensor([0, 1]), th.tensor([1, 2])),
-        # }
+    @abc.abstractmethod
+    def dense_to_dgl(x, device):
         pass
 
     @staticmethod
-    def __dense_to_netwrokx(x, device=None):
-
-        G = nx.Graph()
-
-        G.add_nodes_from(
-            (('row-{}'.format(i + 1), {'cluster': 0}) for i in range(x.shape[0])), bipartide=0)
-
-        G.add_nodes_from(
-            (('col-{}'.format(j + 1), {'cluster': 0}) for j in range(x.shape[1])), bipartide=1
-        )
-
-        G.add_weighted_edges_from(
-            [('row-{}'.format(i + 1), 'col-{}'.format(j + 1), elem)
-             for i, row in enumerate(x) for j, elem in enumerate(row)]
-        )
-
-        return G
+    @abc.abstractmethod
+    def dense_to_netwrokx(x, device=None):
+        pass
 
     def to_graph(self, x=None, framework='networkx', device='cpu'):
 
@@ -227,7 +205,7 @@ class Generator(metaclass=abc.ABCMeta):
                               'DGL will be used instead.')
 
             # call private method
-            return getattr(self, '__dense_to_{}'.format(framework))(x, device)
+            return getattr(self, 'dense_to_{}'.format(framework))(x, device)
 
         else:
             raise AttributeError('No generated dataset exists. '
@@ -312,7 +290,7 @@ class Generator(metaclass=abc.ABCMeta):
         return self.to_tensor(generatedDataset, in_memory=kwargs.get('in_memory'))
 
     @staticmethod
-    def start():
+    def __start():
 
         if jpype.isJVMStarted():
             pass
