@@ -6,12 +6,13 @@ from sparse import COO
 import os
 import json
 import warnings
+import tqdm
+
 
 @click.command()
 @click.option('--GridFile', default=None, help='Path to json file with test parameters grid')
-@click.option('--output', default=None, help='How to output if errors exit')
+@click.option('--output', default='json', help='How to output if errors exit')
 def testcli(GridFile, output):
-
     if GridFile:
         f = open(GridFile, )
         GridFile = json.load(f)
@@ -23,7 +24,7 @@ def testcli(GridFile, output):
 
         if output == 'print':
             print(errs)
-        else:
+        elif output == 'json':
             with open('output.json', 'w') as outfile:
                 json.dump(errs, outfile)
 
@@ -59,7 +60,7 @@ class Test:
                                         None
                                     ],
                                     'symbols': [
-                                        [1,2,3,4,5],
+                                        [1, 2, 3, 4, 5],
                                         ['1', '2', '3'],
                                         None
                                     ],
@@ -80,7 +81,7 @@ class Test:
                             'contiguity': [None, 'COLUMNS'],
                             'plaidcoherency': ['ADDITIVE', 'MULTIPLICATIVE', 'INTERPOLED', 'NONE', 'NO_OVERLAPPING'],
                             'timeprofile': ['RANDOM', 'MONONICALLY_INCREASING', 'MONONICALLY_DECREASING']
-                         },
+                        },
                     'generate': {
                         'nrows': [30],
                         'ncols': [20],
@@ -170,12 +171,22 @@ class Test:
 
     def test(self):
 
+        print('Building tests...')
+
         combinations = self.__grid_parser(self.grid)
 
-        for n, combination in enumerate(combinations):
+        print('Starting main tests')
+
+        pbar = tqdm(combinations)
+
+        for n, combination in enumerate(pbar):
+
+            pbar.set_description('TEST {}'.format(n))
+            pbar.set_postfix(errors=len(self.description))
 
             self.description.append({
                 'test': n,
+                'config': False,
                 'params': combination,
                 'errors': []
             })
@@ -203,6 +214,35 @@ class Test:
 
             if len(self.description[-1]['errors']) == 0:
                 self.description.pop()
+
+        print('Starting config file tests')
+
+        congif_params = []
+
+        # TODO select a combination for bics and another for trics append to config_parms and pass
+        pbar = tqdm(congif_params)
+
+        for n, params in enumerate(pbar):
+
+            pbar.set_description('CONFIG TEST {}'.format(n))
+            pbar.set_postfix(errors=len([test for test in self.description if test['config']]))
+
+            self.description.append({
+                'test': n,
+                'config': True,
+                'params': combination,
+                'errors': []
+            })
+
+            try:
+                self.__test_configfile(params)
+            except Exception as err:
+                self.__error_collector(err, 'config file fail')
+
+            if len(self.description[-1]['errors']) == 0:
+                self.description.pop()
+
+        print('All tests finished')
 
         if len(self.description) > 0:
             warnings.warn('{} errors occurred'.format(len(self.description)))
@@ -258,7 +298,8 @@ class Test:
         except Exception as err:
             self.__error_collector(err, 'tests on tensor')
 
-    def __test_save(self, instance, params):
+    @staticmethod
+    def __test_save(instance, params):
 
         instance.save(**params)
 
@@ -285,6 +326,22 @@ class Test:
         # TODO implement graph tests
         pass
 
+    @staticmethod
+    def __test_configfile(params):
+
+        # Dump constructer params into file
+
+        file = 'configtest.json'
+        with open(file, 'w') as outfile:
+            json.dump(params['init'], outfile)
+
+        # test construct instance
+        getattr(nclustgen, params['algorithm'] + 'byConfig')(file)
+
+        # delete file
+
+        os.remove(file)
+
     def __error_collector(self, err, description):
 
         self.description[-1]['errors'].append({
@@ -293,4 +350,4 @@ class Test:
 
 
 if __name__ == '__main__':
- testcli()
+    testcli()
