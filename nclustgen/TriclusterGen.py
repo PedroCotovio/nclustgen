@@ -2,6 +2,7 @@
 from .Generator import Generator
 
 import os
+import json
 import numpy as np
 from sparse import concatenate, COO
 
@@ -158,3 +159,16 @@ class TriclusterGenerator(Generator):
         serv.setPath(path)
         serv.setSingleFileOutput(self.asses_memory(single_file, gends=self.generatedDataset))
         serv.saveResult(self.generatedDataset, file_name + 'cluster_data', file_name + 'dataset')
+
+
+class TriclusterGeneratorbyConfig(TriclusterGenerator):
+
+    def __init__(self, file_path=None):
+        if file_path:
+            f = open(file_path, )
+            params = json.load(f)
+            f.close()
+
+            super().__init__(**params)
+
+        super().__init__()

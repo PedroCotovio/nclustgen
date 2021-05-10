@@ -148,3 +148,17 @@ class BiclusterGenerator(Generator):
         getattr(serv, 'save{}Result'.format(self.dstype.capitalize()))(
             self.generatedDataset, file_name + 'cluster_data', file_name + 'dataset'
         )
+
+
+class BiclusterGeneratorbyConfig(BiclusterGenerator):
+
+    def __init__(self, file_path=None):
+
+        if file_path:
+            f = open(file_path, )
+            params = json.load(f)
+            f.close()
+
+            super().__init__(**params)
+
+        super().__init__()
