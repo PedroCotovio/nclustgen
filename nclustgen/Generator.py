@@ -9,6 +9,13 @@ import jpype
 import jpype.imports
 from jpype.types import *
 
+# Start JVM
+if jpype.isJVMStarted():
+    pass
+else:
+    # Loading G-Bic
+    jpype.startJVM(classpath=['nclustgen/jars/*'])
+
 
 # TODO docs
 class Generator(metaclass=abc.ABCMeta):
@@ -19,9 +26,6 @@ class Generator(metaclass=abc.ABCMeta):
                  percofoverlappingcolumns=1.0, percofoverlappingcontexts=1.0, percmissingsonbackground=0.0,
                  percmissingsonclusters=0.0, percnoiseonbackground=0.0, percnoiseonclusters=0.0, percnoisedeviation=0.0,
                  percerroesonbackground=0.0, percerrorsonclusters=0.0, *args, **kwargs):
-
-        # Start JVM
-        self.__start()
 
         self.n = n
 
@@ -290,16 +294,7 @@ class Generator(metaclass=abc.ABCMeta):
         return self.to_tensor(generatedDataset, in_memory=kwargs.get('in_memory'))
 
     @staticmethod
-    def __start():
-
-        if jpype.isJVMStarted():
-            pass
-        else:
-            # Loading G-Bic
-            jpype.startJVM(classpath=['nclustgen/jars/*'])
-
-    @staticmethod
-    def shutdown():
+    def shutdownJVM():
 
         try:
             jpype.shutdownJVM()
