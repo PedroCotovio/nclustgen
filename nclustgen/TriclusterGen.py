@@ -3,10 +3,16 @@ from .Generator import Generator
 
 import os
 import json
+import sys
 import numpy as np
 from sparse import concatenate, COO
 
+# import dgl without backend info
+stderr = sys.stderr
+sys.stderr = open(os.devnull, 'w')
 import dgl
+sys.stderr = stderr
+
 import torch as th
 import networkx as nx
 
