@@ -160,6 +160,8 @@ class TriclusterGenerator(Generator):
 
     def save(self, file_name='example', path=None, single_file=None):
 
+        self.start_silencing()
+
         serv = GTricService()
 
         if path is None:
@@ -168,6 +170,8 @@ class TriclusterGenerator(Generator):
         serv.setPath(path)
         serv.setSingleFileOutput(self.asses_memory(single_file, gends=self.generatedDataset))
         serv.saveResult(self.generatedDataset, file_name + '_cluster_data', file_name + '_dataset')
+
+        self.stop_silencing()
 
 
 class TriclusterGeneratorbyConfig(TriclusterGenerator):

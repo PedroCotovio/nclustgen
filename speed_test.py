@@ -4,7 +4,7 @@ from nclustgen import TriclusterGenerator, BiclusterGenerator
 import torch as th
 import json
 from tqdm import tqdm
-from time import perf_counter as pc
+from time import perf_counter as pc, sleep
 
 
 @click.command()
@@ -67,7 +67,7 @@ def speedtest(shape=None, hidden=1, grid=None):
 
         # Generating DS
         start = pc()
-        instance = generator(in_memory=boolean)
+        instance = generator(in_memory=boolean, silence=True)
         _, _ = instance.generate(*shape, nclusters=hidden)
         stop = pc()
 

@@ -1,4 +1,5 @@
 
+import os
 import abc
 import warnings
 import json
@@ -16,6 +17,9 @@ else:
     # Loading G-Bic
     jpype.startJVM(classpath=['nclustgen/jars/*'])
 
+from java.lang import System
+from java.io import PrintStream
+
 
 # TODO docs
 class Generator(metaclass=abc.ABCMeta):
@@ -25,8 +29,9 @@ class Generator(metaclass=abc.ABCMeta):
                  maxclustsperoverlappedarea=0, maxpercofoverlappingelements=0.0, percofoverlappingrows=1.0,
                  percofoverlappingcolumns=1.0, percofoverlappingcontexts=1.0, percmissingsonbackground=0.0,
                  percmissingsonclusters=0.0, percnoiseonbackground=0.0, percnoiseonclusters=0.0, percnoisedeviation=0.0,
-                 percerroesonbackground=0.0, percerrorsonclusters=0.0, *args, **kwargs):
+                 percerroesonbackground=0.0, percerrorsonclusters=0.0, silence=False, *args, **kwargs):
 
+        # define dimensions
         self.n = n
 
         if patterns is None:
@@ -34,17 +39,18 @@ class Generator(metaclass=abc.ABCMeta):
         if clusterdistribution is None:
             clusterdistribution = [['UNIFORM', 4, 4]] * n
 
-        self.time_profile = kwargs.get('timeprofile')
-
-        if self.time_profile:
-            self.time_profile = str(self.time_profile).upper()
-
+        # Parse basic Parameters
         self.dstype = str(dstype).upper()
         self.patterns = [[str(pattern_type).upper() for pattern_type in pattern] for pattern in patterns]
         self.clusterdistribution = [[str(dist[0]).upper(), int(dist[1]), int(dist[2])] for dist in clusterdistribution]
         self.contiguity = str(contiguity).upper()
 
-        # Dataset type dependent parameters
+        self.time_profile = kwargs.get('timeprofile')
+
+        if self.time_profile:
+            self.time_profile = str(self.time_profile).upper()
+
+        # Parse dataset type parameters
         self.realval = bool(kwargs.get('realval', True))
         self.minval = int(kwargs.get('minval', -10.0))
         self.maxval = int(kwargs.get('maxval', 10.0))
@@ -71,12 +77,13 @@ class Generator(metaclass=abc.ABCMeta):
         self.percofoverlappingrows = float(percofoverlappingrows)
         self.percofoverlappingcolumns = float(percofoverlappingcolumns)
         self.percofoverlappingcontexts = float(percofoverlappingcontexts)
+
         # Noise settings
         self.missing = (float(percmissingsonbackground), float(percmissingsonclusters))
         self.noise = (float(percnoiseonbackground), float(percnoiseonclusters), float(percnoisedeviation))
         self.errors = (float(percerroesonbackground), float(percerrorsonclusters), float(percnoisedeviation))
 
-        # set background
+        # define background
         bktype = str(bktype).upper()
         if bktype == 'NORMAL':
             self.background = [bktype, int(kwargs.get('mean', 14)), kwargs.get('sdev', 7)]
@@ -87,15 +94,33 @@ class Generator(metaclass=abc.ABCMeta):
         else:
             self.background = [bktype]
 
-        # set bicluster patterns
-        self.patterns = [[str(pattern_type).upper() for pattern_type in pattern] for pattern in patterns]
+        # initialize class arguments
 
-        # dataset
+        # Data
         self.generatedDataset = None
         self.X = None
         self.Y = None
         self.graph = None
         self.in_memory = kwargs.get('in_memory')
+
+        # General
+        self.silenced = silence
+        self.stdout = System.out
+
+    def start_silencing(self):
+
+        if self.silenced:
+            System.setOut(PrintStream('logs'))
+
+    def stop_silencing(self):
+
+        if self.silenced:
+            System.setOut(self.stdout)
+
+            try:
+                os.remove('logs')
+            except FileNotFoundError:
+                pass
 
     @abc.abstractmethod
     def build_background(self):
@@ -133,6 +158,8 @@ class Generator(metaclass=abc.ABCMeta):
 
     def to_tensor(self, generatedDataset=None, in_memory=None, keys=None):
 
+        self.start_silencing()
+
         if generatedDataset is None:
             generatedDataset = self.generatedDataset
 
@@ -162,6 +189,8 @@ class Generator(metaclass=abc.ABCMeta):
         )
 
         self.Y = [js[i][key] for i in js.keys() for key in keys]
+
+        self.stop_silencing()
 
         return self.X, self.Y
 
@@ -264,6 +293,8 @@ class Generator(metaclass=abc.ABCMeta):
 
     def generate(self, nrows=100, ncols=100, ncontexts=3, nclusters=1, no_return=False, **kwargs):
 
+        self.start_silencing()
+
         # define background
         background = self.build_background()
 
@@ -289,6 +320,8 @@ class Generator(metaclass=abc.ABCMeta):
 
         # return
         self.generatedDataset = generatedDataset
+
+        self.stop_silencing()
 
         if no_return:
             return None, None

@@ -142,6 +142,8 @@ class BiclusterGenerator(Generator):
 
     def save(self, file_name='example', path=None, single_file=None):
 
+        self.start_silencing()
+
         serv = GBicService()
 
         if path is None:
@@ -153,6 +155,8 @@ class BiclusterGenerator(Generator):
         getattr(serv, 'save{}Result'.format(self.dstype.capitalize()))(
             self.generatedDataset, file_name + '_cluster_data', file_name + '_dataset'
         )
+
+        self.stop_silencing()
 
 
 class BiclusterGeneratorbyConfig(BiclusterGenerator):

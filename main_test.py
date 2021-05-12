@@ -80,7 +80,7 @@ class Test:
                             ],
                             'contiguity': [None, 'COLUMNS'],
                             'plaidcoherency': ['ADDITIVE', 'MULTIPLICATIVE', 'INTERPOLED', 'NONE', 'NO_OVERLAPPING'],
-                            'timeprofile': ['RANDOM', 'MONONICALLY_INCREASING', 'MONONICALLY_DECREASING']
+                            'timeprofile': ['RANDOM', 'MONONICALLY_INCREASING', 'MONONICALLY_DECREASING'],
                         },
                     'generate': {
                         'nrows': [30],
@@ -192,7 +192,7 @@ class Test:
             })
 
             try:
-                instance = getattr(nclustgen, combination['algorithm'])(combination['init'])
+                instance = getattr(nclustgen, combination['algorithm'])(**combination['init'], silence=True)
 
                 try:
                     self.__test_generate(instance, combination['generate'])
