@@ -8,10 +8,11 @@ from time import perf_counter as pc
 
 
 @click.command()
-@click.option('--shape', default=None, help='Shape of dataset')
-@click.option('--hidden', default=1, help='number of hidden clusters')
-@click.option('--grid', default=None, help='test grid')
-@click.option('--output', default='json', help='How to output results')
+@click.option('--shape', default=None, help='Shape of dataset -> (rows, cols, contexts)')
+@click.option('--hidden', default=1, help='number of hidden clusters -> int')
+@click.option('--grid', default=None, help='test grid -> dict('
+                                           'graphNet: Bool, graphDGLcpu: bool,graphDGLgpu: bool,save: bool})')
+@click.option('--output', default='json', help='How to output results -> str(json) or str(print)')
 def testcli(shape, hidden, grid, output):
 
     res = speedtest(shape, hidden, grid)
@@ -42,8 +43,8 @@ def speedtest(shape=None, hidden=1, grid=None):
     if grid is None:
         grid = {
             'graphNet': True,
-            'graphDGLcpu': False,
-            'graphDGLgpu': False,
+            'graphDGLcpu': True,
+            'graphDGLgpu': True,
             'save': True
         }
 
