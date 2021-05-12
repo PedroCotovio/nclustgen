@@ -6,6 +6,8 @@ import json
 import numpy as np
 from sparse import COO
 
+import torch as th
+
 import jpype
 import jpype.imports
 from jpype.types import *
@@ -226,9 +228,15 @@ class Generator(metaclass=abc.ABCMeta):
 
         if x is not None:
 
-            # if sparse matrix then densify
+            # if sparse matrix then transform into dense
             if isinstance(x, COO):
                 x = x.todense()
+
+            if device == 'gpu' and not th.cuda.is_available():
+
+                device = 'cpu'
+
+                warnings.warn('CUDA not available CPU will be used instead')
 
             if device == 'gpu' and framework == 'networkx':
 
