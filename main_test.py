@@ -6,7 +6,7 @@ from sparse import COO
 import os
 import json
 import warnings
-import tqdm
+from tqdm import tqdm
 
 
 @click.command()
@@ -25,7 +25,7 @@ def testcli(GridFile, output):
         if output == 'print':
             print(errs)
         elif output == 'json':
-            with open('output.json', 'w') as outfile:
+            with open('fulltest.json', 'w') as outfile:
                 json.dump(errs, outfile)
 
 
@@ -226,6 +226,7 @@ class Test:
 
             pbar.set_description('CONFIG TEST {}'.format(n))
             pbar.set_postfix(errors=len([test for test in self.description if test['config']]))
+            print('')
 
             self.description.append({
                 'test': n,
@@ -306,21 +307,33 @@ class Test:
         if params['path'] is None:
             params['path'] = os.getcwd()
 
+        # Assert is data files were created
         if instance.asses_memory(params['single_file'], gends=instance.generatedDataset):
             suffix = ''
         else:
             suffix = '_1'
 
-        assert '{}_data{}.tsv'.format(params['file_name'], suffix) in os.listdir(params['path'])
+        assert '{}_dataset{}.tsv'.format(params['file_name'], suffix) in os.listdir(params['path'])
 
-        if instance.n == 2:
-            alg = 'bics'
-
-        else:
-            alg = 'trics'
+        # Assert descriptive files created
 
         for suffix in ['json', 'txt']:
-            assert '{}_{}.{}'.format(params['file_name']) in os.listdir(params['path'])
+            file = '{}_cluster_data.{}'.format(params['file_name'], suffix)
+
+            assert file in os.listdir(params['path'])
+
+            # Remove descriptive file
+            os.remove(os.path.join(params['path'], file))
+
+        # Remove data files
+        if params['single_file']:
+            os.remove(os.path.join(params['path'], '{}_dataset.tsv'.format(params['file_name'])))
+        else:
+            try:
+                for i in range(100):
+                    os.remove(os.path.join(params['path'], '{}_dataset_{}.txt'.format(params['file_name'], i)))
+            except FileNotFoundError:
+                pass
 
     def __test_graph(self, instance, params):
         # TODO implement graph tests
@@ -329,8 +342,7 @@ class Test:
     @staticmethod
     def __test_configfile(params):
 
-        # Dump constructer params into file
-
+        # Dump constructor params into file
         file = 'configtest.json'
         with open(file, 'w') as outfile:
             json.dump(params['init'], outfile)
@@ -339,7 +351,6 @@ class Test:
         getattr(nclustgen, params['algorithm'] + 'byConfig')(file)
 
         # delete file
-
         os.remove(file)
 
     def __error_collector(self, err, description):
