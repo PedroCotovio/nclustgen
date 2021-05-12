@@ -172,7 +172,7 @@ class Generator(metaclass=abc.ABCMeta):
 
     @staticmethod
     @abc.abstractmethod
-    def dense_to_netwrokx(x, device=None):
+    def dense_to_networkx(x, device=None):
         pass
 
     def to_graph(self, x=None, framework='networkx', device='cpu'):
@@ -195,7 +195,7 @@ class Generator(metaclass=abc.ABCMeta):
                 '{} is not a compatible framework, please use either dgl or networkx'.format(framework)
             )
 
-        if x:
+        if x is not None:
 
             # if sparse matrix then densify
             if isinstance(x, COO):
@@ -209,7 +209,9 @@ class Generator(metaclass=abc.ABCMeta):
                               'DGL will be used instead.')
 
             # call private method
-            return getattr(self, 'dense_to_{}'.format(framework))(x, device)
+            self.graph = getattr(self, 'dense_to_{}'.format(framework))(x, device)
+
+            return self.graph
 
         else:
             raise AttributeError('No generated dataset exists. '

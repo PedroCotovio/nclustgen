@@ -135,7 +135,7 @@ class TriclusterGenerator(Generator):
         pass
 
     @staticmethod
-    def dense_to_netwrokx(x, device=None):
+    def dense_to_networkx(x, device=None):
 
         G = nx.Graph()
 
@@ -163,11 +163,11 @@ class TriclusterGenerator(Generator):
         serv = GTricService()
 
         if path is None:
-            path = os.getcwd()
+            path = os.getcwd() + '/'
 
         serv.setPath(path)
         serv.setSingleFileOutput(self.asses_memory(single_file, gends=self.generatedDataset))
-        serv.saveResult(self.generatedDataset, file_name + 'cluster_data', file_name + 'dataset')
+        serv.saveResult(self.generatedDataset, file_name + '_cluster_data', file_name + '_dataset')
 
 
 class TriclusterGeneratorbyConfig(TriclusterGenerator):

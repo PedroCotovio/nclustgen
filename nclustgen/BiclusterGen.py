@@ -124,7 +124,7 @@ class BiclusterGenerator(Generator):
         pass
 
     @staticmethod
-    def dense_to_netwrokx(x, device=None):
+    def dense_to_networkx(x, device=None):
 
         G = nx.Graph()
 
@@ -145,13 +145,13 @@ class BiclusterGenerator(Generator):
         serv = GBicService()
 
         if path is None:
-            path = os.getcwd()
+            path = os.getcwd() + '/'
 
         serv.setPath(path)
         serv.setSingleFileOutput(self.asses_memory(single_file, gends=self.generatedDataset))
 
         getattr(serv, 'save{}Result'.format(self.dstype.capitalize()))(
-            self.generatedDataset, file_name + 'cluster_data', file_name + 'dataset'
+            self.generatedDataset, file_name + '_cluster_data', file_name + '_dataset'
         )
 
 
