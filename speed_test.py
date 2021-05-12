@@ -23,11 +23,11 @@ def testcli(shape, hidden, grid, output):
             for array_type in res.keys():
 
                 print(' {} array generation:'.format(array_type.capitalize()))
-                print('     Dataset Generation Speed: {}s'.format(round(res[array_type]['generate'], 5)))
-                print('     NetworkX Graph Generation Speed: {}s'.format(round(res[array_type]['graphNet'], 5)))
-                print('     DGL(cpu) Graph Generation Speed: {}s'.format(round(res[array_type]['graphDGLcpu'], 5)))
-                print('     DGL(gpu) Graph Generation Speed: {}s'.format(round(res[array_type]['graphDGLgpu'], 5)))
-                print('     Save Speed: {}s'.format(round(res[array_type]['save'], 5)))
+                print('     Dataset Generation Speed: {}s'.format(res[array_type]['generate']))
+                print('     NetworkX Graph Generation Speed: {}s'.format(res[array_type]['graphNet']))
+                print('     DGL(cpu) Graph Generation Speed: {}s'.format(res[array_type]['graphDGLcpu']))
+                print('     DGL(gpu) Graph Generation Speed: {}s'.format(res[array_type]['graphDGLgpu']))
+                print('     Save Speed: {}s'.format(res[array_type]['save']))
 
         elif output == 'json':
             with open('speedtest.json', 'w') as outfile:
