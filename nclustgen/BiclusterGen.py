@@ -40,7 +40,10 @@ class BiclusterGenerator(Generator):
 
     def build_background(self):
 
-        self.background[0] = getattr(BackgroundType, self.background[0])
+        try:
+            self.background[0] = getattr(BackgroundType, self.background[0])
+        except TypeError:
+            pass
 
         return Background(*self.background)
 

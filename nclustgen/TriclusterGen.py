@@ -40,7 +40,10 @@ class TriclusterGenerator(Generator):
 
     def build_background(self):
 
-        self.background[0] = getattr(BackgroundType, self.background[0])
+        try:
+            self.background[0] = getattr(BackgroundType, self.background[0])
+        except TypeError:
+            pass
 
         return Background(*self.background)
 
@@ -58,8 +61,6 @@ class TriclusterGenerator(Generator):
         [patterns.add(
             TriclusterPattern(*[getattr(PatternType, pattern_type) for pattern_type in pattern] + [self.time_profile])
         ) for pattern in self.patterns]
-
-        # TODO add set_timeprofile
 
         return patterns
 
