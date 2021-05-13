@@ -107,8 +107,8 @@ class Test:
                                     'patterns': [
                                         ['NONE', 'NONE', 'ORDER_PRESERVING'],
                                         ['CONSTANT', 'NONE', 'NONE'],
-                                        ['CONSTANT', 'CONSTANT', 'MULTIPLICATIVE'],
-                                        ['CONSTANT', 'CONSTANT', 'ADDITIVE'],
+                                        [['CONSTANT', 'CONSTANT', 'MULTIPLICATIVE'], ['CONSTANT', 'NONE', 'NONE']],
+                                        [['CONSTANT', 'CONSTANT', 'ADDITIVE'], ['CONSTANT', 'NONE', 'NONE']],
                                         None
                                     ],
                                     'realval': [True, False],
