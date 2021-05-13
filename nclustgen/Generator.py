@@ -171,8 +171,6 @@ class Generator(metaclass=abc.ABCMeta):
         if keys is None:
             keys = ['X', 'Y', 'Z']
 
-        cluster_type = {2: 'bi', 3: 'Tri'}[self.n]
-
         # Get Tensor
 
         if bool(in_memory):
@@ -185,9 +183,12 @@ class Generator(metaclass=abc.ABCMeta):
 
         keys = keys[:self.n]
 
+        cluster_type = {2: 'bi', 3: 'Tri'}[self.n]
+        geninfo_params = {2: [generatedDataset, False], 3: [generatedDataset]}[self.n]
+
         js = json.loads(
             str(getattr(generatedDataset, 'get{}csInfoJSON'.format(cluster_type.capitalize()))
-                (generatedDataset).getJSONObject('{}clusters'.format(cluster_type)).toString())
+                (*geninfo_params).getJSONObject('{}clusters'.format(cluster_type)).toString())
         )
 
         self.Y = [js[i][key] for i in js.keys() for key in keys]
