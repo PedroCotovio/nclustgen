@@ -129,11 +129,35 @@ class TriclusterGenerator(Generator):
     @staticmethod
     def dense_to_dgl(x, device):
 
-        # TODO implement dense_to_dgl tric
-        # graph_data = {
-        #    ('row', 'elem', 'col'): (th.tensor([0, 1]), th.tensor([1, 2])),
-        # }
-        pass
+        # TODO set (u,v)
+
+        tensor = th.tensor(
+            [[i, j, z, elem] for z, ctx in enumerate(x) for i, row in enumerate(ctx) for j, elem in enumerate(row)]
+        ).T
+
+        graph_data = {
+            ('row', 'elem', 'col'): (tensor[0].int(), tensor[1].int()),
+            ('row', 'elem', 'ctx'): (tensor[0].int(), tensor[2].int()),
+            ('col', 'elem', 'ctx'): (tensor[1].int(), tensor[2].int()),
+        }
+
+        # create graph
+        G = dgl.heterograph(graph_data)
+
+        # TODO set weights
+        G.edges[('row', 'elem', 'col')].data['w'] = tensor[3]
+        G.edges[('row', 'elem', 'ctx')].data['w'] = tensor[3]
+        G.edges[('col', 'elem', 'ctx')].data['w'] = tensor[3]
+
+        # set cluster members
+        G.nodes['row'].data['c'] = th.zeros(x.shape[1])
+        G.nodes['col'].data['c'] = th.zeros(x.shape[2])
+        G.nodes['ctx'].data['c'] = th.zeros(x.shape[0])
+
+        if device == 'gpu':
+            G = G.to('cuda')
+
+        return G
 
     @staticmethod
     def dense_to_networkx(x, device=None):

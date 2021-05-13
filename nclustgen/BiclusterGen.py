@@ -120,11 +120,30 @@ class BiclusterGenerator(Generator):
     @staticmethod
     def dense_to_dgl(x, device):
 
-        # TODO implement dense_to_dgl bic
-        # graph_data = {
-        #    ('row', 'elem', 'col'): (th.tensor([0, 1]), th.tensor([1, 2])),
-        # }
-        pass
+        # set (u,v)
+
+        tensor = th.tensor([[i, j, elem] for i, row in enumerate(x) for j, elem in enumerate(row)]).T
+
+        graph_data = {
+               ('row', 'elem', 'col'): (tensor[0].int(), tensor[1].int()),
+            }
+
+        # create graph
+        G = dgl.heterograph(graph_data)
+
+        # set weights
+        weights = tensor[2]
+
+        G.edata['w'] = weights
+
+        # set cluster members
+        G.nodes['row'].data['c'] = th.zeros(x.shape[0])
+        G.nodes['col'].data['c'] = th.zeros(x.shape[1])
+
+        if device == 'gpu':
+            G = G.to('cuda')
+
+        return G
 
     @staticmethod
     def dense_to_networkx(x, device=None):
