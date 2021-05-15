@@ -279,7 +279,6 @@ class Generator(metaclass=abc.ABCMeta):
     def asses_memory(self, in_memory=None, **kwargs):
 
         if in_memory is not None:
-            self.in_memory = in_memory
             return in_memory
 
         elif self.in_memory is not None:
