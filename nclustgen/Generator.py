@@ -109,20 +109,22 @@ class Generator(metaclass=abc.ABCMeta):
         self.silenced = silence
         self.stdout = System.out
 
-    def start_silencing(self):
+    def start_silencing(self, silence=None):
 
-        if self.silenced:
+        if silence is None:
+            silence = self.silenced
+
+        if bool(silence):
             System.setOut(PrintStream('logs'))
 
     def stop_silencing(self):
 
-        if self.silenced:
-            System.setOut(self.stdout)
+        System.setOut(self.stdout)
 
-            try:
-                os.remove('logs')
-            except FileNotFoundError:
-                pass
+        try:
+            os.remove('logs')
+        except FileNotFoundError:
+            pass
 
     @abc.abstractmethod
     def build_background(self):
