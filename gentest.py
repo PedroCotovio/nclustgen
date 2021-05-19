@@ -1,11 +1,30 @@
 from nclustgen import BiclusterGenerator as bg, TriclusterGenerator as tg
 import unittest
+import pathlib as pl
+import numpy
+from scipy.sparse import csr_matrix
+from sparse import COO
 
 from java.lang import System
 from java.io import PrintStream
 
+from com.gbic.types import Background as bic_background
+from com.gtric.types import Background as tric_background
 
-class GenTest(unittest.TestCase):
+
+class TestCaseBase(unittest.TestCase):
+
+    @staticmethod
+    def assertIsFile(path):
+        if not pl.Path(path).resolve().is_file():
+            raise AssertionError("File does not exist: %s" % str(path))
+
+    @staticmethod
+    def assertIsNotFile(path):
+        if pl.Path(path).resolve().is_file():
+            raise AssertionError("File exists: %s" % str(path))
+
+class GenTest(TestCaseBase):
 
     def test_silence(self):
 
@@ -24,22 +43,21 @@ class GenTest(unittest.TestCase):
         System.setOut(instance_T.stdout)
 
         # check method logic
-        instance_T.start_silencing()
 
-        # System.out and PrintStream('logs') are not comparable, everytime PrintStream('logs') is set is under a
-        # unique hash, to check this the initial printstream needed to be stored and even that would not ensure
-        # it was the correct one
-        # TODO assert by checking if something is being logged into loggs file
-        self.assertEquals(System.out, PrintStream('logs'))
+        instance_T.start_silencing()
+        self.assertIsFile('logs')
 
         instance_T.stop_silencing()
-        self.assertEquals(System.out, instance_T.stdout)
+        self.assertIsNotFile('logs')
+        self.assertEqual(System.out, instance_T.stdout)
 
         instance_T.start_silencing(silence=False)
-        self.assertEquals(System.out, instance_T.stdout)
+        self.assertIsNotFile('logs')
+        self.assertEqual(System.out, instance_T.stdout)
 
         instance_F.start_silencing()
-        self.assertEquals(System.out, instance_T.stdout)
+        self.assertIsNotFile('logs')
+        self.assertEqual(System.out, instance_T.stdout)
 
     def test_memory(self):
 
