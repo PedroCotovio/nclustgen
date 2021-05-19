@@ -32,6 +32,8 @@ from com.gtric.utils import IOUtils as io
 
 from java.util import ArrayList
 
+from .utils import tensor_value_check as tvc
+
 
 class TriclusterGenerator(Generator):
 
@@ -99,7 +101,7 @@ class TriclusterGenerator(Generator):
         tensor = str(io.matrixToStringColOriented(generatedDataset, generatedDataset.getNumRows(), 0, False))
 
         tensor = np.array(
-            [np.array_split([float(val) for val in row.split('\t')[1:]], 3) for row in tensor.split('\n')][:-1]
+            [np.array_split([tvc(val) for val in row.split('\t')[1:]], 3) for row in tensor.split('\n')][:-1]
         )
 
         return tensor.reshape(
@@ -117,7 +119,7 @@ class TriclusterGenerator(Generator):
             tensor = str(io.matrixToStringColOriented(generatedDataset, threshold, step, False))
 
             tensor = COO.from_numpy(np.array(
-                [np.array_split([float(val) for val in row.split('\t')[1:]], 3) for row in tensor.split('\n')][:-1]
+                [np.array_split([tvc(val) for val in row.split('\t')[1:]], 3) for row in tensor.split('\n')][:-1]
             ))
 
             tensor = tensor.reshape((generatedDataset.getNumContexts(), threshold, generatedDataset.getNumCols()))
