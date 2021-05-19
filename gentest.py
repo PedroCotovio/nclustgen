@@ -112,18 +112,64 @@ class GenTest(TestCaseBase):
         self.assertTrue(instance_N.asses_memory(gends=gends_T))
         self.assertFalse(instance_N.asses_memory(gends=gends_F))
 
-        # integrated test
 
-        # TODO generate and asses output
-
-
-class BicsGenTest(unittest.TestCase):
-
-    def setUp(self):
-        pass
+class BicsGenTest(TestCaseBase):
 
     def test_background(self):
-        pass
+
+        # Test initialization
+
+        probs = [0.5, 0.25, 0.25]
+
+        instance_numeric_uniform = bg(silence=True)
+        instance_numeric_missing = bg(bktype='Missing', silence=True)
+        instance_numeric_discrete = bg(bktype='Discrete', minval=1, maxval=3, probs=probs, silence=True)
+        instance_numeric_normal = bg(bktype='Normal', silence=True)
+
+        instance_symbolic_uniform = bg(dstype='SYMBOLIC', silence=True)
+        instance_symbolic_missing = bg(dstype='symbolic', bktype='Missing', silence=True)
+        instance_symbolic_discrete = bg(dstype='Symbolic', bktype='Discrete', nsymbols=3, probs=probs, silence=True)
+        instance_symbolic_discrete_noprobs = bg(dstype='Symbolic', bktype='Discrete', nsymbols=3, silence=True)
+        instance_symbolic_normal = bg(dstype='Symbolic', bktype='Normal', silence=True)
+
+        # test initialization
+
+        self.assertEqual(instance_numeric_uniform.background, ['UNIFORM'])
+        self.assertEqual(instance_numeric_missing.background, ['MISSING'])
+        self.assertEqual(instance_numeric_discrete.background, ['DISCRETE', probs])
+        self.assertEqual(instance_numeric_normal.background, ['NORMAL', 14, 7])
+
+        self.assertEqual(instance_symbolic_uniform.background, ['UNIFORM'])
+        self.assertEqual(instance_symbolic_missing.background, ['MISSING'])
+        self.assertEqual(instance_symbolic_discrete.background, ['DISCRETE', probs])
+        self.assertEqual(instance_symbolic_discrete_noprobs.background, ['UNIFORM'])
+        self.assertEqual(instance_symbolic_normal.background, ['NORMAL', 14, 7])
+
+        # test method
+
+        self.assertTrue(isinstance(instance_numeric_uniform.build_background(), bic_background))
+        self.assertTrue(isinstance(instance_numeric_missing.build_background(), bic_background))
+        self.assertTrue(isinstance(instance_numeric_discrete.build_background(), bic_background))
+        self.assertTrue(isinstance(instance_numeric_normal.build_background(), bic_background))
+
+        self.assertTrue(isinstance(instance_symbolic_uniform.build_background(), bic_background))
+        self.assertTrue(isinstance(instance_symbolic_missing.build_background(), bic_background))
+        self.assertTrue(isinstance(instance_symbolic_discrete.build_background(), bic_background))
+        self.assertTrue(isinstance(instance_symbolic_discrete_noprobs.build_background(), bic_background))
+        self.assertTrue(isinstance(instance_symbolic_normal.build_background(), bic_background))
+
+        # integration
+
+        instance_numeric_uniform.generate()
+        instance_numeric_missing.generate()
+        instance_numeric_discrete.generate()
+        instance_numeric_normal.generate()
+
+        instance_symbolic_uniform.generate()
+        instance_symbolic_missing.generate()
+        instance_symbolic_discrete.generate()
+        instance_symbolic_discrete_noprobs.generate()
+        instance_symbolic_normal.generate()
 
     def test_patterns(self):
         pass
@@ -153,13 +199,62 @@ class BicsGenTest(unittest.TestCase):
         pass
 
 
-class TricsGenTest(unittest.TestCase):
-
-    def setUp(self):
-        pass
+class TricsGenTest(TestCaseBase):
 
     def test_background(self):
-        pass
+        # Test initialization
+
+        probs = [0.5, 0.25, 0.25]
+
+        instance_numeric_uniform = tg(silence=True)
+        instance_numeric_missing = tg(bktype='Missing', silence=True)
+        instance_numeric_discrete = tg(bktype='Discrete', minval=1, maxval=3, probs=probs, silence=True)
+        instance_numeric_normal = tg(bktype='Normal', silence=True)
+
+        instance_symbolic_uniform = tg(dstype='SYMBOLIC', silence=True)
+        instance_symbolic_missing = tg(dstype='symbolic', bktype='Missing', silence=True)
+        instance_symbolic_discrete = tg(dstype='Symbolic', bktype='Discrete', nsymbols=3, probs=probs, silence=True)
+        instance_symbolic_discrete_noprobs = tg(dstype='Symbolic', bktype='Discrete', nsymbols=3, silence=True)
+        instance_symbolic_normal = tg(dstype='Symbolic', bktype='Normal', silence=True)
+
+        # test initialization
+
+        self.assertEqual(instance_numeric_uniform.background, ['UNIFORM'])
+        self.assertEqual(instance_numeric_missing.background, ['MISSING'])
+        self.assertEqual(instance_numeric_discrete.background, ['DISCRETE', probs])
+        self.assertEqual(instance_numeric_normal.background, ['NORMAL', 14, 7])
+
+        self.assertEqual(instance_symbolic_uniform.background, ['UNIFORM'])
+        self.assertEqual(instance_symbolic_missing.background, ['MISSING'])
+        self.assertEqual(instance_symbolic_discrete.background, ['DISCRETE', probs])
+        self.assertEqual(instance_symbolic_discrete_noprobs.background, ['UNIFORM'])
+        self.assertEqual(instance_symbolic_normal.background, ['NORMAL', 14, 7])
+
+        # test method
+
+        self.assertTrue(isinstance(instance_numeric_uniform.build_background(), tric_background))
+        self.assertTrue(isinstance(instance_numeric_missing.build_background(), tric_background))
+        self.assertTrue(isinstance(instance_numeric_discrete.build_background(), tric_background))
+        self.assertTrue(isinstance(instance_numeric_normal.build_background(), tric_background))
+
+        self.assertTrue(isinstance(instance_symbolic_uniform.build_background(), tric_background))
+        self.assertTrue(isinstance(instance_symbolic_missing.build_background(), tric_background))
+        self.assertTrue(isinstance(instance_symbolic_discrete.build_background(), tric_background))
+        self.assertTrue(isinstance(instance_symbolic_discrete_noprobs.build_background(), tric_background))
+        self.assertTrue(isinstance(instance_symbolic_normal.build_background(), tric_background))
+
+        # integration
+
+        instance_numeric_uniform.generate()
+        instance_numeric_missing.generate()
+        instance_numeric_discrete.generate()
+        instance_numeric_normal.generate()
+
+        instance_symbolic_uniform.generate()
+        instance_symbolic_missing.generate()
+        instance_symbolic_discrete.generate()
+        instance_symbolic_discrete_noprobs.generate()
+        instance_symbolic_normal.generate()
 
     def test_patterns(self):
         pass
