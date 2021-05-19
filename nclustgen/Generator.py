@@ -53,23 +53,34 @@ class Generator(metaclass=abc.ABCMeta):
             self.time_profile = str(self.time_profile).upper()
 
         # Parse dataset type parameters
-        self.realval = bool(kwargs.get('realval', True))
-        self.minval = int(kwargs.get('minval', -10.0))
-        self.maxval = int(kwargs.get('maxval', 10.0))
 
-        try:
-            self.symbols = [str(symbol) for symbol in kwargs.get('symbols')]
-            self.nsymbols = len(self.symbols)
+        if self.dstype == 'NUMERIC':
 
-        except TypeError:
-            self.nsymbols = kwargs.get('nsymbols', 10)
+            self.realval = bool(kwargs.get('realval', True))
+            self.minval = int(kwargs.get('minval', -10.0))
+            self.maxval = int(kwargs.get('maxval', 10.0))
 
-            if self.nsymbols:
-                self.symbols = [str(symbol) for symbol in range(self.nsymbols)]
-            else:
-                self.symbols = None
+            # Noise
+            self.noise = (float(percnoiseonbackground), float(percnoiseonclusters), float(percnoisedeviation))
+            self.errors = (float(percerroesonbackground), float(percerrorsonclusters), float(percnoisedeviation))
 
-        self.symmetries = kwargs.get('symmetries', False)
+        else:
+            try:
+                self.symbols = [str(symbol) for symbol in kwargs.get('symbols')]
+                self.nsymbols = len(self.symbols)
+
+            except TypeError:
+                self.nsymbols = kwargs.get('nsymbols', 10)
+
+                if self.nsymbols:
+                    self.symbols = [str(symbol) for symbol in range(self.nsymbols)]
+
+            self.symmetries = kwargs.get('symmetries', False)
+
+            # Noise
+
+            self.noise = (float(percnoiseonbackground), float(percnoiseonclusters), int(percnoisedeviation))
+            self.errors = (float(percerroesonbackground), float(percerrorsonclusters), int(percnoisedeviation))
 
         # Overlapping Settings
         self.plaidcoherency = str(plaidcoherency).upper()
@@ -80,10 +91,8 @@ class Generator(metaclass=abc.ABCMeta):
         self.percofoverlappingcolumns = float(percofoverlappingcolumns)
         self.percofoverlappingcontexts = float(percofoverlappingcontexts)
 
-        # Noise settings
+        # missing settings
         self.missing = (float(percmissingsonbackground), float(percmissingsonclusters))
-        self.noise = (float(percnoiseonbackground), float(percnoiseonclusters), float(percnoisedeviation))
-        self.errors = (float(percerroesonbackground), float(percerrorsonclusters), float(percnoisedeviation))
 
         # define background
         bktype = str(bktype).upper()
@@ -91,7 +100,12 @@ class Generator(metaclass=abc.ABCMeta):
             self.background = [bktype, int(kwargs.get('mean', 14)), kwargs.get('sdev', 7)]
 
         elif bktype == 'DISCRETE':
-            self.background = [bktype, [float(prob) for prob in kwargs.get('probs')]]
+
+            try:
+                self.background = [bktype, [float(prob) for prob in kwargs.get('probs')]]
+
+            except TypeError:
+                self.background = ['UNIFORM']
 
         else:
             self.background = [bktype]
