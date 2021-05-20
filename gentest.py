@@ -10,8 +10,12 @@ from java.io import PrintStream
 
 from com.gbic.types import Background as bic_background
 from com.gtric.types import Background as tric_background
+
 from com.gbic.utils import SingleBiclusterPattern
 from com.gtric.utils import TriclusterPattern
+
+from com.gbic.utils import BiclusterStructure
+from com.gtric.utils import TriclusterStructure
 
 
 class TestCaseBase(unittest.TestCase):
@@ -193,26 +197,66 @@ class BicsGenTest(TestCaseBase):
 
             # print(i)
 
+            # build instance and tester
             instance = bg(dstype=pattern[0], patterns=pattern[1], timeprofile=pattern[2], silence=True)
             builts = instance.build_patterns()
 
             for built, expect in zip(builts, expected[1]):
 
+                # check class
                 self.assertTrue(isinstance(built, SingleBiclusterPattern))
 
+                # check patterns
                 self.assertEqual(str(built.getBiclusterType().toString()).upper(), expected[0])
                 self.assertEqual(str(built.getRowsPattern().toString()).upper(), expect[0])
                 self.assertEqual(str(built.getColumnsPattern().toString()).upper(), expect[1])
 
+                # check time profile
                 if expected[2]:
                     self.assertEqual(str(built.getTimeProfile().toString()).upper(), expected[2])
                 else:
                     self.assertIsNone(built.getTimeProfile())
 
+            # check integration
             instance.generate()
 
     def test_struture(self):
-        pass
+
+        distribution = [
+            [[['UNIFoRM', 1.0, 4], ['UNIFORM', 1, 4]], 'NONE'],
+            [[['Normal', 3, 1], ['UNIFORM', 1, 4]], 'CoLUMNS']
+        ]
+
+        expected_distribution = [
+            [[['UNIFORM', 1, 4], ['UNIFORM', 1, 4]], 'NONE'],
+            [[['NORMAL', 3, 1], ['UNIFORM', 1, 4]], 'COLUMNS']
+        ]
+
+        for i, (dist, expected) in enumerate(zip(distribution, expected_distribution)):
+
+            # build instance and tester
+            instance = bg(clusterdistribution=dist[0], contiguity=dist[1], silence=True)
+            built = instance.build_structure()
+
+            # check class
+            self.assertTrue(isinstance(built, BiclusterStructure))
+
+            # check row distribution
+            self.assertEqual(str(built.getRowsDistribution().toString()), expected[0][0][0])
+            self.assertEqual(int(built.getRowsParam1()), expected[0][0][1])
+            self.assertEqual(int(built.getRowsParam2()), expected[0][0][2])
+
+            # check cols distribution
+            self.assertEqual(str(built.getColumnsDistribution().toString()), expected[0][1][0])
+            self.assertEqual(int(built.getColumnsParam1()), expected[0][1][1])
+            self.assertEqual(int(built.getColumnsParam2()), expected[0][1][2])
+
+            # check row contiguity
+            self.assertEqual(str(built.getContiguity().toString()), expected[1])
+
+            # check integration
+            instance.generate()
+
 
     def test_generator(self):
         pass
@@ -332,7 +376,47 @@ class TricsGenTest(TestCaseBase):
             instance.generate()
 
     def test_struture(self):
-        pass
+
+        distribution = [
+            [[['UNIFoRM', 1.0, 4], ['UNIFORM', 1, 4], ['UNIFoRM', 1.0, 4]], 'NONE'],
+            [[['Normal', 3, 1], ['Normal', 3, 1], ['UNIFORM', 1, 4]], 'CoLUMNS'],
+            [[['Normal', 3, 1], ['Normal', 3, 1], ['UNIFORM', 1, 4]], 'Contexts']
+        ]
+
+        expected_distribution = [
+            [[['UNIFORM', 1, 4], ['UNIFORM', 1, 4], ['UNIFORM', 1, 4]], 'NONE'],
+            [[['NORMAL', 3, 1], ['NORMAL', 3, 1], ['UNIFORM', 1, 4]], 'COLUMNS'],
+            [[['NORMAL', 3, 1], ['NORMAL', 3, 1], ['UNIFORM', 1, 4]], 'CONTEXTS']
+        ]
+
+        for i, (dist, expected) in enumerate(zip(distribution, expected_distribution)):
+            # build instance and tester
+            instance = tg(clusterdistribution=dist[0], contiguity=dist[1], silence=True)
+            built = instance.build_structure()
+
+            # check class
+            self.assertTrue(isinstance(built, TriclusterStructure))
+
+            # check row distribution
+            self.assertEqual(str(built.getRowsDistribution().toString()), expected[0][0][0])
+            self.assertEqual(int(built.getRowsParam1()), expected[0][0][1])
+            self.assertEqual(int(built.getRowsParam2()), expected[0][0][2])
+
+            # check cols distribution
+            self.assertEqual(str(built.getColumnsDistribution().toString()), expected[0][1][0])
+            self.assertEqual(int(built.getColumnsParam1()), expected[0][1][1])
+            self.assertEqual(int(built.getColumnsParam2()), expected[0][1][2])
+
+            # check contexts distribution
+            self.assertEqual(str(built.getContextsDistribution().toString()), expected[0][2][0])
+            self.assertEqual(int(built.getContextsParam1()), expected[0][2][1])
+            self.assertEqual(int(built.getContextsParam2()), expected[0][2][2])
+
+            # check row contiguity
+            self.assertEqual(str(built.getContiguity().toString()), expected[1])
+
+            # check integration
+            instance.generate()
 
     def test_generator(self):
         pass
