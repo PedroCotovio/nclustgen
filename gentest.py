@@ -10,6 +10,8 @@ from java.io import PrintStream
 
 from com.gbic.types import Background as bic_background
 from com.gtric.types import Background as tric_background
+from com.gbic.utils import SingleBiclusterPattern
+from com.gtric.utils import TriclusterPattern
 
 
 class TestCaseBase(unittest.TestCase):
@@ -172,7 +174,42 @@ class BicsGenTest(TestCaseBase):
         instance_symbolic_normal.generate()
 
     def test_patterns(self):
-        pass
+
+        patterns = [
+            ['Numeric', [['Constant', 'CONSTANT'], ['CONSTANT', 'none']], None],
+            ['Symbolic', [['NONE', 'ORDER_PRESERVING']], 'Random'],
+            ['Numeric', [['NONE', 'ADDITIVE']], None],
+            ['NUMERIC', [['multiplicative', 'CONSTANT']], None]
+        ]
+
+        expected_patterns = [
+            ['NUMERIC', [['CONSTANT', 'CONSTANT'], ['CONSTANT', 'NONE']], None],
+            ['SYMBOLIC', [['NONE', 'ORDERPRESERVING']], 'RANDOM'],
+            ['NUMERIC', [['NONE', 'ADDITIVE']], None],
+            ['NUMERIC', [['MULTIPLICATIVE', 'CONSTANT']], None]
+        ]
+
+        for i, (pattern, expected) in enumerate(zip(patterns, expected_patterns)):
+
+            # print(i)
+
+            instance = bg(dstype=pattern[0], patterns=pattern[1], timeprofile=pattern[2], silence=True)
+            builts = instance.build_patterns()
+
+            for built, expect in zip(builts, expected[1]):
+
+                self.assertTrue(isinstance(built, SingleBiclusterPattern))
+
+                self.assertEqual(str(built.getBiclusterType().toString()).upper(), expected[0])
+                self.assertEqual(str(built.getRowsPattern().toString()).upper(), expect[0])
+                self.assertEqual(str(built.getColumnsPattern().toString()).upper(), expect[1])
+
+                if expected[2]:
+                    self.assertEqual(str(built.getTimeProfile().toString()).upper(), expected[2])
+                else:
+                    self.assertIsNone(built.getTimeProfile())
+
+            instance.generate()
 
     def test_struture(self):
         pass
@@ -257,7 +294,42 @@ class TricsGenTest(TestCaseBase):
         instance_symbolic_normal.generate()
 
     def test_patterns(self):
-        pass
+
+        patterns = [
+            ['Numeric', [['Constant', 'CONSTANT', 'MULTIPLICATIVE'], ['CONSTANT', 'NONE', 'NONE']], None],
+            ['Symbolic', [['NONE', 'NONE', 'OrDeR_PRESERVING']], 'Random'],
+            ['Numeric', [['CONSTANT', 'CONStANT', 'ADDITIVE'], ['CONSTANT', 'NONE', 'NONE']], None],
+            ['NUMERIC', [['COnSTaNT', 'NONE', 'none']], None]
+        ]
+
+        expected_patterns = [
+            ['NUMERIC', [['CONSTANT', 'CONSTANT', 'MULTIPLICATIVE'], ['CONSTANT', 'NONE', 'NONE']], None],
+            ['SYMBOLIC', [['NONE', 'NONE', 'ORDERPRESERVING']], 'RANDOM'],
+            ['NUMERIC', [['CONSTANT', 'CONSTANT', 'ADDITIVE'], ['CONSTANT', 'NONE', 'NONE']], None],
+            ['NUMERIC', [['CONSTANT', 'NONE', 'NONE']], None]
+        ]
+
+        for i, (pattern, expected) in enumerate(zip(patterns, expected_patterns)):
+
+            # print(i)
+
+            instance = tg(dstype=pattern[0], patterns=pattern[1], timeprofile=pattern[2], silence=True)
+            builts = instance.build_patterns()
+
+            for built, expect in zip(builts, expected[1]):
+
+                self.assertTrue(isinstance(built, TriclusterPattern))
+
+                self.assertEqual(str(built.getRowsPattern().toString()).upper(), expect[0])
+                self.assertEqual(str(built.getColumnsPattern().toString()).upper(), expect[1])
+                self.assertEqual(str(built.getContextsPattern().toString()).upper(), expect[2])
+
+                if expected[2]:
+                    self.assertEqual(str(built.getTimeProfile().toString()).upper(), expected[2])
+                else:
+                    self.assertIsNone(built.getTimeProfile())
+
+            instance.generate()
 
     def test_struture(self):
         pass
