@@ -58,7 +58,7 @@ class TriclusterGenerator(Generator):
         patterns = ArrayList()
 
         if self.time_profile:
-            self.time_profile = getattr(TimeProfile, self.time_profile)
+            self.time_profile = getattr(TimeProfile, str(self.time_profile).upper())
 
         [patterns.add(
             TriclusterPattern(*[getattr(PatternType, pattern_type) for pattern_type in pattern] + [self.time_profile])
