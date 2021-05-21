@@ -4,6 +4,7 @@ import pathlib as pl
 import numpy
 from scipy.sparse import csr_matrix
 from sparse import COO
+import os
 
 from java.lang import System
 from java.io import PrintStream
@@ -270,6 +271,9 @@ class BicsGenTest(TestCaseBase):
                 instance.generate()
 
     def test_generator(self):
+
+        # check dstype vars
+        # check generator
         pass
 
     def test_overlapping(self):
@@ -320,16 +324,67 @@ class BicsGenTest(TestCaseBase):
             if self.integration:
                 instance.generate(nclusters=5)
 
-    def test_quality(self):
-        pass
-
     def test_generate(self):
+
+        # check generated dataset
+            # check shape
+            # check quality settings
+        # check tensor
+
         pass
 
     def test_save(self):
-        pass
+
+        save_params = [
+            ['example', None, None],
+            ['example', os.getcwd() + '/', True],
+            ['example', os.getcwd() + '/', False]
+        ]
+
+        for i, params in enumerate(save_params):
+
+            # build instance
+
+            instance = bg(silence=True)
+            instance.generate()
+            instance.save(*params)
+
+            if params[1] is None:
+                params[1] = os.getcwd() + '/'
+
+            # Assert data files were created
+            if instance.asses_memory(params[2], gends=instance.generatedDataset):
+                suffix = '.tsv'
+            else:
+                suffix = '_0.txt'
+
+            self.assertIsFile(os.path.join(params[1], '{}_dataset{}'.format(params[0], suffix)))
+
+            # Assert descriptive files were also created
+
+            for kind in ['json', 'txt']:
+                file = '{}_cluster_data.{}'.format(params[0], kind)
+                path = os.path.join(params[1], file)
+
+                self.assertIsFile(path)
+
+                # Remove descriptive file
+                os.remove(path)
+
+            # Remove data files
+            if suffix == '.tsv':
+                os.remove(os.path.join(params[1], '{}_dataset.tsv'.format(params[0])))
+            else:
+                try:
+                    for j in range(100):
+                        os.remove(os.path.join(params[1], '{}_dataset_{}.txt'.format(params[0], j)))
+                except FileNotFoundError:
+                    pass
 
     def test_graph(self):
+        pass
+
+    def test_configfile(self):
         pass
 
 
@@ -532,16 +587,61 @@ class TricsGenTest(TestCaseBase):
             if self.integration:
                 instance.generate(nclusters=5)
 
-    def test_quality(self):
-        pass
-
     def test_generate(self):
         pass
 
     def test_save(self):
-        pass
+
+        save_params = [
+            ['example', None, None],
+            ['example', os.getcwd() + '/', True],
+            ['example', os.getcwd() + '/', False]
+        ]
+
+        for i, params in enumerate(save_params):
+
+            # build instance
+
+            instance = tg(silence=True)
+            instance.generate()
+            instance.save(*params)
+
+            if params[1] is None:
+                params[1] = os.getcwd() + '/'
+
+            # Assert data files were created
+            if instance.asses_memory(params[2], gends=instance.generatedDataset):
+                suffix = '.tsv'
+            else:
+                suffix = '_0.txt'
+
+            self.assertIsFile(os.path.join(params[1], '{}_dataset{}'.format(params[0], suffix)))
+
+            # Assert descriptive files were also created
+
+            for kind in ['json', 'txt']:
+                file = '{}_cluster_data.{}'.format(params[0], kind)
+                path = os.path.join(params[1], file)
+
+                self.assertIsFile(path)
+
+                # Remove descriptive file
+                os.remove(path)
+
+            # Remove data files
+            if suffix == '.tsv':
+                os.remove(os.path.join(params[1], '{}_dataset.tsv'.format(params[0])))
+            else:
+                try:
+                    for j in range(100):
+                        os.remove(os.path.join(params[1], '{}_dataset_{}.txt'.format(params[0], j)))
+                except FileNotFoundError:
+                    pass
 
     def test_graph(self):
+        pass
+
+    def test_configfile(self):
         pass
 
 
