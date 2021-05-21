@@ -17,6 +17,9 @@ from com.gtric.utils import TriclusterPattern
 from com.gbic.utils import BiclusterStructure
 from com.gtric.utils import TriclusterStructure
 
+from com.gbic.utils import OverlappingSettings as overlap_bic
+from com.gtric.utils import OverlappingSettings as overlap_tric
+
 
 class TestCaseBase(unittest.TestCase):
 
@@ -121,6 +124,10 @@ class GenTest(TestCaseBase):
 
 class BicsGenTest(TestCaseBase):
 
+    def setUp(self):
+
+        self.integration = True
+
     def test_background(self):
 
         # Test initialization
@@ -166,16 +173,18 @@ class BicsGenTest(TestCaseBase):
 
         # integration
 
-        instance_numeric_uniform.generate()
-        instance_numeric_missing.generate()
-        instance_numeric_discrete.generate()
-        instance_numeric_normal.generate()
+        if self.integration:
 
-        instance_symbolic_uniform.generate()
-        instance_symbolic_missing.generate()
-        instance_symbolic_discrete.generate()
-        instance_symbolic_discrete_noprobs.generate()
-        instance_symbolic_normal.generate()
+            instance_numeric_uniform.generate()
+            instance_numeric_missing.generate()
+            instance_numeric_discrete.generate()
+            instance_numeric_normal.generate()
+
+            instance_symbolic_uniform.generate()
+            instance_symbolic_missing.generate()
+            instance_symbolic_discrete.generate()
+            instance_symbolic_discrete_noprobs.generate()
+            instance_symbolic_normal.generate()
 
     def test_patterns(self):
 
@@ -218,7 +227,9 @@ class BicsGenTest(TestCaseBase):
                     self.assertIsNone(built.getTimeProfile())
 
             # check integration
-            instance.generate()
+
+            if self.integration:
+                instance.generate()
 
     def test_struture(self):
 
@@ -255,17 +266,59 @@ class BicsGenTest(TestCaseBase):
             self.assertEqual(str(built.getContiguity().toString()), expected[1])
 
             # check integration
-            instance.generate()
-
+            if self.integration:
+                instance.generate()
 
     def test_generator(self):
         pass
 
     def test_overlapping(self):
-        pass
 
-    def test_type(self):
-        pass
+        overlapping = [
+            ['NO_OVeRLaPPING', 0, 0.0, 0.0, 1.0, 1.0],
+            [None, 0, 0, 0.0, 1.0, 1.0],
+            ['AddITIVE', 0.5, 2, 0.5, 0.75, 0.5],
+            ['MULTiPLICATIVE', 0.25, 2.0, 0.75, 1.0, 1.0],
+            ['INTERPOLED', 0.75, 3, 1, 1, 1],
+        ]
+
+        expected_overlapping = [
+            ['NO OVERLAPPING', 0.0, 0, 0.0, 1.0, 1.0],
+            ['NONE', 0.0, 0, 0.0, 1.0, 1.0],
+            ['ADDITIVE', 0.5, 2, 0.5, 0.75, 0.5],
+            ['MULTIPLICATIVE', 0.25, 2, 0.75, 1.0, 1.0],
+            ['INTERPOLED', 0.75, 3, 1.0, 1.0, 1.0],
+        ]
+
+        for i, (overlap, expected) in enumerate(zip(overlapping, expected_overlapping)):
+            # build instance and tester
+            instance = bg(
+                plaidcoherency=overlap[0],
+                percofoverlappingclusters=overlap[1],
+                maxclustsperoverlappedarea=overlap[2],
+                maxpercofoverlappingelements=overlap[3],
+                percofoverlappingrows=overlap[4],
+                percofoverlappingcolumns=overlap[5],
+                silence=True
+            )
+
+            built = instance.build_overlapping()
+
+            # check class
+            self.assertTrue(isinstance(built, overlap_bic))
+
+            # check values
+
+            self.assertEqual(str(built.getPlaidCoherency().toString()).upper(), expected[0])
+            self.assertEqual(float(built.getPercOfOverlappingBics()), expected[1])
+            self.assertEqual(int(built.getMaxBicsPerOverlappedArea()), expected[2])
+            self.assertEqual(float(built.getMaxPercOfOverlappingElements()), expected[3])
+            self.assertEqual(float(built.getPercOfOverlappingRows()), expected[4])
+            self.assertEqual(float(built.getPercOfOverlappingColumns()), expected[5])
+
+            # check integration
+            if self.integration:
+                instance.generate(nclusters=5)
 
     def test_quality(self):
         pass
@@ -281,6 +334,10 @@ class BicsGenTest(TestCaseBase):
 
 
 class TricsGenTest(TestCaseBase):
+
+    def setUp(self):
+
+        self.integration = True
 
     def test_background(self):
         # Test initialization
@@ -326,16 +383,18 @@ class TricsGenTest(TestCaseBase):
 
         # integration
 
-        instance_numeric_uniform.generate()
-        instance_numeric_missing.generate()
-        instance_numeric_discrete.generate()
-        instance_numeric_normal.generate()
+        if self.integration:
 
-        instance_symbolic_uniform.generate()
-        instance_symbolic_missing.generate()
-        instance_symbolic_discrete.generate()
-        instance_symbolic_discrete_noprobs.generate()
-        instance_symbolic_normal.generate()
+            instance_numeric_uniform.generate()
+            instance_numeric_missing.generate()
+            instance_numeric_discrete.generate()
+            instance_numeric_normal.generate()
+
+            instance_symbolic_uniform.generate()
+            instance_symbolic_missing.generate()
+            instance_symbolic_discrete.generate()
+            instance_symbolic_discrete_noprobs.generate()
+            instance_symbolic_normal.generate()
 
     def test_patterns(self):
 
@@ -373,7 +432,8 @@ class TricsGenTest(TestCaseBase):
                 else:
                     self.assertIsNone(built.getTimeProfile())
 
-            instance.generate()
+            if self.integration:
+                instance.generate()
 
     def test_struture(self):
 
@@ -416,16 +476,61 @@ class TricsGenTest(TestCaseBase):
             self.assertEqual(str(built.getContiguity().toString()), expected[1])
 
             # check integration
-            instance.generate()
+            if self.integration:
+                instance.generate()
 
     def test_generator(self):
         pass
 
     def test_overlapping(self):
-        pass
 
-    def test_type(self):
-        pass
+        overlapping = [
+            ['NO_OVeRLaPPING', 0, 0.0, 0.0, 1.0, 1.0, 1.0],
+            [None, 0, 0, 0.0, 1.0, 1.0, 1.0],
+            ['AddITIVE', 0.5, 2, 0.5, 0.75, 0.5, 1.0],
+            ['MULTiPLICATIVE', 0.25, 2.0, 0.75, 1.0, 1.0, 1.0],
+            ['INTERPOLED', 0.75, 3, 1, 1, 1, 1.0],
+        ]
+
+        expected_overlapping = [
+            ['NO OVERLAPPING', 0.0, 0, 0.0, 1.0, 1.0, 1.0],
+            ['NONE', 0.0, 0, 0.0, 1.0, 1.0, 1.0],
+            ['ADDITIVE', 0.5, 2, 0.5, 0.75, 0.5, 1.0],
+            ['MULTIPLICATIVE', 0.25, 2, 0.75, 1.0, 1.0, 1.0],
+            ['INTERPOLED', 0.75, 3, 1.0, 1.0, 1.0, 1.0],
+        ]
+
+        for i, (overlap, expected) in enumerate(zip(overlapping, expected_overlapping)):
+            # build instance and tester
+            instance = tg(
+                plaidcoherency=overlap[0],
+                percofoverlappingclusters=overlap[1],
+                maxclustsperoverlappedarea=overlap[2],
+                maxpercofoverlappingelements=overlap[3],
+                percofoverlappingrows=overlap[4],
+                percofoverlappingcolumns=overlap[5],
+                percofoverlappingcontexts=overlap[6],
+                silence=True
+            )
+
+            built = instance.build_overlapping()
+
+            # check class
+            self.assertTrue(isinstance(built, overlap_tric))
+
+            # check values
+
+            self.assertEqual(str(built.getPlaidCoherency().toString()).upper(), expected[0])
+            self.assertEqual(float(built.getPercOfOverlappingTrics()), expected[1])
+            self.assertEqual(int(built.getMaxTricsPerOverlappedArea()), expected[2])
+            self.assertEqual(float(built.getMaxPercOfOverlappingElements()), expected[3])
+            self.assertEqual(float(built.getPercOfOverlappingRows()), expected[4])
+            self.assertEqual(float(built.getPercOfOverlappingColumns()), expected[5])
+            self.assertEqual(float(built.getPercOfOverlappingContexts()), expected[6])
+
+            # check integration
+            if self.integration:
+                instance.generate(nclusters=5)
 
     def test_quality(self):
         pass
