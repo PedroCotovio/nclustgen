@@ -208,7 +208,7 @@ class Generator(metaclass=abc.ABCMeta):
                 (*geninfo_params).getJSONObject('{}clusters'.format(cluster_type)).toString())
         )
 
-        self.Y = [js[i][key] for i in js.keys() for key in keys]
+        self.Y = [[js[i][key] for key in keys] for i in js.keys()]
 
         self.stop_silencing()
 
