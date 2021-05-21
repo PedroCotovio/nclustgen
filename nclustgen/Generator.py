@@ -31,7 +31,8 @@ class Generator(metaclass=abc.ABCMeta):
                  maxclustsperoverlappedarea=0, maxpercofoverlappingelements=0.0, percofoverlappingrows=1.0,
                  percofoverlappingcolumns=1.0, percofoverlappingcontexts=1.0, percmissingsonbackground=0.0,
                  percmissingsonclusters=0.0, percnoiseonbackground=0.0, percnoiseonclusters=0.0, percnoisedeviation=0.0,
-                 percerroesonbackground=0.0, percerrorsonclusters=0.0, silence=False, *args, **kwargs):
+                 percerroesonbackground=0.0, percerrorsonclusters=0.0, percerrorondeviation=0.0, silence=False,
+                 *args, **kwargs):
 
         # define dimensions
         self.n = n
@@ -62,7 +63,7 @@ class Generator(metaclass=abc.ABCMeta):
 
             # Noise
             self.noise = (float(percnoiseonbackground), float(percnoiseonclusters), float(percnoisedeviation))
-            self.errors = (float(percerroesonbackground), float(percerrorsonclusters), float(percnoisedeviation))
+            self.errors = (float(percerroesonbackground), float(percerrorsonclusters), float(percerrorondeviation))
 
         else:
             try:
@@ -80,7 +81,7 @@ class Generator(metaclass=abc.ABCMeta):
             # Noise
 
             self.noise = (float(percnoiseonbackground), float(percnoiseonclusters), int(percnoisedeviation))
-            self.errors = (float(percerroesonbackground), float(percerrorsonclusters), int(percnoisedeviation))
+            self.errors = (float(percerroesonbackground), float(percerrorsonclusters), int(percerrorondeviation))
 
         # Overlapping Settings
         self.plaidcoherency = str(plaidcoherency).upper()
