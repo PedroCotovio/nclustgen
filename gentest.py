@@ -21,6 +21,13 @@ from com.gtric.utils import TriclusterStructure
 from com.gbic.utils import OverlappingSettings as overlap_bic
 from com.gtric.utils import OverlappingSettings as overlap_tric
 
+from com.gbic.domain.dataset import NumericDataset as bic_n_dataset
+from com.gbic.domain.dataset import SymbolicDataset as bic_s_dataset
+
+from com.gtric.domain.dataset import NumericDataset as tric_n_dataset
+from com.gtric.domain.dataset import SymbolicDataset as tric_s_dataset
+
+
 
 class TestCaseBase(unittest.TestCase):
 
@@ -274,6 +281,14 @@ class BicsGenTest(TestCaseBase):
 
         # check dstype vars
         # check generator
+
+        # {
+        #     'dstype': 'Numeric',
+        #     'realval': False,
+        #     'minval': 1,
+        #     'maxval': 5,
+        #     'silence': True
+        #}
         pass
 
     def test_overlapping(self):
@@ -324,13 +339,98 @@ class BicsGenTest(TestCaseBase):
             if self.integration:
                 instance.generate(nclusters=5)
 
+    def test_quality(self):
+
+        datasets = ['Numeric', 'Symbolic']
+
+        quality_params = [
+            [0.12, 0.10, 0.20, 0.1, 0.0, 0.1, 0.23, 0.05],
+            [0.12, 0.10, 0.20, 1.0, 0.1, 0.1, 0.23, 1.0],
+        ]
+
+        expected_params = [
+            [0.12, 0.10, 0.20, 0.1, 0.0, 0.1, 0.23, 0.05],
+            [0.12, 0.10, 0.20, 1, 0.1, 0.1, 0.23, 1],
+        ]
+
+        for i, (ds, params, expected) in enumerate(zip(datasets, quality_params, expected_params)):
+
+            # build instance
+            instance = bg(dstype=ds, percmissingsonbackground=params[0], percmissingsonclusters=params[1],
+                          percnoiseonclusters=params[2], percnoisedeviation=params[3], percnoiseonbackground=params[4],
+                          percerroesonbackground=params[5], percerrorsonclusters=params[6],
+                          percerrorondeviation=params[7], silence=True)
+
+            # check values
+            self.assertEqual(instance.missing, (expected[0], expected[1]))
+            self.assertEqual(instance.noise, (expected[4], expected[2], expected[3]))
+            self.assertEqual(instance.errors, (expected[5], expected[6], expected[7]))
+
+            # check integration
+            if self.integration:
+                instance.generate()
+
     def test_generate(self):
 
-        # check generated dataset
-            # check shape
-            # check quality settings
-        # check tensor
+        datasets = ['Numeric', 'Numeric', 'Symbolic']
 
+        generate_params = [
+            [100, 100, 2, False, True],
+            [100, 50, 2, False, False],
+            [1000, 200, 5, True, None]
+        ]
+
+        expected_params = [
+            [100, 100, 2, False, True],
+            [100, 50, 2, False, False],
+            [1000, 200, 5, True, False]
+        ]
+
+        for i, (ds, params, expected) in enumerate(zip(datasets, generate_params, expected_params)):
+
+            # build instance
+            instance = bg(dstype=ds, silence=True)
+
+            x, y = instance.generate(
+                nrows=params[0], ncols=params[1], nclusters=params[2], no_return=params[3], in_memory=params[4]
+            )
+
+            # assert dataset type
+            self.assertEqual(instance.dstype, ds.upper())
+
+            expected_shape = (expected[0], expected[1])
+            gends = instance.generatedDataset
+            shape = (int(gends.getNumRows()), int(gends.getNumCols()))
+
+            if ds.upper() == 'NUMERIC':
+                self.assertTrue(isinstance(gends, bic_n_dataset))
+
+            else:
+                self.assertTrue(isinstance(gends, bic_s_dataset))
+
+            # assert gends shape
+            self.assertEqual(shape, expected_shape)
+            self.assertEqual(int(gends.getNumBics()), expected[2])
+
+            # check no_return
+            if expected[3]:
+                self.assertIsNone(x)
+                self.assertIsNone(y)
+
+            else:
+                # check to_tensor
+                self.assertTrue(isinstance(y, list))
+                self.assertEqual(len(y), expected[2])
+
+                if expected[4]:
+                    self.assertTrue(isinstance(x, numpy.ndarray))
+
+                else:
+                    self.assertTrue(isinstance(x, csr_matrix))
+
+                self.assertEqual(x.shape, expected_shape)
+
+    def test_seed(self):
         pass
 
     def test_save(self):
@@ -587,7 +687,103 @@ class TricsGenTest(TestCaseBase):
             if self.integration:
                 instance.generate(nclusters=5)
 
+    def test_quality(self):
+
+        datasets = ['Numeric', 'Symbolic']
+
+        quality_params = [
+            [0.12, 0.10, 0.20, 0.1, 0.0, 0.1, 0.23, 0.05],
+            [0.12, 0.10, 0.20, 1.0, 0.1, 0.1, 0.23, 1.0],
+        ]
+
+        expected_params = [
+            [0.12, 0.10, 0.20, 0.1, 0.0, 0.1, 0.23, 0.05],
+            [0.12, 0.10, 0.20, 1, 0.1, 0.1, 0.23, 1],
+        ]
+
+        for i, (ds, params, expected) in enumerate(zip(datasets, quality_params, expected_params)):
+
+            # build instance and tester
+            instance = tg(dstype=ds, percmissingsonbackground=params[0], percmissingsonclusters=params[1],
+                          percnoiseonclusters=params[2], percnoisedeviation=params[3], percnoiseonbackground=params[4],
+                          percerroesonbackground=params[5], percerrorsonclusters=params[6],
+                          percerrorondeviation=params[7], silence=True)
+
+            # check values
+            self.assertEqual(instance.missing, (expected[0], expected[1]))
+            self.assertEqual(instance.noise, (expected[4], expected[2], expected[3]))
+            self.assertEqual(instance.errors, (expected[5], expected[6], expected[7]))
+
+            # check integration
+            if self.integration:
+                instance.generate()
+
     def test_generate(self):
+
+        datasets = ['Numeric', 'Numeric', 'Symbolic']
+
+        generate_params = [
+            [100, 100, 2, 2, False, True],
+            [100, 50, 3, 2, False, False],
+            [1000, 200, 50, 5, True, None]
+        ]
+
+        expected_params = [
+            [100, 100, 2, 2, False, True],
+            [100, 50, 3, 2, False, False],
+            [1000, 200, 50, 5, True, False]
+        ]
+
+        for i, (ds, params, expected) in enumerate(zip(datasets, generate_params, expected_params)):
+
+            # build instance
+            instance = tg(dstype=ds, silence=True)
+
+            x, y = instance.generate(
+                nrows=params[0],
+                ncols=params[1],
+                ncontexts=params[2],
+                nclusters=params[3],
+                no_return=params[4],
+                in_memory=params[5]
+            )
+
+            # assert dataset type
+            self.assertEqual(instance.dstype, ds.upper())
+
+            expected_shape = (expected[2], expected[0], expected[1])
+            gends = instance.generatedDataset
+            shape = (int(gends.getNumContexts()), int(gends.getNumRows()), int(gends.getNumCols()))
+
+            if ds.upper() == 'NUMERIC':
+                self.assertTrue(isinstance(gends, tric_n_dataset))
+
+            else:
+                self.assertTrue(isinstance(gends, tric_s_dataset))
+
+            # assert gends shape
+            self.assertEqual(shape, expected_shape)
+            self.assertEqual(int(gends.getNumTrics()), expected[3])
+
+            # check no_return
+            if expected[4]:
+                self.assertIsNone(x)
+                self.assertIsNone(y)
+
+            else:
+                # check to_tensor
+                self.assertTrue(isinstance(y, list))
+                self.assertEqual(len(y), expected[3])
+
+                if expected[5]:
+                    self.assertTrue(isinstance(x, numpy.ndarray))
+
+                else:
+                    self.assertTrue(isinstance(x, COO))
+
+                self.assertEqual(x.shape, expected_shape)
+
+    def test_seed(self):
         pass
 
     def test_save(self):
