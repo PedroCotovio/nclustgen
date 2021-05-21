@@ -27,7 +27,7 @@ from java.io import PrintStream
 class Generator(metaclass=abc.ABCMeta):
 
     def __init__(self, n, dstype='NUMERIC', patterns=None, bktype='UNIFORM', clusterdistribution=None,
-                 contiguity=None, plaidcoherency='NO_OVERLAPPING', percofoverlappingclusters=0,
+                 contiguity=None, plaidcoherency='NO_OVERLAPPING', percofoverlappingclusters=0.0,
                  maxclustsperoverlappedarea=0, maxpercofoverlappingelements=0.0, percofoverlappingrows=1.0,
                  percofoverlappingcolumns=1.0, percofoverlappingcontexts=1.0, percmissingsonbackground=0.0,
                  percmissingsonclusters=0.0, percnoiseonbackground=0.0, percnoiseonclusters=0.0, percnoisedeviation=0.0,
