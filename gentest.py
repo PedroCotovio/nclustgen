@@ -1,10 +1,16 @@
-from nclustgen import BiclusterGenerator as bg, TriclusterGenerator as tg
+from nclustgen import \
+    BiclusterGenerator as bg, \
+    BiclusterGeneratorbyConfig as bgconfig, \
+    TriclusterGenerator as tg, \
+    TriclusterGeneratorbyConfig as tgconfig
+
 import unittest
 import pathlib as pl
 import numpy
 from scipy.sparse import csr_matrix
 from sparse import COO
 import os
+import json
 
 from java.lang import System
 from java.io import PrintStream
@@ -279,6 +285,8 @@ class BicsGenTest(TestCaseBase):
 
     def test_generator(self):
 
+        # TODO test generator
+
         # check dstype vars
         # check generator
 
@@ -431,6 +439,7 @@ class BicsGenTest(TestCaseBase):
                 self.assertEqual(x.shape, expected_shape)
 
     def test_seed(self):
+        # TODO test seed
         pass
 
     def test_save(self):
@@ -482,10 +491,41 @@ class BicsGenTest(TestCaseBase):
                     pass
 
     def test_graph(self):
+        # TODO test graph
         pass
 
     def test_configfile(self):
-        pass
+
+        config_params = [
+            {'silence': True}
+        ]
+
+        expected_params = [
+            {'silence': True}
+        ]
+
+        for i, (params, expected) in enumerate(zip(config_params, expected_params)):
+
+            # Dump constructor params into file
+            file = 'configtest.json'
+            with open(file, 'w') as outfile:
+                json.dump(params, outfile)
+
+            # test construct instance
+            instance = bgconfig(file)
+            self.assertTrue(isinstance(instance, bgconfig))
+            self.assertTrue(instance.silenced)
+
+            # test integration
+            if self.integration:
+                instance.generate()
+                self.assertTrue(
+                    isinstance(instance.generatedDataset, bic_n_dataset) or
+                    isinstance(instance.generatedDataset, bic_s_dataset)
+                )
+
+            # delete file
+            os.remove(file)
 
 
 class TricsGenTest(TestCaseBase):
@@ -838,7 +878,37 @@ class TricsGenTest(TestCaseBase):
         pass
 
     def test_configfile(self):
-        pass
+
+        config_params = [
+            {'silence': True}
+        ]
+
+        expected_params = [
+            {'silence': True}
+        ]
+
+        for i, (params, expected) in enumerate(zip(config_params, expected_params)):
+
+            # Dump constructor params into file
+            file = 'configtest.json'
+            with open(file, 'w') as outfile:
+                json.dump(params, outfile)
+
+            # test construct instance
+            instance = tgconfig(file)
+            self.assertTrue(isinstance(instance, tgconfig))
+            self.assertTrue(instance.silenced)
+
+            # test integration
+            if self.integration:
+                instance.generate()
+                self.assertTrue(
+                    isinstance(instance.generatedDataset, tric_n_dataset) or
+                    isinstance(instance.generatedDataset, tric_s_dataset)
+                )
+
+            # delete file
+            os.remove(file)
 
 
 if __name__ == '__main__':

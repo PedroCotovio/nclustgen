@@ -24,6 +24,7 @@ from java.io import PrintStream
 
 
 # TODO docs
+# TODO add seed
 class Generator(metaclass=abc.ABCMeta):
 
     def __init__(self, n, dstype='NUMERIC', patterns=None, bktype='UNIFORM', clusterdistribution=None,
