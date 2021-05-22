@@ -213,4 +213,5 @@ class TriclusterGeneratorbyConfig(TriclusterGenerator):
 
             super().__init__(**params)
 
-        super().__init__()
+        else:
+            super().__init__()

@@ -186,7 +186,6 @@ class BiclusterGenerator(Generator):
 class BiclusterGeneratorbyConfig(BiclusterGenerator):
 
     def __init__(self, file_path=None):
-
         if file_path:
             f = open(file_path, )
             params = json.load(f)
@@ -194,4 +193,5 @@ class BiclusterGeneratorbyConfig(BiclusterGenerator):
 
             super().__init__(**params)
 
-        super().__init__()
+        else:
+            super().__init__()
