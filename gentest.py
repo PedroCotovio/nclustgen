@@ -33,6 +33,9 @@ from com.gbic.domain.dataset import SymbolicDataset as bic_s_dataset
 from com.gtric.domain.dataset import NumericDataset as tric_n_dataset
 from com.gtric.domain.dataset import SymbolicDataset as tric_s_dataset
 
+from com.gbic import generator as gen_bic
+from com.gtric import generator as gen_tric
+
 
 
 class TestCaseBase(unittest.TestCase):
@@ -285,19 +288,84 @@ class BicsGenTest(TestCaseBase):
 
     def test_generator(self):
 
-        # TODO test generator
+        generator_parameters = [
+            {
+                'dstype': 'Numeric',
+                'realval': False,
+                'minval': 1,
+                'maxval': 5,
+                'silence': True
+            },
+            {
+                'dstype': 'Numeric',
+                'realval': True,
+                'minval': 1,
+                'maxval': 5,
+                'silence': True
+            },
+            {
+                'dstype': 'Symbolic',
+                'nsymbols': 5,
+                'symmetries': 1,
+                'silence': True
+            }
+        ]
 
-        # check dstype vars
-        # check generator
+        expected_parameters = [
+            {
+                'dstype': 'NUMERIC',
+                'realval': False,
+                'minval': 1,
+                'maxval': 5,
+                'silence': True
+            },
+            {
+                'dstype': 'NUMERIC',
+                'realval': True,
+                'minval': 1,
+                'maxval': 5,
+                'silence': True
+            },
+            {
+                'dstype': 'SYMBOLIC',
+                'nsymbols': 5,
+                'symmetries': 1,
+                'silence': True
+            }
+        ]
 
-        # {
-        #     'dstype': 'Numeric',
-        #     'realval': False,
-        #     'minval': 1,
-        #     'maxval': 5,
-        #     'silence': True
-        #}
-        pass
+        for i, (params, expected) in enumerate(zip(generator_parameters, expected_parameters)):
+
+            # build instance
+            instance = bg(**params)
+
+            background = instance.build_background()
+            generate_params = [100, 100, 1, 5, background]
+
+            parameters = instance.get_dstype_vars(*generate_params)
+            built = instance.build_generator(*parameters)
+
+            generate_params.remove(1)
+
+            self.assertTrue(isinstance(built, getattr(gen_bic, parameters[0])))
+
+            if expected['dstype'] == 'NUMERIC':
+
+                self.assertEqual(parameters[1][1:5], generate_params)
+                self.assertEqual(parameters[1][0], expected['realval'])
+                self.assertEqual(parameters[1][5], expected['minval'])
+                self.assertEqual(parameters[1][6], expected['maxval'])
+                self.assertEqual(parameters[2], 3)
+
+            else:
+                self.assertEqual(parameters[1][:4], generate_params)
+                self.assertEqual(len(parameters[1][4]), expected['nsymbols'])
+                self.assertEqual(parameters[1][5], expected['symmetries'])
+                self.assertEqual(parameters[2], 2)
+
+            # check integration
+            if self.integration:
+                instance.generate()
 
     def test_overlapping(self):
 
@@ -675,7 +743,83 @@ class TricsGenTest(TestCaseBase):
                 instance.generate()
 
     def test_generator(self):
-        pass
+
+        generator_parameters = [
+            {
+                'dstype': 'Numeric',
+                'realval': False,
+                'minval': 1,
+                'maxval': 5,
+                'silence': True
+            },
+            {
+                'dstype': 'Numeric',
+                'realval': True,
+                'minval': 1,
+                'maxval': 5,
+                'silence': True
+            },
+            {
+                'dstype': 'Symbolic',
+                'nsymbols': 5,
+                'symmetries': 1,
+                'silence': True
+            }
+        ]
+
+        expected_parameters = [
+            {
+                'dstype': 'NUMERIC',
+                'realval': False,
+                'minval': 1,
+                'maxval': 5,
+                'silence': True
+            },
+            {
+                'dstype': 'NUMERIC',
+                'realval': True,
+                'minval': 1,
+                'maxval': 5,
+                'silence': True
+            },
+            {
+                'dstype': 'SYMBOLIC',
+                'nsymbols': 5,
+                'symmetries': 1,
+                'silence': True
+            }
+        ]
+
+        for i, (params, expected) in enumerate(zip(generator_parameters, expected_parameters)):
+
+            # build instance
+            instance = tg(**params)
+
+            background = instance.build_background()
+            generate_params = [100, 100, 3, 5, background]
+
+            parameters = instance.get_dstype_vars(*generate_params)
+            built = instance.build_generator(*parameters)
+
+            self.assertTrue(isinstance(built, getattr(gen_tric, parameters[0])))
+
+            if expected['dstype'] == 'NUMERIC':
+
+                self.assertEqual(parameters[1][1:6], generate_params)
+                self.assertEqual(parameters[1][0], expected['realval'])
+                self.assertEqual(parameters[1][6], expected['minval'])
+                self.assertEqual(parameters[1][7], expected['maxval'])
+                self.assertIsNotNone(parameters[2])
+
+            else:
+                self.assertEqual(parameters[1][:5], generate_params)
+                self.assertEqual(len(parameters[1][5]), expected['nsymbols'])
+                self.assertEqual(parameters[1][6], expected['symmetries'])
+                self.assertIsNotNone(parameters[2])
+
+            # check integration
+            if self.integration:
+                instance.generate()
 
     def test_overlapping(self):
 
