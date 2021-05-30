@@ -28,6 +28,7 @@ from com.gtric.types import PlaidCoherency
 from com.gtric.utils import OverlappingSettings
 from com.gtric.utils import TriclusterStructure
 from com.gtric.utils import TriclusterPattern
+from com.gtric.utils import RandomObject
 from com.gtric.utils import IOUtils as io
 
 from java.util import ArrayList
@@ -39,6 +40,10 @@ class TriclusterGenerator(Generator):
 
     def __init__(self, *args, **kwargs):
         super().__init__(n=3, *args, **kwargs)
+
+    def initialize_seed(self):
+
+        RandomObject.initialization(self.seed)
 
     def build_background(self):
 

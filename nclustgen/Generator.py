@@ -32,7 +32,7 @@ class Generator(metaclass=abc.ABCMeta):
                  maxclustsperoverlappedarea=0, maxpercofoverlappingelements=0.0, percofoverlappingrows=1.0,
                  percofoverlappingcolumns=1.0, percofoverlappingcontexts=1.0, percmissingsonbackground=0.0,
                  percmissingsonclusters=0.0, percnoiseonbackground=0.0, percnoiseonclusters=0.0, percnoisedeviation=0.0,
-                 percerroesonbackground=0.0, percerrorsonclusters=0.0, percerrorondeviation=0.0, silence=False,
+                 percerroesonbackground=0.0, percerrorsonclusters=0.0, percerrorondeviation=0.0, silence=False, seed=-1,
                  *args, **kwargs):
 
         # define dimensions
@@ -50,6 +50,7 @@ class Generator(metaclass=abc.ABCMeta):
         self.contiguity = str(contiguity).upper()
 
         self.time_profile = kwargs.get('timeprofile')
+        self.seed = seed
 
         if self.time_profile:
             self.time_profile = str(self.time_profile).upper()
@@ -141,6 +142,10 @@ class Generator(metaclass=abc.ABCMeta):
             os.remove('logs')
         except FileNotFoundError:
             pass
+
+    @abc.abstractmethod
+    def initialize_seed(self):
+        pass
 
     @abc.abstractmethod
     def build_background(self):
@@ -320,6 +325,9 @@ class Generator(metaclass=abc.ABCMeta):
     def generate(self, nrows=100, ncols=100, ncontexts=3, nclusters=1, no_return=False, **kwargs):
 
         self.start_silencing()
+
+        # initialize random seed
+        self.initialize_seed()
 
         # define background
         background = self.build_background()

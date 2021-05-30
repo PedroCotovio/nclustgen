@@ -28,6 +28,7 @@ from com.gbic.types import PlaidCoherency
 from com.gbic.utils import OverlappingSettings
 from com.gbic.utils import SingleBiclusterPattern
 from com.gbic.utils import BiclusterStructure
+from com.gbic.utils import RandomObject
 from com.gbic.utils import IOUtils as io
 
 from java.util import ArrayList
@@ -39,6 +40,10 @@ class BiclusterGenerator(Generator):
 
     def __init__(self, *args, **kwargs):
         super().__init__(n=2, *args, **kwargs)
+
+    def initialize_seed(self):
+
+        RandomObject.initialization(self.seed)
 
     def build_background(self):
 
