@@ -11,6 +11,9 @@ from scipy.sparse import csr_matrix
 from sparse import COO
 import os
 import json
+from networkx import Graph
+import torch as th
+import dgl
 
 from java.lang import System
 from java.io import PrintStream
@@ -559,8 +562,82 @@ class BicsGenTest(TestCaseBase):
                     pass
 
     def test_graph(self):
-        # TODO test graph
-        pass
+
+        datasets = ['Numeric', 'Numeric', 'Numeric',
+                    'Symbolic', 'Symbolic', 'Symbolic']
+
+        generate_params = [
+            [100, 100, 2, False, True, 'networkx', 'cpu'],
+            [100, 100, 2, False, True, 'networkx', 'gpu'],
+            [100, 100, 2, False, True, 'dgl', 'cpu'],
+            [100, 100, 2, False, True, 'dgl', 'gpu'],
+            [100, 100, 2, False, True, 'networkx', 'cpu'],
+            [100, 100, 2, False, True, 'networkx', 'gpu'],
+            [100, 100, 2, False, True, 'dgl', 'cpu'],
+            [100, 100, 2, False, True, 'dgl', 'gpu'],
+        ]
+
+        expected_params = [
+            [100, 100, 2, False, True, 'networkx', 'cpu'],
+            [100, 100, 2, False, True, 'networkx', 'gpu'],
+            [100, 100, 2, False, True, 'dgl', 'cpu'],
+            [100, 100, 2, False, True, 'dgl', 'gpu'],
+            [100, 100, 2, False, True, 'networkx', 'cpu'],
+            [100, 100, 2, False, True, 'networkx', 'gpu'],
+            [100, 100, 2, False, True, 'dgl', 'cpu'],
+            [100, 100, 2, False, True, 'dgl', 'gpu'],
+        ]
+
+        for i, (ds, params, expected) in enumerate(zip(datasets, generate_params, expected_params)):
+
+            # build instance
+            instance = bg(dstype=ds, silence=True)
+
+            instance.generate(
+                nrows=params[0], ncols=params[1], nclusters=params[2], no_return=params[3], in_memory=params[4]
+            )
+
+            instance.to_graph(framework=params[5], device=params[6])
+
+            # assert dataset type
+            self.assertEqual(instance.dstype, ds.upper())
+
+            expected_shape = (expected[0] + expected[1], expected[0] * expected[1])
+
+            # check method logic
+            if params[5] == 'networkx' and (params[6] != 'gpu' or not th.cuda.is_available()):
+
+                if params[6] == 'gpu':
+                    self.assertWarns(UserWarning)
+
+                # assert class and define shape for networkx
+                self.assertTrue(isinstance(instance.graph, Graph))
+                shape = (len(instance.graph.nodes), len(instance.graph.edges))
+
+            else:
+
+                # assert class and  define shape for dgl
+                self.assertTrue(isinstance(instance.graph, dgl.DGLGraph))
+                shape = (instance.graph.num_nodes(), instance.graph.num_edges())
+
+                if params[6] == 'gpu':
+
+                    if th.cuda.is_available():
+
+                        if params[5] == 'networkx':
+                            self.assertWarns(UserWarning)
+
+                        self.assertEqual(instance.graph.device.type.lower(), 'gpu')
+
+                    else:
+                        self.assertWarns(UserWarning)
+                        self.assertEqual(instance.graph.device.type.lower(), 'cpu')
+
+                else:
+                    self.assertEqual(instance.graph.device.type.lower(), 'cpu')
+
+            # assert shape
+            self.assertEqual(expected_shape, shape)
 
     def test_configfile(self):
 
@@ -1019,7 +1096,92 @@ class TricsGenTest(TestCaseBase):
                     pass
 
     def test_graph(self):
-        pass
+
+        datasets = ['Numeric', 'Numeric', 'Numeric',
+                    'Symbolic', 'Symbolic', 'Symbolic']
+
+        generate_params = [
+            [100, 100, 50, 2, False, True, 'networkx', 'cpu'],
+            [100, 100, 50, 2, False, True, 'networkx', 'gpu'],
+            [100, 100, 50, 2, False, True, 'dgl', 'cpu'],
+            [100, 100, 50, 2, False, True, 'dgl', 'gpu'],
+            [100, 100, 50, 2, False, True, 'networkx', 'cpu'],
+            [100, 100, 50, 2, False, True, 'networkx', 'gpu'],
+            [100, 100, 50, 2, False, True, 'dgl', 'cpu'],
+            [100, 100, 50, 2, False, True, 'dgl', 'gpu'],
+        ]
+
+        expected_params = [
+            [100, 100, 50, 2, False, True, 'networkx', 'cpu'],
+            [100, 100, 50, 2, False, True, 'networkx', 'gpu'],
+            [100, 100, 50, 2, False, True, 'dgl', 'cpu'],
+            [100, 100, 50, 2, False, True, 'dgl', 'gpu'],
+            [100, 100, 50, 2, False, True, 'networkx', 'cpu'],
+            [100, 100, 50, 2, False, True, 'networkx', 'gpu'],
+            [100, 100, 50, 2, False, True, 'dgl', 'cpu'],
+            [100, 100, 50, 2, False, True, 'dgl', 'gpu'],
+        ]
+
+        for i, (ds, params, expected) in enumerate(zip(datasets, generate_params, expected_params)):
+
+            # build instance
+            instance = tg(dstype=ds, silence=True)
+
+            instance.generate(
+                nrows=params[0],
+                ncols=params[1],
+                ncontexts=params[2],
+                nclusters=params[3],
+                no_return=params[4],
+                in_memory=params[5]
+            )
+
+            instance.to_graph(framework=params[6], device=params[7])
+
+            # assert dataset type
+            self.assertEqual(instance.dstype, ds.upper())
+
+            expected_shape = (
+                expected[0] + expected[1] + expected[2],
+                (expected[0] * expected[1]) +
+                (expected[0] * expected[2]) +
+                (expected[1] * expected[2])
+            )
+
+            # check method logic
+            if params[6] == 'networkx' and (params[7] != 'gpu' or not th.cuda.is_available()):
+
+                if params[7] == 'gpu':
+                    self.assertWarns(UserWarning)
+
+                # assert class and define shape for networkx
+                self.assertTrue(isinstance(instance.graph, Graph))
+                shape = (len(instance.graph.nodes), len(instance.graph.edges))
+
+            else:
+
+                # assert class and  define shape for dgl
+                self.assertTrue(isinstance(instance.graph, dgl.DGLGraph))
+                shape = (instance.graph.num_nodes(), instance.graph.num_edges())
+
+                if params[7] == 'gpu':
+
+                    if th.cuda.is_available():
+
+                        if params[6] == 'networkx':
+                            self.assertWarns(UserWarning)
+
+                        self.assertEqual(instance.graph.device.type.lower(), 'gpu')
+
+                    else:
+                        self.assertWarns(UserWarning)
+                        self.assertEqual(instance.graph.device.type.lower(), 'cpu')
+
+                else:
+                    self.assertEqual(instance.graph.device.type.lower(), 'cpu')
+
+            # assert shape
+            self.assertEqual(expected_shape, shape)
 
     def test_configfile(self):
 
