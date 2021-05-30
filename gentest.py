@@ -510,8 +510,27 @@ class BicsGenTest(TestCaseBase):
                 self.assertEqual(x.shape, expected_shape)
 
     def test_seed(self):
-        # TODO test seed
-        pass
+
+        seed_params = [-1, 1, 5]
+
+        for i, seed in enumerate(seed_params):
+
+            # build instances
+
+            instance_1 = bg(seed=seed, silence=True)
+            x1, y1 = instance_1.generate()
+
+            instance_2 = bg(seed=seed, silence=True)
+            x2, y2 = instance_2.generate()
+
+            # assert argument logic
+            if seed != -1:
+                self.assertTrue(numpy.array_equal(x1, x2))
+                self.assertEqual(y1, y2)
+
+            else:
+                self.assertFalse(numpy.array_equal(x1, x2))
+                self.assertNotEqual(y1, y2)
 
     def test_save(self):
 
@@ -1045,7 +1064,27 @@ class TricsGenTest(TestCaseBase):
                 self.assertEqual(x.shape, expected_shape)
 
     def test_seed(self):
-        pass
+
+        seed_params = [-1, 1, 5]
+
+        for i, seed in enumerate(seed_params):
+
+            # build instances
+
+            instance_1 = tg(seed=seed, silence=True)
+            x1, y1 = instance_1.generate()
+
+            instance_2 = tg(seed=seed, silence=True)
+            x2, y2 = instance_2.generate()
+
+            # assert argument logic
+            if seed != -1:
+                self.assertTrue(numpy.array_equal(x1, x2))
+                self.assertEqual(y1, y2)
+
+            else:
+                self.assertFalse(numpy.array_equal(x1, x2))
+                self.assertNotEqual(y1, y2)
 
     def test_save(self):
 
