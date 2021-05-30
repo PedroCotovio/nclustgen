@@ -133,7 +133,7 @@ class TriclusterGenerator(Generator):
     @staticmethod
     def dense_to_dgl(x, device):
 
-        # TODO set (u,v)
+        # set (u,v)
 
         tensor = th.tensor(
             [[i, j, z, elem] for z, ctx in enumerate(x) for i, row in enumerate(ctx) for j, elem in enumerate(row)]
@@ -148,7 +148,7 @@ class TriclusterGenerator(Generator):
         # create graph
         G = dgl.heterograph(graph_data)
 
-        # TODO set weights
+        # set weights
         G.edges[('row', 'elem', 'col')].data['w'] = tensor[3]
         G.edges[('row', 'elem', 'ctx')].data['w'] = tensor[3]
         G.edges[('col', 'elem', 'ctx')].data['w'] = tensor[3]
@@ -157,6 +157,9 @@ class TriclusterGenerator(Generator):
         G.nodes['row'].data['c'] = th.zeros(x.shape[1])
         G.nodes['col'].data['c'] = th.zeros(x.shape[2])
         G.nodes['ctx'].data['c'] = th.zeros(x.shape[0])
+
+        # remove duplicate edges
+        G = dgl.to_simple(G)
 
         if device == 'gpu':
             G = G.to('cuda')
