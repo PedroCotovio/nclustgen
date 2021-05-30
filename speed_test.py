@@ -5,6 +5,7 @@ import torch as th
 import json
 from tqdm import tqdm
 from time import perf_counter as pc, sleep
+from statistics import mean
 
 
 @click.command()
@@ -12,10 +13,11 @@ from time import perf_counter as pc, sleep
 @click.option('--hidden', default=1, help='number of hidden clusters -> int')
 @click.option('--grid', default=None, help='test grid -> dict('
                                            'graphNet: Bool, graphDGLcpu: bool,graphDGLgpu: bool,save: bool})')
-@click.option('--output', default='json', help='How to output results -> str(json) or str(print)')
-def testcli(shape, hidden, grid, output):
+@click.option('--i', default=10, help='number of iterations -> int')
+@click.option('--output', default='print', help='How to output results -> str(json) or str(print)')
+def testcli(shape, hidden, grid, i, output):
 
-    res = speedtest(shape, hidden, grid)
+    res = speedtest(shape, hidden, grid, i)
 
     if output:
 
@@ -35,7 +37,7 @@ def testcli(shape, hidden, grid, output):
                 json.dump(res, outfile)
 
 
-def speedtest(shape=None, hidden=1, grid=None):
+def speedtest(shape=None, hidden=1, grid=None, i=10):
 
     if shape is None:
         shape = (100, 100, 3)
@@ -55,112 +57,121 @@ def speedtest(shape=None, hidden=1, grid=None):
     else:
         generator = BiclusterGenerator
 
-    results = {}
+    results = {
+        'dense': {
+            'generate': [],
+            'graphNet': [],
+            'graphDGLcpu': [],
+            'graphDGLgpu': [],
+            'save': []
+            },
 
-    pbar = tqdm(zip([True, False], ['dense', 'sparse']))
-    pbar.set_description('SPEEDTEST')
+        'sparse': {
+            'generate': [],
+            'graphNet': [],
+            'graphDGLcpu': [],
+            'graphDGLgpu': [],
+            'save': []
+            }
+    }
 
-    for boolean, array in pbar:
+    pbar = tqdm(range(i))
 
-        pbar.set_postfix(type=array, stage='generating ds')
-        print('')
+    for iteration in pbar:
 
-        # Generating DS
-        start = pc()
-        instance = generator(in_memory=boolean, silence=True)
-        _, _ = instance.generate(*shape, nclusters=hidden)
-        stop = pc()
+        pbar.set_description('SPEEDTEST: {}'.format(iteration))
 
-        speedgen = stop - start
+        for boolean, array in zip([True, False], ['dense', 'sparse']):
 
-        # Test grid
-        if grid['graphNet']:
-            # building networkx graph
-            # set testing stage on loop
-            pbar.set_postfix(type=array, stage='generating net graph')
-            pbar.update()
-
+            # Generating DS
             start = pc()
-            _ = instance.to_graph()
+            instance = generator(in_memory=boolean, silence=True)
+            _, _ = instance.generate(*shape, nclusters=hidden)
             stop = pc()
 
-            speedgraphNet = stop - start
+            speedgen = stop - start
 
-        else:
-            # Else set speed to None (for test not run)
-            speedgraphNet = None
+            # Test grid
+            if grid['graphNet']:
+                # building networkx graph
 
-        if grid['graphDGLcpu']:
-            # building dgl graph on cpu
-            # set testing stage on loop
-            pbar.set_postfix(type=array, stage='generating dgl graph (on cpu)')
-            pbar.update()
+                start = pc()
+                _ = instance.to_graph()
+                stop = pc()
 
-            start = pc()
-            _ = instance.to_graph(framework='dgl')
-            stop = pc()
+                speedgraphNet = stop - start
 
-            speedgraphDGLcpu = stop - start
-
-        else:
-            # Else set speed to None (for test not run)
-            speedgraphDGLcpu = None
-
-        # test condicions to run test
-        if th.cuda.is_available() and grid['graphDGLgpu']:
-            # building dgl graph on gpu
-            # set testing stage on loop
-            pbar.set_postfix(type=array, stage='generating dgl graph (on gpu)')
-            pbar.update()
-
-            start = pc()
-            _ = instance.to_graph(framework='dgl', device='gpu')
-            stop = pc()
-
-            speedgraphDGLgpu = stop - start
-
-        else:
-            speedgraphDGLgpu = None
-
-        if grid['save']:
-            # saving
-            # set testing stage on loop
-            pbar.set_postfix(type=array, stage='saving')
-            pbar.update()
-
-            path = os.getcwd()
-
-            start = pc()
-            instance.save(single_file=boolean)
-            stop = pc()
-
-            speedsave = stop - start
-
-            # Remove data files
-            if boolean:
-                os.remove('example_dataset.tsv')
             else:
-                try:
-                    for i in range(100):
-                        os.remove('example_dataset_{}.txt'.format(i))
-                except FileNotFoundError:
-                    pass
+                # Else set speed to None (for test not run)
+                speedgraphNet = None
 
-            # Remove descriptive files
+            if grid['graphDGLcpu']:
+                # building dgl graph on cpu
 
-            os.remove('example_cluster_data.txt')
-            os.remove('example_cluster_data.json')
+                start = pc()
+                _ = instance.to_graph(framework='dgl')
+                stop = pc()
 
-        else:
-            speedsave = None
+                speedgraphDGLcpu = stop - start
 
-        results[array] = {
-            'generate': speedgen,
-            'graphNet': speedgraphNet,
-            'graphDGLcpu': speedgraphDGLcpu,
-            'graphDGLgpu': speedgraphDGLgpu,
-            'save': speedsave
-        }
+            else:
+                # Else set speed to None (for test not run)
+                speedgraphDGLcpu = None
+
+            # test condicions to run test
+            if th.cuda.is_available() and grid['graphDGLgpu']:
+                # building dgl graph on gpu
+
+                start = pc()
+                _ = instance.to_graph(framework='dgl', device='gpu')
+                stop = pc()
+
+                speedgraphDGLgpu = stop - start
+
+            else:
+                speedgraphDGLgpu = None
+
+            if grid['save']:
+                # saving
+
+                path = os.getcwd()
+
+                start = pc()
+                instance.save(single_file=boolean)
+                stop = pc()
+
+                speedsave = stop - start
+
+                # Remove data files
+                if boolean:
+                    os.remove('example_dataset.tsv')
+                else:
+                    try:
+                        for i in range(100):
+                            os.remove('example_dataset_{}.txt'.format(i))
+                    except FileNotFoundError:
+                        pass
+
+                # Remove descriptive files
+
+                os.remove('example_cluster_data.txt')
+                os.remove('example_cluster_data.json')
+
+            else:
+                speedsave = None
+
+            results[array]['generate'].append(speedgen)
+            results[array]['graphNet'].append(speedgraphNet)
+            results[array]['graphDGLcpu'].append(speedgraphDGLcpu)
+            results[array]['graphDGLgpu'].append(speedgraphDGLgpu)
+            results[array]['save'].append(speedsave)
+
+    for array in results.keys():
+        for test in results[array].keys():
+            try:
+                results[array][test] = mean(results[array][test])
+            except TypeError:
+                results[array][test] = None
 
     return results
 

@@ -24,14 +24,16 @@ from java.io import PrintStream
 
 
 # TODO docs
+# TODO add seed
 class Generator(metaclass=abc.ABCMeta):
 
     def __init__(self, n, dstype='NUMERIC', patterns=None, bktype='UNIFORM', clusterdistribution=None,
-                 contiguity=None, plaidcoherency='NO_OVERLAPPING', percofoverlappingclusters=0,
+                 contiguity=None, plaidcoherency='NO_OVERLAPPING', percofoverlappingclusters=0.0,
                  maxclustsperoverlappedarea=0, maxpercofoverlappingelements=0.0, percofoverlappingrows=1.0,
                  percofoverlappingcolumns=1.0, percofoverlappingcontexts=1.0, percmissingsonbackground=0.0,
                  percmissingsonclusters=0.0, percnoiseonbackground=0.0, percnoiseonclusters=0.0, percnoisedeviation=0.0,
-                 percerroesonbackground=0.0, percerrorsonclusters=0.0, silence=False, *args, **kwargs):
+                 percerroesonbackground=0.0, percerrorsonclusters=0.0, percerrorondeviation=0.0, silence=False,
+                 *args, **kwargs):
 
         # define dimensions
         self.n = n
@@ -53,23 +55,34 @@ class Generator(metaclass=abc.ABCMeta):
             self.time_profile = str(self.time_profile).upper()
 
         # Parse dataset type parameters
-        self.realval = bool(kwargs.get('realval', True))
-        self.minval = int(kwargs.get('minval', -10.0))
-        self.maxval = int(kwargs.get('maxval', 10.0))
 
-        try:
-            self.symbols = [str(symbol) for symbol in kwargs.get('symbols')]
-            self.nsymbols = len(self.symbols)
+        if self.dstype == 'NUMERIC':
 
-        except TypeError:
-            self.nsymbols = kwargs.get('nsymbols', 10)
+            self.realval = bool(kwargs.get('realval', True))
+            self.minval = int(kwargs.get('minval', -10.0))
+            self.maxval = int(kwargs.get('maxval', 10.0))
 
-            if self.nsymbols:
-                self.symbols = [str(symbol) for symbol in range(self.nsymbols)]
-            else:
-                self.symbols = None
+            # Noise
+            self.noise = (float(percnoiseonbackground), float(percnoiseonclusters), float(percnoisedeviation))
+            self.errors = (float(percerroesonbackground), float(percerrorsonclusters), float(percerrorondeviation))
 
-        self.symmetries = kwargs.get('symmetries', False)
+        else:
+            try:
+                self.symbols = [str(symbol) for symbol in kwargs.get('symbols')]
+                self.nsymbols = len(self.symbols)
+
+            except TypeError:
+                self.nsymbols = kwargs.get('nsymbols', 10)
+
+                if self.nsymbols:
+                    self.symbols = [str(symbol) for symbol in range(self.nsymbols)]
+
+            self.symmetries = kwargs.get('symmetries', False)
+
+            # Noise
+
+            self.noise = (float(percnoiseonbackground), float(percnoiseonclusters), int(percnoisedeviation))
+            self.errors = (float(percerroesonbackground), float(percerrorsonclusters), int(percerrorondeviation))
 
         # Overlapping Settings
         self.plaidcoherency = str(plaidcoherency).upper()
@@ -80,10 +93,8 @@ class Generator(metaclass=abc.ABCMeta):
         self.percofoverlappingcolumns = float(percofoverlappingcolumns)
         self.percofoverlappingcontexts = float(percofoverlappingcontexts)
 
-        # Noise settings
+        # missing settings
         self.missing = (float(percmissingsonbackground), float(percmissingsonclusters))
-        self.noise = (float(percnoiseonbackground), float(percnoiseonclusters), float(percnoisedeviation))
-        self.errors = (float(percerroesonbackground), float(percerrorsonclusters), float(percnoisedeviation))
 
         # define background
         bktype = str(bktype).upper()
@@ -91,7 +102,12 @@ class Generator(metaclass=abc.ABCMeta):
             self.background = [bktype, int(kwargs.get('mean', 14)), kwargs.get('sdev', 7)]
 
         elif bktype == 'DISCRETE':
-            self.background = [bktype, [float(prob) for prob in kwargs.get('probs')]]
+
+            try:
+                self.background = [bktype, [float(prob) for prob in kwargs.get('probs')]]
+
+            except TypeError:
+                self.background = ['UNIFORM']
 
         else:
             self.background = [bktype]
@@ -109,20 +125,22 @@ class Generator(metaclass=abc.ABCMeta):
         self.silenced = silence
         self.stdout = System.out
 
-    def start_silencing(self):
+    def start_silencing(self, silence=None):
 
-        if self.silenced:
+        if silence is None:
+            silence = self.silenced
+
+        if bool(silence):
             System.setOut(PrintStream('logs'))
 
     def stop_silencing(self):
 
-        if self.silenced:
-            System.setOut(self.stdout)
+        System.setOut(self.stdout)
 
-            try:
-                os.remove('logs')
-            except FileNotFoundError:
-                pass
+        try:
+            os.remove('logs')
+        except FileNotFoundError:
+            pass
 
     @abc.abstractmethod
     def build_background(self):
@@ -191,7 +209,7 @@ class Generator(metaclass=abc.ABCMeta):
                 (*geninfo_params).getJSONObject('{}clusters'.format(cluster_type)).toString())
         )
 
-        self.Y = [js[i][key] for i in js.keys() for key in keys]
+        self.Y = [[js[i][key] for key in keys] for i in js.keys()]
 
         self.stop_silencing()
 
@@ -277,7 +295,6 @@ class Generator(metaclass=abc.ABCMeta):
     def asses_memory(self, in_memory=None, **kwargs):
 
         if in_memory is not None:
-            self.in_memory = in_memory
             return in_memory
 
         elif self.in_memory is not None:

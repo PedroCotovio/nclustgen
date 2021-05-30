@@ -1,2 +1,4 @@
 from .BiclusterGen import BiclusterGenerator
+from .BiclusterGen import BiclusterGeneratorbyConfig
 from .TriclusterGen import TriclusterGenerator
+from .TriclusterGen import TriclusterGeneratorbyConfig

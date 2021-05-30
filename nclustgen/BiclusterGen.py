@@ -32,6 +32,8 @@ from com.gbic.utils import IOUtils as io
 
 from java.util import ArrayList
 
+from .utils import tensor_value_check as tvc
+
 
 class BiclusterGenerator(Generator):
 
@@ -58,7 +60,7 @@ class BiclusterGenerator(Generator):
         patterns = ArrayList()
 
         if self.time_profile:
-            self.time_profile = getattr(TimeProfile, self.time_profile)
+            self.time_profile = getattr(TimeProfile, str(self.time_profile).upper())
 
         [patterns.add(
             SingleBiclusterPattern(
@@ -99,7 +101,7 @@ class BiclusterGenerator(Generator):
 
         tensor = str(io.matrixToStringColOriented(generatedDataset, generatedDataset.getNumRows(), 0, False))
 
-        return np.array([[float(val) for val in row.split('\t')[1:]] for row in tensor.split('\n')][:-1])
+        return np.array([[tvc(val) for val in row.split('\t')[1:]] for row in tensor.split('\n')][:-1])
 
     @staticmethod
     def java_to_sparse(generatedDataset):
@@ -111,7 +113,7 @@ class BiclusterGenerator(Generator):
         for step in steps:
             tensor = str(io.matrixToStringColOriented(generatedDataset, threshold, step, False))
 
-            tensor = csr_matrix([[float(val) for val in row.split('\t')[1:]] for row in tensor.split('\n')][:-1])
+            tensor = csr_matrix([[tvc(val) for val in row.split('\t')[1:]] for row in tensor.split('\n')][:-1])
 
             tensors.append(tensor)
 
@@ -184,7 +186,6 @@ class BiclusterGenerator(Generator):
 class BiclusterGeneratorbyConfig(BiclusterGenerator):
 
     def __init__(self, file_path=None):
-
         if file_path:
             f = open(file_path, )
             params = json.load(f)
@@ -192,4 +193,5 @@ class BiclusterGeneratorbyConfig(BiclusterGenerator):
 
             super().__init__(**params)
 
-        super().__init__()
+        else:
+            super().__init__()
