@@ -1,4 +1,4 @@
-
+import inspect
 import os
 import abc
 import warnings
@@ -144,6 +144,14 @@ class Generator(metaclass=abc.ABCMeta):
             os.remove('logs')
         except FileNotFoundError:
             pass
+
+    def get_params(self):
+
+        attributes = inspect.getmembers(self, lambda a: not (inspect.isroutine(a)))
+
+        return {a[0]: a[1]
+                for a in attributes if not (a[0].startswith('__') and a[0].endswith('__') or a[0].startswith('_'))
+                }
 
     @abc.abstractmethod
     def initialize_seed(self):
