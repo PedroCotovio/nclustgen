@@ -36,12 +36,14 @@ class Generator(metaclass=abc.ABCMeta):
                  *args, **kwargs):
 
         # define dimensions
-        self.n = n
+        self._n = n
 
         if patterns is None:
             patterns = [['CONSTANT'] * n]
         if clusterdistribution is None:
             clusterdistribution = [['UNIFORM', 4, 4]] * n
+        if seed is None:
+            seed = -1
 
         # Parse basic Parameters
         self.dstype = str(dstype).upper()
@@ -50,7 +52,7 @@ class Generator(metaclass=abc.ABCMeta):
         self.contiguity = str(contiguity).upper()
 
         self.time_profile = kwargs.get('timeprofile')
-        self.seed = seed
+        self.seed = int(seed)
 
         if self.time_profile:
             self.time_profile = str(self.time_profile).upper()
@@ -60,8 +62,8 @@ class Generator(metaclass=abc.ABCMeta):
         if self.dstype == 'NUMERIC':
 
             self.realval = bool(kwargs.get('realval', True))
-            self.minval = int(kwargs.get('minval', -10.0))
-            self.maxval = int(kwargs.get('maxval', 10.0))
+            self.minval = float(kwargs.get('minval', -10.0))
+            self.maxval = float(kwargs.get('maxval', 10.0))
 
             # Noise
             self.noise = (float(percnoiseonbackground), float(percnoiseonclusters), float(percnoisedeviation))
@@ -100,7 +102,7 @@ class Generator(metaclass=abc.ABCMeta):
         # define background
         bktype = str(bktype).upper()
         if bktype == 'NORMAL':
-            self.background = [bktype, int(kwargs.get('mean', 14)), kwargs.get('sdev', 7)]
+            self.background = [bktype, float(kwargs.get('mean', 14.0)), float(kwargs.get('sdev', 7.0))]
 
         elif bktype == 'DISCRETE':
 
@@ -124,7 +126,7 @@ class Generator(metaclass=abc.ABCMeta):
 
         # General
         self.silenced = silence
-        self.stdout = System.out
+        self._stdout = System.out
 
     def start_silencing(self, silence=None):
 
@@ -136,7 +138,7 @@ class Generator(metaclass=abc.ABCMeta):
 
     def stop_silencing(self):
 
-        System.setOut(self.stdout)
+        System.setOut(self._stdout)
 
         try:
             os.remove('logs')
@@ -204,10 +206,10 @@ class Generator(metaclass=abc.ABCMeta):
 
         # Get clusters
 
-        keys = keys[:self.n]
+        keys = keys[:self._n]
 
-        cluster_type = {2: 'bi', 3: 'Tri'}[self.n]
-        geninfo_params = {2: [generatedDataset, False], 3: [generatedDataset]}[self.n]
+        cluster_type = {2: 'bi', 3: 'Tri'}[self._n]
+        geninfo_params = {2: [generatedDataset, False], 3: [generatedDataset]}[self._n]
 
         js = json.loads(
             str(getattr(generatedDataset, 'get{}csInfoJSON'.format(cluster_type.capitalize()))
