@@ -37,6 +37,144 @@ from .utils import tensor_value_check as tvc
 
 
 class TriclusterGenerator(Generator):
+    """
+        This class inherits from the Generator class, and provides an implementation for three-dimensional datasets with
+        hidden triclusters.
+
+        Examples
+        --------
+        >>> from nclustgen import TriclusterGenerator
+        >>> generator = TriclusterGenerator(
+        ...     dstype='NUMERIC',
+        ...     patterns=[['CONSTANT', 'CONSTANT', 'CONSTANT'], ['CONSTANT', 'NONE', 'NONE']],
+        ...     bktype='UNIFORM',
+        ...     in_memory='True'
+        ... )
+        >>> generator.get_params()
+        {'X': None, 'Y': None, 'background': ['UNIFORM'], 'clusterdistribution': [['UNIFORM', 4, 4], ['UNIFORM', 4, 4],
+        ['UNIFORM', 4, 4]], 'contiguity': 'NONE', 'dstype': 'NUMERIC', 'errors': (0.0, 0.0, 0.0),
+        'generatedDataset': None, 'graph': None, 'in_memory': 'True', 'maxclustsperoverlappedarea': 0,
+        'maxpercofoverlappingelements': 0.0, 'maxval': 10.0, 'minval': -10.0, 'missing': (0.0, 0.0), 'n': 3,
+        'noise': (0.0, 0.0, 0.0), 'patterns': [['CONSTANT', 'CONSTANT', 'CONSTANT'], ['CONSTANT', 'NONE', 'NONE']],
+        'percofoverlappingclusts': 0.0, 'percofoverlappingcolumns': 1.0, 'percofoverlappingcontexts': 1.0,
+        'percofoverlappingrows': 1.0, 'plaidcoherency': 'NO_OVERLAPPING', 'realval': True, 'seed': -1,
+        'silenced': False, 'time_profile': None}
+        >>> x, y = generator.generate(nrows=50, ncols=100, ncontexts=5, nclusters=3)
+        Generating tricluster 1 of 3...
+        Tric 1 - Generating contexts...
+        Contexts: 4
+        Tric 1 - Generating columns...
+        Columns: 4
+        Tric 1 - Generating rows...
+        Rows: 4
+        Tric 1 - Has space, lets plant the patterns
+        Tric 1 - planting the tric
+        Planting on ctx 0 row 0
+        Planting on ctx 1 row 0
+        Planting on ctx 2 row 0
+        Planting on ctx 3 row 0
+        ##### Heap utilization statistics [MB] #####
+        Used Memory:20
+        Free Memory:19
+        Total Memory:40
+        Max Memory:8192
+        Generating tricluster 2 of 3...
+        Tric 2 - Generating contexts...
+        Contexts: 4
+        Tric 2 - Generating columns...
+        Columns: 4
+        Tric 2 - Generating rows...
+        Rows: 4
+        Tric 2 - Has space, lets plant the patterns
+        Tric 2 - planting the tric
+        Planting on ctx 0 row 0
+        Planting on ctx 1 row 0
+        Planting on ctx 2 row 0
+        Planting on ctx 3 row 0
+        ##### Heap utilization statistics [MB] #####
+        Used Memory:20
+        Free Memory:19
+        Total Memory:40
+        Max Memory:8192
+        Generating tricluster 3 of 3...
+        Tric 3 - Generating contexts...
+        Contexts: 4
+        Tric 3 - Generating columns...
+        Columns: 4
+        Tric 3 - Generating rows...
+        Rows: 4
+        Tric 3 - Has space, lets plant the patterns
+        Tric 3 - planting the tric
+        Planting on ctx 0 row 0
+        Planting on ctx 1 row 0
+        Planting on ctx 2 row 0
+        Planting on ctx 3 row 0
+        ##### Heap utilization statistics [MB] #####
+        Used Memory:20
+        Free Memory:19
+        Total Memory:40
+        Max Memory:8192
+        Writing dataset file: 0.0%
+        >>> x
+        array([[[-1.29, -4.92, -2.49, ..., -9.17, -5.19,  6.66],
+                [ 5.41, -3.04, -1.58, ..., -3.44,  1.99,  9.84],
+                [-1.88, -9.09,  5.06, ..., -8.96, -8.4 ,  3.56],
+                ...,
+                [ 8.74,  4.07,  0.6 , ...,  6.73, -1.3 ,  5.  ],
+                [ 3.33,  4.66, -5.72, ...,  0.55,  5.82, -3.17],
+                [ 2.32, -9.29,  3.95, ...,  3.61,  3.93, -6.76]],
+               [[ 4.34,  8.59, -1.96, ...,  0.88,  8.52, -7.85],
+                [ 1.87, -8.59, -9.78, ...,  5.33, -7.45,  3.1 ],
+                [-6.86, -3.93,  7.73, ...,  3.21,  6.54, -7.13],
+                ...,
+                [-5.75,  9.91, -4.76, ...,  0.94, -9.2 , -1.32],
+                [ 3.11, -8.26, -2.32, ..., -5.08,  5.33,  2.52],
+                [-4.18,  7.98,  8.42, ...,  4.21, -0.03, -7.51]],
+               [[ 1.22, -5.69, -8.72, ...,  5.78,  8.74,  1.44],
+                [ 3.41, -7.45,  7.01, ...,  8.93, -6.01,  0.18],
+                [ 3.8 ,  2.92, -1.87, ..., -1.16, -3.31, -3.02],
+                ...,
+                [ 4.82, -9.82,  0.31, ...,  9.91, -0.45,  7.86],
+                [ 7.24,  8.28, -3.13, ...,  9.12, -0.47,  6.16],
+                [-6.61, -7.34, -0.56, ...,  1.41, -1.7 ,  6.22]],
+               [[ 3.46,  7.85, -8.23, ...,  1.33,  2.82, -4.05],
+                [-8.87, -6.42,  2.28, ...,  9.72, -1.75,  5.01],
+                [-0.26, -3.25, -9.16, ..., -1.69,  6.96,  4.63],
+                ...,
+                [-5.36,  2.84, -2.09, ...,  0.33, -2.88,  3.43],
+                [ 5.72,  1.11,  2.11, ...,  0.27, -5.95,  3.39],
+                [-7.02, -3.85, -5.44, ...,  1.64, -1.24, -2.74]],
+               [[-2.39, -9.27, -8.12, ..., -7.86,  7.54,  4.99],
+                [ 2.06,  3.84, -2.99, ...,  4.82, -9.29, -9.23],
+                [ 0.21, -5.85, -8.45, ...,  4.35, -2.69,  0.34],
+                ...,
+                [-0.52, -2.59,  7.63, ..., -8.07, -3.51,  2.7 ],
+                [ 4.93, -1.55, -0.65, ..., -0.87,  8.53,  9.97],
+                [ 8.03,  2.32, -4.76, ..., -2.03, -4.48, -5.56]]])
+        >>> y
+        [[[8, 16, 17, 35], [36, 55, 69, 88], [0, 2, 3, 4]], [[7, 21, 33, 35], [22, 57, 65, 75], [0, 1, 2, 4]],
+        [[9, 19, 23, 27], [12, 19, 59, 72], [1, 2, 3, 4]]]
+        >>> graph = generator.to_graph(x, framework='dgl', device='cpu')
+        >>> graph
+        Graph(num_nodes={'col': 100, 'ctx': 5, 'row': 50},
+              num_edges={('col', 'elem', 'ctx'): 500, ('row', 'elem', 'col'): 5000, ('row', 'elem', 'ctx'): 250},
+              metagraph=[('col', 'ctx', 'elem'), ('row', 'col', 'elem'), ('row', 'ctx', 'elem')])
+        >>> generator.save(file_name='example', single_file=True)
+        Writting output...
+        Triclusters txt file written!
+        Triclusters JSON file written!
+        Writing dataset file: 0.0%
+        Writing dataset file: 10.0%
+        Writing dataset file: 20.0%
+        Writing dataset file: 30.0%
+        Writing dataset file: 40.0%
+        Writing dataset file: 50.0%
+        Writing dataset file: 60.0%
+        Writing dataset file: 70.0%
+        Writing dataset file: 80.0%
+        Writing dataset file: 90.0%
+        Dataset tsv file written!
+        """
 
     def __init__(self, *args, **kwargs):
         super().__init__(n=3, *args, **kwargs)
@@ -213,7 +351,48 @@ class TriclusterGenerator(Generator):
 
 class TriclusterGeneratorbyConfig(TriclusterGenerator):
 
+    """
+    This class inherits from the TriclusterGenerator class, and provides way to use it via a configuration file.
+
+    Examples
+    ________
+    >>> from nclustgen import TriclusterGeneratorbyConfig
+    >>> generator = TriclusterGeneratorbyConfig('example.json')
+    >>> x, y = generator.generate(nrows=50, ncols=100, ncontexte=4, nclusters=2)
+    >>> x
+    array([[[ 3.94, -7.62, -2.68, ..., -1.66,  4.41, -3.8 ],
+            [-2.27, -7.19, -3.42, ...,  7.19, -2.9 , -6.03],
+            [-8.91, -9.46, -7.98, ..., -0.78, -7.66, -4.96],
+            ...,
+            [-7.93,  9.79,  2.95, ...,  2.01,  7.99,  6.15],
+            [-4.25, -3.81, -1.43, ..., -0.61, -5.36, -8.09],
+            [ 0.4 , -5.36, -3.68, ...,  8.5 ,  6.8 , -7.34]],
+           [[ 0.62, -1.18, -3.07, ...,  0.23, -8.38,  2.96],
+            [ 6.37,  4.63,  6.15, ...,  9.13,  9.6 ,  9.5 ],
+            [-5.33,  0.15,  1.65, ...,  5.73, -4.64, -6.47],
+            ...,
+            [ 9.16,  4.75,  3.06, ...,  3.76, -3.09, -6.96],
+            [ 3.6 ,  5.54, -0.2 , ...,  1.09,  9.23, -0.62],
+            [ 2.68, -6.15, -8.99, ...,  8.65,  9.89,  7.63]],
+           [[ 0.55, -1.03,  6.35, ...,  3.88,  5.96, -6.52],
+            [-0.71,  7.99,  2.56, ..., -7.15,  0.33,  7.9 ],
+            [ 0.86,  2.99,  3.69, ...,  1.57, -5.23,  4.59],
+            ...,
+            [ 4.2 ,  4.03, -9.11, ...,  5.28,  6.09,  1.19],
+            [-0.31,  7.71,  7.57, ..., -3.57, -9.67, -9.89],
+            [ 6.55,  4.69, -9.96, ..., -8.9 ,  7.31, -0.13]]])
+    """
+
     def __init__(self, file_path=None):
+
+        """
+        Parameters
+        ----------
+
+        file_path: str, default None
+            Determines the path to the configuration file. If None then no parameters are passed to class.
+        """
+
         if file_path:
             f = open(file_path, )
             params = json.load(f)
