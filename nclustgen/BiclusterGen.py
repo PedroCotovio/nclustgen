@@ -38,6 +38,97 @@ from .utils import tensor_value_check as tvc
 
 class BiclusterGenerator(Generator):
 
+    """
+    This class inherits from the Generator class, and provides an implementation for two-dimensional datasets with
+    hidden biclusters.
+
+    Examples
+    --------
+    >>> from nclustgen import BiclusterGenerator
+    >>> generator = BiclusterGenerator(
+    ...     dstype='NUMERIC',
+    ...     patterns=[['CONSTANT', 'CONSTANT'], ['CONSTANT', 'NONE']],
+    ...     bktype='UNIFORM',
+    ...     in_memory='True'
+    ... )
+    >>> generator.get_params()
+    {'X': None, 'Y': None, 'background': ['UNIFORM'], 'clusterdistribution': [['UNIFORM', 4, 4], ['UNIFORM', 4, 4]],
+    'contiguity': 'NONE', 'dstype': 'NUMERIC', 'errors': (0.0, 0.0, 0.0), 'generatedDataset': None, 'graph': None,
+    'in_memory': 'True', 'maxclustsperoverlappedarea': 0, 'maxpercofoverlappingelements': 0.0, 'maxval': 10.0,
+    'minval': -10.0, 'missing': (0.0, 0.0), 'n': 2, 'noise': (0.0, 0.0, 0.0),
+    'patterns': [['CONSTANT', 'CONSTANT'], ['CONSTANT', 'NONE']], 'percofoverlappingclusts': 0.0,
+    'percofoverlappingcolumns': 1.0, 'percofoverlappingcontexts': 1.0, 'percofoverlappingrows': 1.0,
+    'plaidcoherency': 'NO_OVERLAPPING', 'realval': True, 'seed': -1, 'silenced': False, 'time_profile': None}
+    >>> x, y = generator.generate(nrows=50, ncols=100, nclusters=3)
+    Generating bicluster 1 of 3...
+    Bic 1 - Generating columns...
+    Columns: 4
+    Bic 1 - Generating rows...
+    Rows: 4
+    Bic 1 - Has space, lets plant the patterns
+    Bic 1 - planting the bic
+    ##### Heap utilization statistics [MB] #####
+    Used Memory:20
+    Free Memory:19
+    Total Memory:40
+    Max Memory:8192
+    Generating bicluster 2 of 3...
+    Bic 2 - Generating columns...
+    Columns: 4
+    Bic 2 - Generating rows...
+    Rows: 4
+    Bic 2 - Has space, lets plant the patterns
+    Bic 2 - planting the bic
+    ##### Heap utilization statistics [MB] #####
+    Used Memory:20
+    Free Memory:19
+    Total Memory:40
+    Max Memory:8192
+    Generating bicluster 3 of 3...
+    Bic 3 - Generating columns...
+    Columns: 4
+    Bic 3 - Generating rows...
+    Rows: 4
+    Bic 3 - Has space, lets plant the patterns
+    Bic 3 - planting the bic
+    ##### Heap utilization statistics [MB] #####
+    Used Memory:20
+    Free Memory:19
+    Total Memory:40
+    Max Memory:8192
+    Writing dataset file: 0.0%
+    >>> x
+    array([[-4.43, -8.2 , -0.34, ...,  8.85,  9.24,  6.13],
+           [ 9.28,  9.45,  5.46, ...,  7.83,  8.67, -6.48],
+           [-9.97, -2.14, -6.58, ...,  1.23,  5.64, -7.29],
+           ...,
+           [-5.12,  1.11, -3.44, ..., -7.45, -0.21,  2.21],
+           [-0.96,  5.43, -3.28, ...,  9.58, -0.73,  3.99],
+           [-0.75,  8.91, -6.91, ..., -9.22,  0.43, -4.46]])
+    >>> y
+    [[[1, 9, 37, 46], [13, 25, 32, 79]], [[17, 29, 39, 46], [0, 5, 74, 90]], [[21, 30, 39, 42], [8, 46, 60, 93]]]
+    >>> graph = generator.to_graph(x, framework='dgl', device='cpu')
+    >>> graph
+    Graph(num_nodes={'col': 100, 'row': 50},
+          num_edges={('row', 'elem', 'col'): 5000},
+          metagraph=[('row', 'col', 'elem')])
+    >>> generator.save(file_name='example', single_file=True)
+    numWritting output...
+    Biclusters txt file written!
+    Biclusters JSON file written!
+    Writing dataset file: 0.0%
+    Writing dataset file: 10.0%
+    Writing dataset file: 20.0%
+    Writing dataset file: 30.0%
+    Writing dataset file: 40.0%
+    Writing dataset file: 50.0%
+    Writing dataset file: 60.0%
+    Writing dataset file: 70.0%
+    Writing dataset file: 80.0%
+    Writing dataset file: 90.0%
+    Dataset tsv file written!
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(n=2, *args, **kwargs)
 
@@ -190,7 +281,42 @@ class BiclusterGenerator(Generator):
 
 class BiclusterGeneratorbyConfig(BiclusterGenerator):
 
+    """
+    This class inherits from the BiclusterGenerator class, and provides way to use it via a configuration file.
+
+    Examples
+    --------
+    >>> from nclustgen import BiclusterGeneratorbyConfig
+    >>> generator = BiclusterGeneratorbyConfig('example.json')
+    >>> generator.get_params()
+    {'X': None, 'Y': None, 'background': ['UNIFORM'], 'clusterdistribution': [['UNIFORM', 4, 4], ['UNIFORM', 4, 4]],
+    'contiguity': 'NONE', 'dstype': 'NUMERIC', 'errors': (0.0, 0.0, 0.0), 'generatedDataset': None, 'graph': None,
+    'in_memory': 'True', 'maxclustsperoverlappedarea': 0, 'maxpercofoverlappingelements': 0.0, 'maxval': 10.0,
+    'minval': -10.0, 'missing': (0.0, 0.0), 'noise': (0.0, 0.0, 0.0),
+    'patterns': [['CONSTANT', 'CONSTANT'], ['CONSTANT', 'NONE']], 'percofoverlappingclusts': 0.0,
+    'percofoverlappingcolumns': 1.0, 'percofoverlappingcontexts': 1.0, 'percofoverlappingrows': 1.0,
+    'plaidcoherency': 'NO_OVERLAPPING', 'realval': True, 'seed': -1, 'silenced': False, 'time_profile': None}
+    >>> x, y = generator.generate(nrows=50, ncols=100, nclusters=3)
+    >>> x
+    array([[-4.67,  3.57,  2.38, ..., -7.41, -4.14,  4.64],
+           [-8.31,  8.06,  1.33, ..., -7.24, -2.62, -5.59],
+           [-4.68, -5.43, -1.81, ..., -0.49, -1.34,  0.68],
+           ...,
+           [ 1.85,  9.55,  8.1 , ..., -2.5 ,  2.41, -5.54],
+           [-2.09,  0.73,  6.38, ...,  0.46, -8.97,  4.46],
+           [-7.21,  6.6 , -9.78, ..., -6.29, -7.24, -2.98]])
+
+    """
+
     def __init__(self, file_path=None):
+
+        """
+        Parameters
+        ----------
+
+        file_path: str, default None
+            Determines the path to the configuration file. If None then no parameters are passed to class.
+        """
         if file_path:
             f = open(file_path, )
             params = json.load(f)
