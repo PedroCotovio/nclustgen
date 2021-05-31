@@ -65,11 +65,11 @@ class GenTest(TestCaseBase):
         self.assertTrue(instance_T.silenced)
         self.assertFalse(instance_F.silenced)
 
-        self.assertIsNotNone(instance_T.stdout)
-        self.assertIsNotNone(instance_F.stdout)
+        self.assertIsNotNone(instance_T._stdout)
+        self.assertIsNotNone(instance_F._stdout)
 
         # enforce System default status
-        System.setOut(instance_T.stdout)
+        System.setOut(instance_T._stdout)
 
         # check method logic
 
@@ -78,15 +78,15 @@ class GenTest(TestCaseBase):
 
         instance_T.stop_silencing()
         self.assertIsNotFile('logs')
-        self.assertEqual(System.out, instance_T.stdout)
+        self.assertEqual(System.out, instance_T._stdout)
 
         instance_T.start_silencing(silence=False)
         self.assertIsNotFile('logs')
-        self.assertEqual(System.out, instance_T.stdout)
+        self.assertEqual(System.out, instance_T._stdout)
 
         instance_F.start_silencing()
         self.assertIsNotFile('logs')
-        self.assertEqual(System.out, instance_T.stdout)
+        self.assertEqual(System.out, instance_T._stdout)
 
     def test_memory(self):
 
