@@ -40,6 +40,186 @@ class Generator(metaclass=abc.ABCMeta):
                  percerroesonbackground=0.0, percerrorsonclusters=0.0, percerrorondeviation=0.0, silence=False,
                  seed=None, *args, **kwargs):
 
+        """
+        Parameters
+        ----------
+
+        n: int, internal
+            Determines dimensionality (e.g. Bi/Tri clustering). Should only be used by subclasses.
+        dstype: {'NUMERIC', 'SYMBOLIC'}, default 'Numeric'
+            Type of Dataset to be generated, numeric or symbolic(categorical).
+        patterns: list or array, default [['CONSTANT', 'CONSTANT']]
+            Defines the type of patterns that will be hidden in the data.
+            Shape: number of patterns, number of dimensions
+            Patterns_Set: {CONSTANT, ADDITIVE, MULTIPLICATIVE, ORDER_PRESERVING, NONE}
+            Numeric_Patterns_Set: {CONSTANT, ADDITIVE, MULTIPLICATIVE, ORDER_PRESERVING, NONE}
+            Symbolic_Patterns_Set: {CONSTANT, ORDER_PRESERVING, NONE}
+            2D_Numeric_Patterns_Combinations:
+                [['Order Preserving', 'None'],
+                ['None', 'Order Preserving'],
+                ['Constant', 'Constant'],
+                ['None', 'Constant'],
+                ['Constant', 'None'],
+                ['Additive', 'Additive'],
+                ['Constant', 'Additive'],
+                ['Additive', 'Constant'],
+                ['Multiplicative', 'Multiplicative'],
+                ['Constant', 'Multiplicative'],
+                ['Multiplicative', 'Constant']]
+            2D_Symbolic_Patterns_Combinations:
+                [['Order Preserving', 'None'],
+                ['None', 'Order Preserving'],
+                ['Constant', 'Constant'],
+                ['None', 'Constant'],
+                ['Constant', 'None']]
+            3D_Numeric_Patterns_Combinations:
+            [['Order Preserving', 'None', 'None'],
+            ['None', 'Order Preserving', 'None'],
+            ['None', 'None', 'Order Preserving'],
+            ['Constant', 'Constant', 'Constant'],
+            ['None', 'Constant', 'Constant'],
+            ['Constant', 'Constant', 'None'],
+            ['Constant', 'None', 'Constant'],
+            ['Constant', 'None', 'None'],
+            ['None', 'Constant', 'None'],
+            ['None', 'None', 'Constant'],
+            ['Additive', 'Additive', 'Additive'],
+            ['Additive', 'Additive', 'Constant'],
+            ['Constant', 'Additive', 'Additive'],
+            ['Additive', 'Constant', 'Additive'],
+            ['Additive', 'Constant', 'Constant'],
+            ['Constant', 'Additive', 'Constant'],
+            ['Constant', 'Constant', 'Additive'],
+            ['Multiplicative', 'Multiplicative', 'Multiplicative'],
+            ['Multiplicative', 'Multiplicative', 'Constant'],
+            ['Constant', 'Multiplicative', 'Multiplicative'],
+            ['Multiplicative', 'Constant', 'Multiplicative'],
+            ['Multiplicative', 'Constant', 'Constant'],
+            ['Constant', 'Multiplicative', 'Constant'],
+            ['Constant', 'Constant', 'Multiplicative']]
+            3D_Symbolic_Patterns_Combinations:
+            [['Order Preserving', 'None', 'None'],
+            ['None', 'Order Preserving', 'None'],
+            ['None', 'None', 'Order Preserving'],
+            ['Constant', 'Constant', 'Constant'],
+            ['None', 'Constant', 'Constant'],
+            ['Constant', 'Constant', 'None'],
+            ['Constant', 'None', 'Constant'],
+            ['Constant', 'None', 'None'],
+            ['None', 'Constant', 'None'],
+            ['None', 'None', 'Constant']]
+        bktype: {'NORMAL', 'UNIFORM', 'DISCRETE', 'MISSING'}, default 'UNIFORM'
+            Determines the distribution used to generate the background values.
+        clusterdistribution: list or array, default [['UNIFORM', 4.0, 4.0], ['UNIFORM', 4.0, 4.0]]
+            Distribution used to calculate the size of a cluster.
+            Shape: number of dimensions, 3 (distribution parameters) -> param1(str), param2(float), param3(float)
+                The first parameter(param1) is always the type of distribution {'NORMAL', 'UNIFORM'}.
+                If param1==UNIFORM, then param2 and param3 represents the min and max, respectively.
+                If param1==NORMAL, then param2 and param3 represents the mean and standard deviation, respectively.
+        contiguity: {'COLUMNS', 'CONTEXTS', 'NONE'}, default None
+            Contiguity can occur on COLUMNS or CONTEXTS. To avoid contiguity use None.
+            If dimensionality == 2 and contiguity == 'CONTEXTS' it defaults to None.
+        plaidcoherency: {'ADDITIVE', 'MULTIPLICATIVE', 'INTERPOLED', 'NONE', 'NO_OVERLAPPING'}, default 'NO_OVERLAPPING'
+            Enforces the type of plaid coherency. To avoid plaid coherency use NONE, to avoid any overlapping use
+            'NO_OVERLAPPING'.
+        percofoverlappingclusters: float, default 0.0
+            Percentage of overlapping clusters. Defines how many clusters are allowed to overlap.
+            Not used if plaidcoherency == 'NO_OVERLAPPING'.
+            Range: [0,1]
+        maxclustsperoverlappedarea: int, default 0
+            Maximum number of clusters overlapped per area. Maximum number of clusters that can overlap together.
+            Not used if plaidcoherency == 'NO_OVERLAPPING'.
+            Range: [0, nclusters]
+        maxpercofoverlappingelements: float, default 0.0
+            Maximum percentage of values shared by overlapped clusters.
+            Not used if plaidcoherency == 'NO_OVERLAPPING'.
+            Range: [0,1]
+        percofoverlappingrows: float, default 1.0
+            Percentage of allowed amount of overlaping across clusters rows.
+            Not used if plaidcoherency == 'NO_OVERLAPPING'.
+            Range: [0,1]
+        percofoverlappingcolumns: float, default 1.0
+            Percentage of allowed amount of overlaping across clusters columns.
+            Not used if plaidcoherency == 'NO_OVERLAPPING'.
+            Range: [0,1]
+        percofoverlappingcontexts: float, default 1.0
+            Percentage of allowed amount of overlaping across clusters contexts.
+            Not used if plaidcoherency == 'NO_OVERLAPPING' or n >= 3.
+            Range: [0,1]
+        percmissingsonbackground: float, 0.0
+            Percentage of missing values on the background, that is, values that do not belong to planted clusters.
+            Range: [0,1]
+        percmissingsonclusters: float, 0.0
+            Maximum percentage of missing values on each cluster.
+            Range: [0,1]
+        percnoiseonbackground: float, 0.0
+            Percentage of noisy values on background, that is, values with added noise.
+            Range: [0,1]
+        percnoiseonclusters: float, 0.0
+            Maximum percentage of noisy values on each cluster.
+            Range: [0,1]
+        percnoisedeviation: int or float, 0.0
+            Percentage of symbol on noisy values deviation, that is, the maximum difference between the current symbol
+            on the matrix and the one that will replaced it to be considered noise.
+            If dstype == Numeric then percnoisedeviation -> float else int.
+            Ex: Let Alphabet = [1,2,3,4,5] and CurrentSymbol = 3, if the noiseDeviation is '1', then CurrentSymbol will
+                be, randomly, replaced by either '2' or '4'. If noiseDeviation is '2', CurrentSymbol can be replaced by
+                either '1','2','4' or '5'.
+        percerroesonbackground: float, 0.0
+            Percentage of error values on background. Similar as noise, a new value is considered an error if the
+            difference between it and the current value in the matrix is greater than noiseDeviation.
+            Ex: Alphabet = [1,2,3,4,5], If currentValue = 2, and errorDeviation = 2, to turn currentValue an error,
+                it's value must be replaced by '5', that is the only possible value that respects
+                abs(currentValue - newValue) > noiseDeviation
+            Range: [0,1]
+        percerrorsonclusters: float, 0.0
+            Percentage of errors values on background. Similar as noise, a new value is considered an error if the
+            difference between it and the current value in the matrix is greater than noiseDeviation.
+            Ex: Alphabet = [1,2,3,4,5], If currentValue = 2, and errorDeviation = 2, to turn currentValue an error,
+                it's value must be replaced by '5', that is the only possible value that respects
+                abs(currentValue - newValue) > noiseDeviation
+            Range: [0,1]
+        percerrorondeviation: int or float, 0.0
+            Percentage of symbol on error values deviation, that is, the maximum difference between the current symbol
+            on the matrix and the one that will replaced it to be considered error.
+             If dstype == Numeric then percnoisedeviation -> float else int.
+        silence: bool, default False
+            If True them the class does not print to the console.
+        seed: int, default -1
+            Seed to initialize random objects.
+            If seed is None or -1 then random objects are initialized without a seed.
+        timeprofile: {'RANDOM', 'MONONICALLY_INCREASING', 'MONONICALLY_DECREASING', None}, default None
+            It determines a time profile for the ORDER_PRESERVING pattern. Only used if ORDER_PRESERVING in patterns.
+            If None and ORDER_PRESERVING in patterns it defaults to 'RANDOM'.
+        realval: bool, default True
+            Indicates if the dataset is real valued. Only used when dstype == 'NUMERIC'.
+        minval: int or float, default -10.0
+            Dataset's minimum value. Only used when dstype == 'NUMERIC'.
+        maxval: int or float, default 10.0
+            Dataset's maximum value. Only used when dstype == 'NUMERIC'.
+        symbols: list or array of strings, default None
+            Dataset's alphabet (list of possible values/symbols it can contain). Only used if dstype == 'SYMBOLIC'.
+            Shape: alphabets length
+        nsymbols: int, default 10
+            Defines the length of the alphabet, instead of defining specific symbols this parameter can be passed, and
+            a list of strings will be create with range(1, n), where n represents this parameter.
+            Only used if dstype == 'SYMBOLIC' and symbols is None.
+        mean: int or float, default 14.0
+            Mean for the background's distribution. Only used when bktype == 'NORMAL'.
+        stdev: int or float, default 7.0
+            Standard deviation for the background's distribution. Only used when bktype == 'NORMAL'.
+        probs: list or array of floats
+            Background weighted distribution probabilities. Only used when bktype == 'DISCRETE'.
+            No default probabilities, if probs is None and bktype == 'DISCRETE', bktype defaults to 'UNIFORM'.
+            Shape: Number of symbols or possible integers
+            Range: [0,1]
+            Math: sum(probs) == 1
+        in_memory: bool, default None
+            Determines if generated datasets return dense or sparse matrix (True/False).
+            If None then if the generated dataset's size is larger then 10**5 it defaults to sparse, else outputs dense.
+            This parameter can be overwritten in the generate method.
+        """
+
         # define dimensions
         self._n = n
 
