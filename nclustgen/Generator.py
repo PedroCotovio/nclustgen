@@ -46,14 +46,14 @@ class Generator(metaclass=abc.ABCMeta):
         if patterns is None:
             patterns = [['CONSTANT'] * n]
         if clusterdistribution is None:
-            clusterdistribution = [['UNIFORM', 4, 4]] * n
+            clusterdistribution = [['UNIFORM', 4.0, 4.0]] * n
         if seed is None:
             seed = -1
 
         # Parse basic Parameters
         self.dstype = str(dstype).upper()
         self.patterns = [[str(pattern_type).upper() for pattern_type in pattern] for pattern in patterns]
-        self.clusterdistribution = [[str(dist[0]).upper(), int(dist[1]), int(dist[2])] for dist in clusterdistribution]
+        self.clusterdistribution = [[str(dist[0]).upper(), float(dist[1]), float(dist[2])] for dist in clusterdistribution]
         self.contiguity = str(contiguity).upper()
 
         self.time_profile = kwargs.get('timeprofile')
