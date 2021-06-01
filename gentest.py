@@ -255,12 +255,14 @@ class BicsGenTest(TestCaseBase):
 
         distribution = [
             [[['UNIFoRM', 1.0, 4], ['UNIFORM', 1, 4]], 'NONE'],
-            [[['Normal', 3, 1], ['UNIFORM', 1, 4]], 'CoLUMNS']
+            [[['Normal', 3, 1], ['UNIFORM', 1, 4]], 'CoLUMNS'],
+            [[['Normal', 3, 1], ['UNIFORM', 1, 4]], 'CONTEXTS']
         ]
 
         expected_distribution = [
             [[['UNIFORM', 1, 4], ['UNIFORM', 1, 4]], 'NONE'],
-            [[['NORMAL', 3, 1], ['UNIFORM', 1, 4]], 'COLUMNS']
+            [[['NORMAL', 3, 1], ['UNIFORM', 1, 4]], 'COLUMNS'],
+            [[['NORMAL', 3, 1], ['UNIFORM', 1, 4]], 'NONE']
         ]
 
         for i, (dist, expected) in enumerate(zip(distribution, expected_distribution)):
