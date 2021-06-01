@@ -176,6 +176,10 @@ class BiclusterGenerator(Generator):
         structure.setColumnsSettings(
             getattr(Distribution, self.clusterdistribution[1][0]), *self.clusterdistribution[1][1:]
         )
+        if self.contiguity == 'CONTEXTS':
+
+            self.contiguity = 'NONE'
+
         structure.setContiguity(getattr(Contiguity, self.contiguity))
 
         return structure
