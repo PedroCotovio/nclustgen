@@ -417,15 +417,15 @@ class Generator(metaclass=abc.ABCMeta):
 
     @staticmethod
     @abc.abstractmethod
-    def dense_to_dgl(x, device):
+    def dense_to_dgl(x, device, n):
         pass
 
     @staticmethod
     @abc.abstractmethod
-    def dense_to_networkx(x, device=None):
+    def dense_to_networkx(x, device=None, n=None):
         pass
 
-    def to_graph(self, x=None, framework='networkx', device='cpu'):
+    def to_graph(self, x=None, framework='networkx', device='cpu', n=0):
 
         if x is None:
             x = self.X
@@ -465,7 +465,7 @@ class Generator(metaclass=abc.ABCMeta):
                               'DGL will be used instead.')
 
             # call private method
-            self.graph = getattr(self, 'dense_to_{}'.format(framework))(x, device)
+            self.graph = getattr(self, 'dense_to_{}'.format(framework))(x, device, n)
 
             return self.graph
 

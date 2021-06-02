@@ -206,7 +206,7 @@ class TriclusterGenerator(Generator):
         return concatenate(tensors, axis=1)
 
     @staticmethod
-    def dense_to_dgl(x, device):
+    def dense_to_dgl(x, device, n=0):
 
         # set (u,v)
 
@@ -237,12 +237,12 @@ class TriclusterGenerator(Generator):
         G = dgl.to_simple(G)
 
         if device == 'gpu':
-            G = G.to('cuda')
+            G = G.to('cuda:{}'.format(n))
 
         return G
 
     @staticmethod
-    def dense_to_networkx(x, device=None):
+    def dense_to_networkx(x, device=None, n=None):
 
         G = nx.Graph()
 
