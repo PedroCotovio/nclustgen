@@ -1,3 +1,5 @@
+import networkx
+
 from nclustgen import \
     BiclusterGenerator as bg, \
     BiclusterGeneratorbyConfig as bgconfig, \
@@ -634,6 +636,7 @@ class BicsGenTest(TestCaseBase):
                 # assert class and define shape for networkx
                 self.assertTrue(isinstance(instance.graph, Graph))
                 shape = (len(instance.graph.nodes), len(instance.graph.edges))
+                self.assertTrue(networkx.is_bipartite(instance.graph))
 
             else:
 
@@ -1136,6 +1139,7 @@ class TricsGenTest(TestCaseBase):
                 except FileNotFoundError:
                     pass
 
+    # TODO check Bipartite
     def test_graph(self):
 
         datasets = ['Numeric', 'Numeric', 'Numeric',
@@ -1198,12 +1202,14 @@ class TricsGenTest(TestCaseBase):
                 # assert class and define shape for networkx
                 self.assertTrue(isinstance(instance.graph, Graph))
                 shape = (len(instance.graph.nodes), len(instance.graph.edges))
+                self.assertTrue(networkx.is_bipartite(instance.graph))
 
             else:
 
                 # assert class and  define shape for dgl
                 self.assertTrue(isinstance(instance.graph, dgl.DGLGraph))
                 shape = (instance.graph.num_nodes(), instance.graph.num_edges())
+                
 
                 if params[7] == 'gpu':
 
