@@ -246,10 +246,10 @@ class TriclusterGenerator(Generator):
 
         G = nx.Graph()
 
-        for cuda, axis in enumerate(['ctx', 'row', 'col']):
+        for n, axis in enumerate(['ctx', 'row', 'col']):
 
             G.add_nodes_from(
-                (('{}-{}'.format(axis, i), {'cluster': 0}) for i in range(x.shape[cuda])), bipartide=cuda)
+                (('{}-{}'.format(axis, i), {'cluster': 0}) for i in range(x.shape[n])), bipartite=n)
 
         edges = np.array(
             [[('row-{}'.format(i), 'col-{}'.format(j), elem),
@@ -258,7 +258,7 @@ class TriclusterGenerator(Generator):
              for z, ctx in enumerate(x) for i, row in enumerate(ctx) for j, elem in enumerate(row)]
         )
 
-        # reshape from (elements, cuda, edge) to (edges, edge)
+        # reshape from (elements, n, edge) to (edges, edge)
         edges = edges.reshape(edges.shape[0] * edges.shape[1], edges.shape[2])
 
         G.add_weighted_edges_from(edges)
