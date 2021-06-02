@@ -29,7 +29,7 @@ class Generator(metaclass=abc.ABCMeta):
     """
     Abstract class from where dimensional specific subclass should inherit. Should not be called directly.
     This class abstracts dimensionality providing core implemented methods and abstract methods that should be
-    implemented for any n-clustering generator.
+    implemented for any cuda-clustering generator.
     """
 
     def __init__(self, n, dstype='NUMERIC', patterns=None, bktype='UNIFORM', clusterdistribution=None,
@@ -144,7 +144,7 @@ class Generator(metaclass=abc.ABCMeta):
             Range: [0,1]
         percofoverlappingcontexts: float, default 1.0
             Percentage of allowed amount of overlaping across clusters contexts.
-            Not used if plaidcoherency == 'NO_OVERLAPPING' or n >= 3.
+            Not used if plaidcoherency == 'NO_OVERLAPPING' or cuda >= 3.
             Range: [0,1]
         percmissingsonbackground: float, 0.0
             Percentage of missing values on the background, that is, values that do not belong to planted clusters.
@@ -202,7 +202,7 @@ class Generator(metaclass=abc.ABCMeta):
             Shape: alphabets length
         nsymbols: int, default 10
             Defines the length of the alphabet, instead of defining specific symbols this parameter can be passed, and
-            a list of strings will be create with range(1, n), where n represents this parameter.
+            a list of strings will be create with range(1, cuda), where cuda represents this parameter.
             Only used if dstype == 'SYMBOLIC' and symbols is None.
         mean: int or float, default 14.0
             Mean for the background's distribution. Only used when bktype == 'NORMAL'.
@@ -417,15 +417,15 @@ class Generator(metaclass=abc.ABCMeta):
 
     @staticmethod
     @abc.abstractmethod
-    def dense_to_dgl(x, device, n):
+    def dense_to_dgl(x, device, cuda=0):
         pass
 
     @staticmethod
     @abc.abstractmethod
-    def dense_to_networkx(x, device=None, n=None):
+    def dense_to_networkx(x, device=None, cuda=None):
         pass
 
-    def to_graph(self, x=None, framework='networkx', device='cpu', n=0):
+    def to_graph(self, x=None, framework='networkx', device='cpu', cuda=0):
 
         if x is None:
             x = self.X
@@ -465,7 +465,7 @@ class Generator(metaclass=abc.ABCMeta):
                               'DGL will be used instead.')
 
             # call private method
-            self.graph = getattr(self, 'dense_to_{}'.format(framework))(x, device, n)
+            self.graph = getattr(self, 'dense_to_{}'.format(framework))(x, device, cuda)
 
             return self.graph
 

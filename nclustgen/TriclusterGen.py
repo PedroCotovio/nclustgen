@@ -55,7 +55,7 @@ class TriclusterGenerator(Generator):
         {'X': None, 'Y': None, 'background': ['UNIFORM'], 'clusterdistribution': [['UNIFORM', 4, 4], ['UNIFORM', 4, 4],
         ['UNIFORM', 4, 4]], 'contiguity': 'NONE', 'dstype': 'NUMERIC', 'errors': (0.0, 0.0, 0.0),
         'generatedDataset': None, 'graph': None, 'in_memory': 'True', 'maxclustsperoverlappedarea': 0,
-        'maxpercofoverlappingelements': 0.0, 'maxval': 10.0, 'minval': -10.0, 'missing': (0.0, 0.0), 'n': 3,
+        'maxpercofoverlappingelements': 0.0, 'maxval': 10.0, 'minval': -10.0, 'missing': (0.0, 0.0), 'cuda': 3,
         'noise': (0.0, 0.0, 0.0), 'patterns': [['CONSTANT', 'CONSTANT', 'CONSTANT'], ['CONSTANT', 'NONE', 'NONE']],
         'percofoverlappingclusts': 0.0, 'percofoverlappingcolumns': 1.0, 'percofoverlappingcontexts': 1.0,
         'percofoverlappingrows': 1.0, 'plaidcoherency': 'NO_OVERLAPPING', 'realval': True, 'seed': -1,
@@ -206,7 +206,7 @@ class TriclusterGenerator(Generator):
         return concatenate(tensors, axis=1)
 
     @staticmethod
-    def dense_to_dgl(x, device, n=0):
+    def dense_to_dgl(x, device, cuda=0):
 
         # set (u,v)
 
@@ -237,19 +237,19 @@ class TriclusterGenerator(Generator):
         G = dgl.to_simple(G)
 
         if device == 'gpu':
-            G = G.to('cuda:{}'.format(n))
+            G = G.to('cuda:{}'.format(cuda))
 
         return G
 
     @staticmethod
-    def dense_to_networkx(x, device=None, n=None):
+    def dense_to_networkx(x, device=None, cuda=None):
 
         G = nx.Graph()
 
-        for n, axis in enumerate(['ctx', 'row', 'col']):
+        for cuda, axis in enumerate(['ctx', 'row', 'col']):
 
             G.add_nodes_from(
-                (('{}-{}'.format(axis, i), {'cluster': 0}) for i in range(x.shape[n])), bipartide=n)
+                (('{}-{}'.format(axis, i), {'cluster': 0}) for i in range(x.shape[cuda])), bipartide=cuda)
 
         edges = np.array(
             [[('row-{}'.format(i), 'col-{}'.format(j), elem),
@@ -258,7 +258,7 @@ class TriclusterGenerator(Generator):
              for z, ctx in enumerate(x) for i, row in enumerate(ctx) for j, elem in enumerate(row)]
         )
 
-        # reshape from (elements, n, edge) to (edges, edge)
+        # reshape from (elements, cuda, edge) to (edges, edge)
         edges = edges.reshape(edges.shape[0] * edges.shape[1], edges.shape[2])
 
         G.add_weighted_edges_from(edges)

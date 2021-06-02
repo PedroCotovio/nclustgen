@@ -56,7 +56,7 @@ class BiclusterGenerator(Generator):
     {'X': None, 'Y': None, 'background': ['UNIFORM'], 'clusterdistribution': [['UNIFORM', 4, 4], ['UNIFORM', 4, 4]],
     'contiguity': 'NONE', 'dstype': 'NUMERIC', 'errors': (0.0, 0.0, 0.0), 'generatedDataset': None, 'graph': None,
     'in_memory': 'True', 'maxclustsperoverlappedarea': 0, 'maxpercofoverlappingelements': 0.0, 'maxval': 10.0,
-    'minval': -10.0, 'missing': (0.0, 0.0), 'n': 2, 'noise': (0.0, 0.0, 0.0),
+    'minval': -10.0, 'missing': (0.0, 0.0), 'cuda': 2, 'noise': (0.0, 0.0, 0.0),
     'patterns': [['CONSTANT', 'CONSTANT'], ['CONSTANT', 'NONE']], 'percofoverlappingclusts': 0.0,
     'percofoverlappingcolumns': 1.0, 'percofoverlappingcontexts': 1.0, 'percofoverlappingrows': 1.0,
     'plaidcoherency': 'NO_OVERLAPPING', 'realval': True, 'seed': -1, 'silenced': True, 'time_profile': None}
@@ -170,7 +170,7 @@ class BiclusterGenerator(Generator):
         return vstack(tensors)
 
     @staticmethod
-    def dense_to_dgl(x, device, n=0):
+    def dense_to_dgl(x, device, cuda=0):
 
         # set (u,v)
 
@@ -193,19 +193,19 @@ class BiclusterGenerator(Generator):
         G.nodes['col'].data['c'] = th.zeros(x.shape[1])
 
         if device == 'gpu':
-            G = G.to('cuda:{}'.format(n))
+            G = G.to('cuda:{}'.format(cuda))
 
         return G
 
     @staticmethod
-    def dense_to_networkx(x, device=None, n=None):
+    def dense_to_networkx(x, device=None, cuda=None):
 
         G = nx.Graph()
 
-        for n, axis in enumerate(['row', 'col']):
+        for cuda, axis in enumerate(['row', 'col']):
 
             G.add_nodes_from(
-                (('{}-{}'.format(axis, i), {'cluster': 0}) for i in range(x.shape[n])), bipartide=n)
+                (('{}-{}'.format(axis, i), {'cluster': 0}) for i in range(x.shape[cuda])), bipartide=cuda)
 
         G.add_weighted_edges_from(
             [('row-{}'.format(i), 'col-{}'.format(j), elem)
