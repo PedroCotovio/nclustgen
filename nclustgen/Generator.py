@@ -596,7 +596,7 @@ class Generator(metaclass=abc.ABCMeta):
     def dense_to_dgl(x, device, cuda=0):
 
         """
-        Extracts a partide dgl graph from numpy array
+        Extracts a partite dgl graph from numpy array
 
         Parameters
         ----------
@@ -610,7 +610,7 @@ class Generator(metaclass=abc.ABCMeta):
         Returns
         -------
         heterograph object
-            numpy array as n-partide dgl graph, where n==dim.
+            numpy array as n-partite dgl graph, where n==dim.
         """
         pass
 
@@ -619,7 +619,7 @@ class Generator(metaclass=abc.ABCMeta):
     def dense_to_networkx(x, **kwargs):
 
         """
-        Extracts a partide networkx graph from numpy array
+        Extracts a partite networkx graph from numpy array
 
         Parameters
         ----------
@@ -631,14 +631,14 @@ class Generator(metaclass=abc.ABCMeta):
         Returns
         -------
         Graph object
-            numpy array as n-partide networkx graph, where n==dim.
+            numpy array as n-partite networkx graph, where n==dim.
         """
         pass
 
     def to_graph(self, x=None, framework='networkx', device='cpu', cuda=0):
 
         """
-        Returns a n-partide graph, where n==dim.
+        Returns a n-partite graph, where n==dim.
 
         Parameters
         ----------
@@ -654,7 +654,7 @@ class Generator(metaclass=abc.ABCMeta):
         Returns
         -------
         Graph object
-            N-partide graph, where n==dim.
+            N-partite graph, where n==dim.
 
         Examples
         --------
