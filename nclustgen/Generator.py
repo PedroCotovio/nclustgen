@@ -43,7 +43,6 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Parameters
         ----------
-
         n: int, internal
             Determines dimensionality (e.g. Bi/Tri clustering). Should only be used by subclasses.
         dstype: {'NUMERIC', 'SYMBOLIC'}, default 'Numeric'
@@ -315,6 +314,16 @@ class Generator(metaclass=abc.ABCMeta):
 
     def start_silencing(self, silence=None):
 
+        """
+        Starts silencing all java prints to terminal.
+
+        Parameters
+        ----------
+        silence: bool, default None
+            If True all java prints to terminal are ignored.
+            If None, defaults to class attribute's value.
+        """
+
         if silence is None:
             silence = self.silenced
 
@@ -322,6 +331,10 @@ class Generator(metaclass=abc.ABCMeta):
             System.setOut(PrintStream('logs'))
 
     def stop_silencing(self):
+
+        """
+        Stops silencing all java prints to terminal.
+        """
 
         System.setOut(self._stdout)
 
@@ -332,6 +345,27 @@ class Generator(metaclass=abc.ABCMeta):
 
     def get_params(self):
 
+        """
+        Returns the classes attributes.
+
+        Returns
+        -------
+        dict
+            Values of class attributes.
+
+        Examples
+        --------
+        >>> generator = BiclusterGenerator()
+        >>> generator.get_params()
+        {'X': None, 'Y': None, 'background': ['UNIFORM'], 'clusterdistribution': [['UNIFORM', 4.0, 4.0],
+        ['UNIFORM', 4.0, 4.0]], 'contiguity': 'NONE', 'dstype': 'NUMERIC', 'errors': (0.0, 0.0, 0.0),
+        'generatedDataset': None, 'graph': None, 'in_memory': None, 'maxclustsperoverlappedarea': 0,
+        'maxpercofoverlappingelements': 0.0, 'maxval': 10.0, 'minval': -10.0, 'missing': (0.0, 0.0),
+        'noise': (0.0, 0.0, 0.0), 'patterns': [['CONSTANT', 'CONSTANT']], 'percofoverlappingclusts': 0.0,
+        'percofoverlappingcolumns': 1.0, 'percofoverlappingcontexts': 1.0, 'percofoverlappingrows': 1.0,
+        'plaidcoherency': 'NO_OVERLAPPING', 'realval': True, 'seed': -1, 'silenced': False, 'time_profile': None}
+        """
+
         attributes = inspect.getmembers(self, lambda a: not (inspect.isroutine(a)))
 
         return {a[0]: a[1]
@@ -340,43 +374,185 @@ class Generator(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def initialize_seed(self):
+
+        """
+        Uses seed attribute to initialize random object.
+        """
         pass
 
     @abc.abstractmethod
     def build_background(self):
+
+        """
+        Builds a Background object, using the background attribute.
+
+        Returns
+        ------
+        Background object
+            Dataset's background.
+        """
         pass
 
     @abc.abstractmethod
     def build_generator(self, class_call, params, contexts_index):
+        """
+        Builds the (Java)Generator object.
+
+        Parameters
+        ----------
+        class_call: {'NumericDatasetGenerator', 'SymbolicDatasetGenerator'}
+            Name of generator to initialize.
+        params: list
+            Parameters to initialize generator.
+        contexts_index: int
+            Position of the ncontext param. Only used when dimensionality < 2.
+
+        Returns
+        -------
+        (Java)Generator object
+            Generator for data generation.
+        """
         pass
 
     @abc.abstractmethod
     def build_patterns(self):
+
+        """
+        Builds a list of pattern objects, using the patterns, time_profile, and dstype attributes.
+
+        Returns
+        -------
+        ArrayList
+            List of pattern objects.
+        """
         pass
 
     @abc.abstractmethod
     def build_structure(self):
+
+        """
+        Builds a Structure object, using the clusterdistribution and contiguity attributes.
+
+        Returns
+        -------
+        Structure object
+            Dataset's structure.
+        """
         pass
 
     @abc.abstractmethod
     def build_overlapping(self):
+
+        """
+        Builds an OverlappingSettings object.
+
+        Returns
+        -------
+        OverlappingSettings object
+            Dataset's overlapping settings.
+        """
         pass
 
     @abc.abstractmethod
     def save(self, file_name='example_dataset', path=None, single_file=None):
+
+        """
+        Saves data files to chosen path.
+
+        Parameters
+        ----------
+        file_name: str, default 'example_dataset'
+            Saved files prefix.
+        path: str, default None
+            Path to save files. If None then files are saved in the current working directory.
+        single_file: Bool, default None.
+            If False dataset is saved in multiple data files. If None then if the dataset's size is larger then 10**5
+            it defaults to False, else True.
+
+        Examples
+        --------
+        >>> generator = BiclusterGenerator(silence=True)
+        >>> generator.generate()
+        >>> generator.save(file_name='BicFiles', single_file=False)
+        """
         pass
 
     @staticmethod
     @abc.abstractmethod
     def java_to_numpy(generatedDataset):
+
+        """
+        Extracts numpy array from Dataset object.
+
+        Parameters
+        ----------
+        generatedDataset: Dataset object
+            Generated dataset (java object).
+
+        Returns
+        -------
+        numpy array
+            Generated dataset as numpy array (dense tensor).
+        """
         pass
 
     @staticmethod
     @abc.abstractmethod
     def java_to_sparse(generatedDataset):
+
+        """
+        Extracts sparce tensor from Dataset object.
+
+        Parameters
+        ----------
+        generatedDataset: Dataset object
+            Generated dataset (java object).
+
+        Returns
+        -------
+        csr_matrix or COO tensor
+            Generated dataset as csr_matrix or COO tensor (sparse tensor).
+            If dim = 2 then returns csr_matrix (from scipy.sparse).
+            Else returns a COO tensor (from sparse).
+        """
         pass
 
     def to_tensor(self, generatedDataset=None, in_memory=None, keys=None):
+
+        """
+        Returns generated dataset as somekind of tensor and hidden cluster labels.
+
+        Parameters
+        ----------
+        generatedDataset: Dataset object
+            Generated dataset (java object).
+        in_memory: bool, default None
+            Determines if generated datasets return dense or sparse matrix (True/False).
+            If None then if the generated dataset's size is larger then 10**5 it defaults to sparse, else outputs dense.
+        keys: list, default ['X', 'Y', 'Z']
+            Axis keys. Do not overwrite, unless you are using a different dataset object.
+
+        Returns
+        -------
+        dense or sparse tensor
+            Generated dataset as tensor.
+        list
+            Hidden cluster labels.
+
+        Examples
+        --------
+        >>> generator = BiclusterGenerator(silence=True)
+        >>> generator.generate(no_return=True)
+        >>> x, y = generator.to_tensor(generatedDataset=generator.generatedDataset, in_memory=True)
+        >>> x
+        array([[-4.15,  9.88,  7.69, ...,  3.68,  1.72, -6.95],
+               [ 7.37,  2.63, -0.13, ..., -2.53,  2.03,  8.03],
+               [ 4.28,  0.36,  8.66, ..., -1.11,  6.28, -1.03],
+               ...,
+               [-9.25, -9.15, -4.68, ...,  2.06, -6.19,  2.54],
+               [ 2.63, -3.03,  3.8 , ...,  4.13, -4.17,  7.68],
+               [-1.98,  8.02,  1.89, ...,  3.59,  4.27,  6.4 ]])
+        """
 
         self.start_silencing()
 
@@ -418,14 +594,77 @@ class Generator(metaclass=abc.ABCMeta):
     @staticmethod
     @abc.abstractmethod
     def dense_to_dgl(x, device, cuda=0):
+
+        """
+        Extracts a partide dgl graph from numpy array
+
+        Parameters
+        ----------
+        x: numpy array
+            Data array.
+        device: {'cpu', 'gpu'}
+            Type of device for storing the tensor.
+        cuda: int, default 0
+            Index of cuda device to use. Only used if device==True.
+
+        Returns
+        -------
+        heterograph object
+            numpy array as n-partide dgl graph, where n==dim.
+        """
         pass
 
     @staticmethod
     @abc.abstractmethod
     def dense_to_networkx(x, **kwargs):
+
+        """
+        Extracts a partide networkx graph from numpy array
+
+        Parameters
+        ----------
+        x: numpy array
+            Data array.
+        **kwargs: any, default None
+            Additional keywords have no effect but might be accepted for compatibility.
+
+        Returns
+        -------
+        Graph object
+            numpy array as n-partide networkx graph, where n==dim.
+        """
         pass
 
     def to_graph(self, x=None, framework='networkx', device='cpu', cuda=0):
+
+        """
+        Returns a n-partide graph, where n==dim.
+
+        Parameters
+        ----------
+        x: numpy array
+            Data array.
+        framework: {networkx, dgl}, default 'networkx'
+            Backend to use to build graph.
+        device: {'cpu', 'gpu'}, default 'cpu'
+            Type of device for storing the tensor. Only used if framework==dgl.
+        cuda: int, default 0
+            Index of cuda device to use. Only used if device==True and framework==dgl.
+
+        Returns
+        -------
+        Graph object
+            N-partide graph, where n==dim.
+
+        Examples
+        --------
+        >>> generator = BiclusterGenerator(silence=True)
+        >>> X, y = generator.generate()
+        >>> g = generator.to_graph(X, framework='dgl')
+        Graph(num_nodes={'col': 100, 'row': 100},
+              num_edges={('row', 'elem', 'col'): 10000},
+              metagraph=[('row', 'col', 'elem')])
+        """
 
         if x is None:
             x = self.X
@@ -475,6 +714,32 @@ class Generator(metaclass=abc.ABCMeta):
 
     def get_dstype_vars(self, nrows, ncols, ncontexts, nclusters, background):
 
+        """
+        Prepares parameters to initialize the generator.
+
+        Parameters
+        ----------
+        nrows: int
+            Number of rows in generated dataset.
+        ncols: int
+            Number of columns in generated dataset.
+        ncontexts: int
+            Number of contexts in generated dataset.
+        nclusters: int
+            Number of clusters in generated dataset.
+        background: Background object
+            Dataset's background.
+
+        Returns
+        -------
+        str
+            Name of generator to initialize.
+        list
+            Parameters to initialize generator.
+        int
+            Position of the ncontext param.
+        """
+
         params = [nrows, ncols, ncontexts, nclusters, background]
 
         if self.dstype == 'NUMERIC':
@@ -493,6 +758,24 @@ class Generator(metaclass=abc.ABCMeta):
         return class_call, params, contexts_index
 
     def asses_memory(self, in_memory=None, **kwargs):
+
+        """
+        Returns True if dataset should be saved in memory.
+
+        Parameters
+        ----------
+        in_memory: bool, default None
+            Determines if dataset should be saved in memory.
+            If None then if the gends > 10**5 it defaults to False.
+        gends: Dataset object, default None
+            Generated Dataset (java object).
+            Only used if in_memory is None, in that case gends cannot be None.
+
+        Returns
+        -------
+        bool
+            True if dataset should be saved in memory, else False.
+        """
 
         if in_memory is not None:
             return in_memory
@@ -513,11 +796,62 @@ class Generator(metaclass=abc.ABCMeta):
 
     def plant_quality_settings(self, generatedDataset):
 
+        """
+        Plants quality settings on generated dataset
+
+        Parameters
+        ----------
+        generatedDataset: Dataset object
+            Generated dataset (java object).
+        """
+
         generatedDataset.plantMissingElements(*self.missing)
         generatedDataset.plantNoisyElements(*self.noise)
         generatedDataset.plantErrors(*self.errors)
 
     def generate(self, nrows=100, ncols=100, ncontexts=3, nclusters=1, no_return=False, **kwargs):
+
+        """
+        Generates dataset, and may return somekind of tensor and hidden cluster labels.
+
+        Parameters
+        ----------
+        nrows: int, default 100
+            Number of rows in generated dataset.
+        ncols: int, default 100
+            Number of columns in generated dataset.
+        ncontexts: int, default 3
+            Number of contexts in generated dataset.
+            Only used if dim >= 3.
+        nclusters: int, default 1
+            Number of clusters in generated dataset.
+        no_return: bool, default False
+            If True method returns None.
+        **kwargs: any, default None
+            Additional keywords that are passed on.
+
+        Returns
+        -------
+        dense or sparse tensor
+            Generated dataset as tensor.
+        list
+            Hidden cluster labels.
+        None
+            If no_return==True.
+
+        Examples
+        --------
+        >>> gen = BiclusterGenerator(silence=True)
+        >>> x, y = gen.generate(nrows=100, ncols=200, nclusters=20, in_memory=True)
+        >>> x
+        array([[-7.36,  4.88,  8.42, ..., -5.04, -4.93,  6.35],
+               [-7.1 ,  0.47, -2.58, ..., -3.03,  0.42,  8.76],
+               [-8.08,  4.19,  2.53, ..., -4.3 ,  7.54,  0.94],
+               ...,
+               [-0.52,  0.38,  6.98, ..., -7.6 ,  5.71,  9.24],
+               [-1.28, -3.55, -3.13, ..., -4.17, -6.05, -9.87],
+               [-5.79, -6.05, -2.24, ...,  1.88,  1.97,  6.05]])
+        """
 
         self.start_silencing()
 
@@ -559,6 +893,11 @@ class Generator(metaclass=abc.ABCMeta):
 
     @staticmethod
     def shutdownJVM():
+
+        """
+        Shuts down JVM.
+        NOTICE if the JVM is shutdown it cannot be restarted on the same session.
+        """
 
         try:
             jpype.shutdownJVM()
