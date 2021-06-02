@@ -198,7 +198,7 @@ class BiclusterGenerator(Generator):
         return G
 
     @staticmethod
-    def dense_to_networkx(x, device=None, cuda=None):
+    def dense_to_networkx(x, **kwargs):
 
         G = nx.Graph()
 

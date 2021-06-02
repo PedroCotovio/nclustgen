@@ -422,7 +422,7 @@ class Generator(metaclass=abc.ABCMeta):
 
     @staticmethod
     @abc.abstractmethod
-    def dense_to_networkx(x, device=None, cuda=None):
+    def dense_to_networkx(x, **kwargs):
         pass
 
     def to_graph(self, x=None, framework='networkx', device='cpu', cuda=0):
@@ -465,7 +465,7 @@ class Generator(metaclass=abc.ABCMeta):
                               'DGL will be used instead.')
 
             # call private method
-            self.graph = getattr(self, 'dense_to_{}'.format(framework))(x, device, cuda)
+            self.graph = getattr(self, 'dense_to_{}'.format(framework))(x, device=device, cuda=cuda)
 
             return self.graph
 
@@ -555,7 +555,7 @@ class Generator(metaclass=abc.ABCMeta):
         if no_return:
             return None, None
 
-        return self.to_tensor(generatedDataset, in_memory=kwargs.get('in_memory'))
+        return self.to_tensor(generatedDataset, **kwargs)
 
     @staticmethod
     def shutdownJVM():
