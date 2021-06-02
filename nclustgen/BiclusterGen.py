@@ -49,7 +49,8 @@ class BiclusterGenerator(Generator):
     ...     dstype='NUMERIC',
     ...     patterns=[['CONSTANT', 'CONSTANT'], ['CONSTANT', 'NONE']],
     ...     bktype='UNIFORM',
-    ...     in_memory='True'
+    ...     in_memory=True,
+    ...     silence=True
     ... )
     >>> generator.get_params()
     {'X': None, 'Y': None, 'background': ['UNIFORM'], 'clusterdistribution': [['UNIFORM', 4, 4], ['UNIFORM', 4, 4]],
@@ -58,45 +59,8 @@ class BiclusterGenerator(Generator):
     'minval': -10.0, 'missing': (0.0, 0.0), 'n': 2, 'noise': (0.0, 0.0, 0.0),
     'patterns': [['CONSTANT', 'CONSTANT'], ['CONSTANT', 'NONE']], 'percofoverlappingclusts': 0.0,
     'percofoverlappingcolumns': 1.0, 'percofoverlappingcontexts': 1.0, 'percofoverlappingrows': 1.0,
-    'plaidcoherency': 'NO_OVERLAPPING', 'realval': True, 'seed': -1, 'silenced': False, 'time_profile': None}
+    'plaidcoherency': 'NO_OVERLAPPING', 'realval': True, 'seed': -1, 'silenced': True, 'time_profile': None}
     >>> x, y = generator.generate(nrows=50, ncols=100, nclusters=3)
-    Generating bicluster 1 of 3...
-    Bic 1 - Generating columns...
-    Columns: 4
-    Bic 1 - Generating rows...
-    Rows: 4
-    Bic 1 - Has space, lets plant the patterns
-    Bic 1 - planting the bic
-    ##### Heap utilization statistics [MB] #####
-    Used Memory:20
-    Free Memory:19
-    Total Memory:40
-    Max Memory:8192
-    Generating bicluster 2 of 3...
-    Bic 2 - Generating columns...
-    Columns: 4
-    Bic 2 - Generating rows...
-    Rows: 4
-    Bic 2 - Has space, lets plant the patterns
-    Bic 2 - planting the bic
-    ##### Heap utilization statistics [MB] #####
-    Used Memory:20
-    Free Memory:19
-    Total Memory:40
-    Max Memory:8192
-    Generating bicluster 3 of 3...
-    Bic 3 - Generating columns...
-    Columns: 4
-    Bic 3 - Generating rows...
-    Rows: 4
-    Bic 3 - Has space, lets plant the patterns
-    Bic 3 - planting the bic
-    ##### Heap utilization statistics [MB] #####
-    Used Memory:20
-    Free Memory:19
-    Total Memory:40
-    Max Memory:8192
-    Writing dataset file: 0.0%
     >>> x
     array([[-4.43, -8.2 , -0.34, ...,  8.85,  9.24,  6.13],
            [ 9.28,  9.45,  5.46, ...,  7.83,  8.67, -6.48],
@@ -113,20 +77,6 @@ class BiclusterGenerator(Generator):
           num_edges={('row', 'elem', 'col'): 5000},
           metagraph=[('row', 'col', 'elem')])
     >>> generator.save(file_name='example', single_file=True)
-    numWritting output...
-    Biclusters txt file written!
-    Biclusters JSON file written!
-    Writing dataset file: 0.0%
-    Writing dataset file: 10.0%
-    Writing dataset file: 20.0%
-    Writing dataset file: 30.0%
-    Writing dataset file: 40.0%
-    Writing dataset file: 50.0%
-    Writing dataset file: 60.0%
-    Writing dataset file: 70.0%
-    Writing dataset file: 80.0%
-    Writing dataset file: 90.0%
-    Dataset tsv file written!
     """
 
     def __init__(self, *args, **kwargs):

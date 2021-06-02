@@ -48,7 +48,8 @@ class TriclusterGenerator(Generator):
         ...     dstype='NUMERIC',
         ...     patterns=[['CONSTANT', 'CONSTANT', 'CONSTANT'], ['CONSTANT', 'NONE', 'NONE']],
         ...     bktype='UNIFORM',
-        ...     in_memory='True'
+        ...     in_memory=True,
+        ...     silence=True
         ... )
         >>> generator.get_params()
         {'X': None, 'Y': None, 'background': ['UNIFORM'], 'clusterdistribution': [['UNIFORM', 4, 4], ['UNIFORM', 4, 4],
@@ -60,61 +61,6 @@ class TriclusterGenerator(Generator):
         'percofoverlappingrows': 1.0, 'plaidcoherency': 'NO_OVERLAPPING', 'realval': True, 'seed': -1,
         'silenced': False, 'time_profile': None}
         >>> x, y = generator.generate(nrows=50, ncols=100, ncontexts=5, nclusters=3)
-        Generating tricluster 1 of 3...
-        Tric 1 - Generating contexts...
-        Contexts: 4
-        Tric 1 - Generating columns...
-        Columns: 4
-        Tric 1 - Generating rows...
-        Rows: 4
-        Tric 1 - Has space, lets plant the patterns
-        Tric 1 - planting the tric
-        Planting on ctx 0 row 0
-        Planting on ctx 1 row 0
-        Planting on ctx 2 row 0
-        Planting on ctx 3 row 0
-        ##### Heap utilization statistics [MB] #####
-        Used Memory:20
-        Free Memory:19
-        Total Memory:40
-        Max Memory:8192
-        Generating tricluster 2 of 3...
-        Tric 2 - Generating contexts...
-        Contexts: 4
-        Tric 2 - Generating columns...
-        Columns: 4
-        Tric 2 - Generating rows...
-        Rows: 4
-        Tric 2 - Has space, lets plant the patterns
-        Tric 2 - planting the tric
-        Planting on ctx 0 row 0
-        Planting on ctx 1 row 0
-        Planting on ctx 2 row 0
-        Planting on ctx 3 row 0
-        ##### Heap utilization statistics [MB] #####
-        Used Memory:20
-        Free Memory:19
-        Total Memory:40
-        Max Memory:8192
-        Generating tricluster 3 of 3...
-        Tric 3 - Generating contexts...
-        Contexts: 4
-        Tric 3 - Generating columns...
-        Columns: 4
-        Tric 3 - Generating rows...
-        Rows: 4
-        Tric 3 - Has space, lets plant the patterns
-        Tric 3 - planting the tric
-        Planting on ctx 0 row 0
-        Planting on ctx 1 row 0
-        Planting on ctx 2 row 0
-        Planting on ctx 3 row 0
-        ##### Heap utilization statistics [MB] #####
-        Used Memory:20
-        Free Memory:19
-        Total Memory:40
-        Max Memory:8192
-        Writing dataset file: 0.0%
         >>> x
         array([[[-1.29, -4.92, -2.49, ..., -9.17, -5.19,  6.66],
                 [ 5.41, -3.04, -1.58, ..., -3.44,  1.99,  9.84],
@@ -160,20 +106,6 @@ class TriclusterGenerator(Generator):
               num_edges={('col', 'elem', 'ctx'): 500, ('row', 'elem', 'col'): 5000, ('row', 'elem', 'ctx'): 250},
               metagraph=[('col', 'ctx', 'elem'), ('row', 'col', 'elem'), ('row', 'ctx', 'elem')])
         >>> generator.save(file_name='example', single_file=True)
-        Writting output...
-        Triclusters txt file written!
-        Triclusters JSON file written!
-        Writing dataset file: 0.0%
-        Writing dataset file: 10.0%
-        Writing dataset file: 20.0%
-        Writing dataset file: 30.0%
-        Writing dataset file: 40.0%
-        Writing dataset file: 50.0%
-        Writing dataset file: 60.0%
-        Writing dataset file: 70.0%
-        Writing dataset file: 80.0%
-        Writing dataset file: 90.0%
-        Dataset tsv file written!
         """
 
     def __init__(self, *args, **kwargs):
