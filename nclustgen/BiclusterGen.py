@@ -77,6 +77,7 @@ class BiclusterGenerator(Generator):
           num_edges={('row', 'elem', 'col'): 5000},
           metagraph=[('row', 'col', 'elem')])
     >>> generator.save(file_name='example', single_file=True)
+
     """
 
     def __init__(self, *args, **kwargs):
@@ -202,10 +203,10 @@ class BiclusterGenerator(Generator):
 
         G = nx.Graph()
 
-        for cuda, axis in enumerate(['row', 'col']):
+        for n, axis in enumerate(['row', 'col']):
 
             G.add_nodes_from(
-                (('{}-{}'.format(axis, i), {'cluster': 0}) for i in range(x.shape[cuda])), bipartide=cuda)
+                (('{}-{}'.format(axis, i), {'cluster': 0}) for i in range(x.shape[n])), bipartite=n)
 
         G.add_weighted_edges_from(
             [('row-{}'.format(i), 'col-{}'.format(j), elem)

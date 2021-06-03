@@ -29,7 +29,7 @@ class Generator(metaclass=abc.ABCMeta):
     """
     Abstract class from where dimensional specific subclass should inherit. Should not be called directly.
     This class abstracts dimensionality providing core implemented methods and abstract methods that should be
-    implemented for any cuda-clustering generator.
+    implemented for any n-clustering generator.
     """
 
     def __init__(self, n, dstype='NUMERIC', patterns=None, bktype='UNIFORM', clusterdistribution=None,
@@ -49,64 +49,90 @@ class Generator(metaclass=abc.ABCMeta):
             Type of Dataset to be generated, numeric or symbolic(categorical).
         patterns: list or array, default [['CONSTANT', 'CONSTANT']]
             Defines the type of patterns that will be hidden in the data.
-            Shape: number of patterns, number of dimensions
+            Shape: (number of patterns, number of dimensions)
             Patterns_Set: {CONSTANT, ADDITIVE, MULTIPLICATIVE, ORDER_PRESERVING, NONE}
             Numeric_Patterns_Set: {CONSTANT, ADDITIVE, MULTIPLICATIVE, ORDER_PRESERVING, NONE}
             Symbolic_Patterns_Set: {CONSTANT, ORDER_PRESERVING, NONE}
-            2D_Numeric_Patterns_Combinations:
-                [['Order Preserving', 'None'],
-                ['None', 'Order Preserving'],
-                ['Constant', 'Constant'],
-                ['None', 'Constant'],
-                ['Constant', 'None'],
-                ['Additive', 'Additive'],
-                ['Constant', 'Additive'],
-                ['Additive', 'Constant'],
-                ['Multiplicative', 'Multiplicative'],
-                ['Constant', 'Multiplicative'],
-                ['Multiplicative', 'Constant']]
-            2D_Symbolic_Patterns_Combinations:
-                [['Order Preserving', 'None'],
-                ['None', 'Order Preserving'],
-                ['Constant', 'Constant'],
-                ['None', 'Constant'],
-                ['Constant', 'None']]
-            3D_Numeric_Patterns_Combinations:
-            [['Order Preserving', 'None', 'None'],
-            ['None', 'Order Preserving', 'None'],
-            ['None', 'None', 'Order Preserving'],
-            ['Constant', 'Constant', 'Constant'],
-            ['None', 'Constant', 'Constant'],
-            ['Constant', 'Constant', 'None'],
-            ['Constant', 'None', 'Constant'],
-            ['Constant', 'None', 'None'],
-            ['None', 'Constant', 'None'],
-            ['None', 'None', 'Constant'],
-            ['Additive', 'Additive', 'Additive'],
-            ['Additive', 'Additive', 'Constant'],
-            ['Constant', 'Additive', 'Additive'],
-            ['Additive', 'Constant', 'Additive'],
-            ['Additive', 'Constant', 'Constant'],
-            ['Constant', 'Additive', 'Constant'],
-            ['Constant', 'Constant', 'Additive'],
-            ['Multiplicative', 'Multiplicative', 'Multiplicative'],
-            ['Multiplicative', 'Multiplicative', 'Constant'],
-            ['Constant', 'Multiplicative', 'Multiplicative'],
-            ['Multiplicative', 'Constant', 'Multiplicative'],
-            ['Multiplicative', 'Constant', 'Constant'],
-            ['Constant', 'Multiplicative', 'Constant'],
-            ['Constant', 'Constant', 'Multiplicative']]
-            3D_Symbolic_Patterns_Combinations:
-            [['Order Preserving', 'None', 'None'],
-            ['None', 'Order Preserving', 'None'],
-            ['None', 'None', 'Order Preserving'],
-            ['Constant', 'Constant', 'Constant'],
-            ['None', 'Constant', 'Constant'],
-            ['Constant', 'Constant', 'None'],
-            ['Constant', 'None', 'Constant'],
-            ['Constant', 'None', 'None'],
-            ['None', 'Constant', 'None'],
-            ['None', 'None', 'Constant']]
+            Pattern_Combinations:
+
+                =========== ====================================
+                    2D Numeric Patterns Possible Combinations
+                ------------------------------------------------
+                index       pattern combination
+                =========== ====================================
+                0           ['Order Preserving', 'None']
+                1           ['None', 'Order Preserving']
+                2           ['Constant', 'Constant']
+                3           ['None', 'Constant']
+                4           ['Constant', 'None']
+                5           ['Additive', 'Additive']
+                6           ['Constant', 'Additive']
+                7           ['Additive', 'Constant']
+                8           ['Multiplicative', 'Multiplicative']
+                9           ['Constant', 'Multiplicative']
+                10          ['Multiplicative', 'Constant']
+                =========== ====================================
+
+                =========== ====================================
+                    2D Symbolic Patterns Possible Combinations
+                ------------------------------------------------
+                index       pattern combination
+                =========== ====================================
+                0           ['Order Preserving', 'None']
+                1           ['None', 'Order Preserving']
+                2           ['Constant', 'Constant']
+                3           ['None', 'Constant']
+                4           ['Constant', 'None']
+                =========== ====================================
+
+                =========== ======================================================
+                            3D Numeric Patterns Possible Combinations
+                ------------------------------------------------------------------
+                index       pattern combination
+                =========== ======================================================
+                0           ['Order Preserving', 'None', 'None']
+                1           ['None', 'Order Preserving', 'None']
+                2           ['None', 'None', 'Order Preserving']
+                3           ['Constant', 'Constant', 'Constant']
+                4           ['None', 'Constant', 'Constant']
+                5           ['Constant', 'Constant', 'None']
+                6           ['Constant', 'None', 'Constant']
+                7           ['Constant', 'None', 'None']
+                8           ['None', 'Constant', 'None']
+                9           ['None', 'None', 'Constant']
+                10          ['Additive', 'Additive', 'Additive']
+                11          ['Additive', 'Additive', 'Constant']
+                12          ['Constant', 'Additive', 'Additive']
+                13          ['Additive', 'Constant', 'Additive']
+                14          ['Additive', 'Constant', 'Constant']
+                15          ['Constant', 'Additive', 'Constant']
+                16          ['Constant', 'Constant', 'Additive']
+                17          ['Multiplicative', 'Multiplicative', 'Multiplicative']
+                18          ['Multiplicative', 'Multiplicative', 'Constant']
+                19          ['Constant', 'Multiplicative', 'Multiplicative']
+                20          ['Multiplicative', 'Constant', 'Multiplicative']
+                21          ['Multiplicative', 'Constant', 'Constant']
+                22          ['Constant', 'Multiplicative', 'Constant']
+                23          ['Constant', 'Constant', 'Multiplicative']
+                =========== ======================================================
+
+                =========== ======================================================
+                            3D Numeric Patterns Possible Combinations
+                ------------------------------------------------------------------
+                index       pattern combination
+                =========== ======================================================
+                0           ['Order Preserving', 'None', 'None']
+                1           ['None', 'Order Preserving', 'None']
+                2           ['None', 'None', 'Order Preserving']
+                3           ['Constant', 'Constant', 'Constant']
+                4           ['None', 'Constant', 'Constant']
+                5           ['Constant', 'Constant', 'None']
+                6           ['Constant', 'None', 'Constant']
+                7           ['Constant', 'None', 'None']
+                8           ['None', 'Constant', 'None']
+                9           ['None', 'None', 'Constant']
+                =========== ======================================================
+
         bktype: {'NORMAL', 'UNIFORM', 'DISCRETE', 'MISSING'}, default 'UNIFORM'
             Determines the distribution used to generate the background values.
         clusterdistribution: list or array, default [['UNIFORM', 4.0, 4.0], ['UNIFORM', 4.0, 4.0]]
@@ -364,6 +390,7 @@ class Generator(metaclass=abc.ABCMeta):
         'noise': (0.0, 0.0, 0.0), 'patterns': [['CONSTANT', 'CONSTANT']], 'percofoverlappingclusts': 0.0,
         'percofoverlappingcolumns': 1.0, 'percofoverlappingcontexts': 1.0, 'percofoverlappingrows': 1.0,
         'plaidcoherency': 'NO_OVERLAPPING', 'realval': True, 'seed': -1, 'silenced': False, 'time_profile': None}
+
         """
 
         attributes = inspect.getmembers(self, lambda a: not (inspect.isroutine(a)))
@@ -474,6 +501,7 @@ class Generator(metaclass=abc.ABCMeta):
         >>> generator = BiclusterGenerator(silence=True)
         >>> generator.generate()
         >>> generator.save(file_name='BicFiles', single_file=False)
+
         """
         pass
 
@@ -493,6 +521,7 @@ class Generator(metaclass=abc.ABCMeta):
         -------
         numpy array
             Generated dataset as numpy array (dense tensor).
+            Shape: (ncontexts, nrows, ncols) or (nrows, ncols)
         """
         pass
 
@@ -514,6 +543,7 @@ class Generator(metaclass=abc.ABCMeta):
             Generated dataset as csr_matrix or COO tensor (sparse tensor).
             If dim = 2 then returns csr_matrix (from scipy.sparse).
             Else returns a COO tensor (from sparse).
+            Shape: (ncontexts, nrows, ncols) or (nrows, ncols)
         """
         pass
 
@@ -536,8 +566,10 @@ class Generator(metaclass=abc.ABCMeta):
         -------
         dense or sparse tensor
             Generated dataset as tensor.
+            Shape: (ncontexts, nrows, ncols) or (nrows, ncols)
         list
             Hidden cluster labels.
+            Shape: (nclusters, any)
 
         Examples
         --------
@@ -552,6 +584,7 @@ class Generator(metaclass=abc.ABCMeta):
                [-9.25, -9.15, -4.68, ...,  2.06, -6.19,  2.54],
                [ 2.63, -3.03,  3.8 , ...,  4.13, -4.17,  7.68],
                [-1.98,  8.02,  1.89, ...,  3.59,  4.27,  6.4 ]])
+
         """
 
         self.start_silencing()
@@ -596,7 +629,7 @@ class Generator(metaclass=abc.ABCMeta):
     def dense_to_dgl(x, device, cuda=0):
 
         """
-        Extracts a partide dgl graph from numpy array
+        Extracts a partite dgl graph from numpy array
 
         Parameters
         ----------
@@ -610,7 +643,9 @@ class Generator(metaclass=abc.ABCMeta):
         Returns
         -------
         heterograph object
-            numpy array as n-partide dgl graph, where n==dim.
+            numpy array as n-partite dgl graph, where n==dim.
+            Shape: (nrows + ncols + ncontexts, nrows*ncols + nrows*ncontexts + ncols*ncontexts) or
+            (nrows + ncols, nrows * ncols)
         """
         pass
 
@@ -619,7 +654,7 @@ class Generator(metaclass=abc.ABCMeta):
     def dense_to_networkx(x, **kwargs):
 
         """
-        Extracts a partide networkx graph from numpy array
+        Extracts a partite networkx graph from numpy array
 
         Parameters
         ----------
@@ -631,14 +666,16 @@ class Generator(metaclass=abc.ABCMeta):
         Returns
         -------
         Graph object
-            numpy array as n-partide networkx graph, where n==dim.
+            numpy array as n-partite networkx graph, where n==dim.
+            Shape: (nrows + ncols + ncontexts, nrows*ncols + nrows*ncontexts + ncols*ncontexts) or
+            (nrows + ncols, nrows * ncols)
         """
         pass
 
     def to_graph(self, x=None, framework='networkx', device='cpu', cuda=0):
 
         """
-        Returns a n-partide graph, where n==dim.
+        Returns a n-partite graph, where n==dim.
 
         Parameters
         ----------
@@ -654,7 +691,9 @@ class Generator(metaclass=abc.ABCMeta):
         Returns
         -------
         Graph object
-            N-partide graph, where n==dim.
+            N-partite graph, where n==dim.
+            Shape: (nrows + ncols + ncontexts, nrows*ncols + nrows*ncontexts + ncols*ncontexts) or
+            (nrows + ncols, nrows * ncols)
 
         Examples
         --------
@@ -664,6 +703,7 @@ class Generator(metaclass=abc.ABCMeta):
         Graph(num_nodes={'col': 100, 'row': 100},
               num_edges={('row', 'elem', 'col'): 10000},
               metagraph=[('row', 'col', 'elem')])
+
         """
 
         if x is None:
@@ -834,8 +874,10 @@ class Generator(metaclass=abc.ABCMeta):
         -------
         dense or sparse tensor
             Generated dataset as tensor.
+            Shape: (ncontexts, nrows, ncols) or (nrows, ncols)
         list
             Hidden cluster labels.
+            Shape: (nclusters, any)
         None
             If no_return==True.
 
@@ -851,6 +893,7 @@ class Generator(metaclass=abc.ABCMeta):
                [-0.52,  0.38,  6.98, ..., -7.6 ,  5.71,  9.24],
                [-1.28, -3.55, -3.13, ..., -4.17, -6.05, -9.87],
                [-5.79, -6.05, -2.24, ...,  1.88,  1.97,  6.05]])
+
         """
 
         self.start_silencing()
