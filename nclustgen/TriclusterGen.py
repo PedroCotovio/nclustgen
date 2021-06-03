@@ -39,8 +39,7 @@ from .utils import tensor_value_check as tvc
 
 class TriclusterGenerator(Generator):
     """
-        This class inherits from the Generator class, and provides an implementation for three-dimensional datasets with
-        hidden triclusters.
+        This class provides an implementation for three-dimensional datasets with hidden triclusters.
 
         **Examples**
 
@@ -285,7 +284,7 @@ class TriclusterGenerator(Generator):
 class TriclusterGeneratorbyConfig(TriclusterGenerator):
 
     """
-    This class inherits from the TriclusterGenerator class, and provides way to use it via a configuration file.
+    This class iniciliazes the generator via configuration file.
 
     **Examples**
 

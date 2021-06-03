@@ -40,8 +40,7 @@ from .utils import tensor_value_check as tvc
 class BiclusterGenerator(Generator):
 
     """
-    This class inherits from the Generator class, and provides an implementation for two-dimensional datasets with
-    hidden biclusters.
+    This class provides an implementation for two-dimensional datasets with hidden biclusters.
 
     **Examples**
 
@@ -238,7 +237,7 @@ class BiclusterGenerator(Generator):
 class BiclusterGeneratorbyConfig(BiclusterGenerator):
 
     """
-    This class inherits from the BiclusterGenerator class, and provides way to use it via a configuration file.
+    This class iniciliazes the generator via configuration file.
 
     **Examples**
 
