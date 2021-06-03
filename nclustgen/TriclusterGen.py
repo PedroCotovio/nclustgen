@@ -284,7 +284,7 @@ class TriclusterGenerator(Generator):
 class TriclusterGeneratorbyConfig(TriclusterGenerator):
 
     """
-    This class iniciliazes the generator via configuration file.
+    This class initializes the generator via configuration file.
 
     **Examples**
 

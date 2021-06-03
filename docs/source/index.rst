@@ -33,10 +33,9 @@ The source code is available at: https://github.com/pepedro97/nclustgen.
    :maxdepth: 4
    :caption: API
 
-   api-reference/generator
    api-reference/bicluster
    api-reference/tricluster
-
+   api-reference/generator
 
 
 Indices and tables
