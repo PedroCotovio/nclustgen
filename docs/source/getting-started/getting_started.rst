@@ -17,6 +17,9 @@ by installing the correct dgl build, more information at: https://www.dgl.ai/pag
 Basic Usage
 -----------
 
+Biclustering Dataset
+^^^^^^^^^^^^^^^^^^^^
+
 .. code:: python
 
     ## Generate biclustering dataset
@@ -44,6 +47,11 @@ Basic Usage
     # Save data files
     generator.save(file_name='example', single_file=True)
 
+Triclustering Dataset
+^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: python
+
     ## Generate triclustering dataset
 
     from nclustgen import TriclusterGenerator
@@ -68,3 +76,5 @@ Basic Usage
 
     # Save data files
     generator.save(file_name='example', single_file=True)
+
+.. seealso:: This is a basic example, more detail at :doc:`/getting-started/generating_data`.
