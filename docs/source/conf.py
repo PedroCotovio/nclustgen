@@ -82,6 +82,12 @@ htmlhelp_basename = 'nclustgendoc'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+epub_title = project
+epub_author = author
+epub_publisher = author
+epub_copyright = copyright
+epub_exclude_files = ['search.html']
+
 inheritance_graph_attrs = dict(rankdir="LR", size='"10.0, 12.0"', ratio='compressed')
 inheritance_node_attrs = dict(fontsize=18, height=1.25, style='filled')
 
