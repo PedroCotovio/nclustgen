@@ -1202,7 +1202,6 @@ class TricsGenTest(TestCaseBase):
                 # assert class and define shape for networkx
                 self.assertTrue(isinstance(instance.graph, Graph))
                 shape = (len(instance.graph.nodes), len(instance.graph.edges))
-                self.assertTrue(networkx.is_bipartite(instance.graph))
 
             else:
 
