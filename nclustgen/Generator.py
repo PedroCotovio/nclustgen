@@ -29,7 +29,7 @@ class Generator(metaclass=abc.ABCMeta):
     """
     Abstract class from where dimensional specific subclass should inherit. Should not be called directly.
     This class abstracts dimensionality providing core implemented methods and abstract methods that should be
-    implemented for any cuda-clustering generator.
+    implemented for any n-clustering generator.
     """
 
     def __init__(self, n, dstype='NUMERIC', patterns=None, bktype='UNIFORM', clusterdistribution=None,
@@ -49,12 +49,12 @@ class Generator(metaclass=abc.ABCMeta):
             Type of Dataset to be generated, numeric or symbolic(categorical).
         patterns: list or array, default [['CONSTANT', 'CONSTANT']]
             Defines the type of patterns that will be hidden in the data.
-            Shape: number of patterns, number of dimensions
+            Shape: (number of patterns, number of dimensions)
             Patterns_Set: {CONSTANT, ADDITIVE, MULTIPLICATIVE, ORDER_PRESERVING, NONE}
             Numeric_Patterns_Set: {CONSTANT, ADDITIVE, MULTIPLICATIVE, ORDER_PRESERVING, NONE}
             Symbolic_Patterns_Set: {CONSTANT, ORDER_PRESERVING, NONE}
             Pattern_Combinations:
-                
+
                 =========== ====================================
                     2D Numeric Patterns Possible Combinations
                 ------------------------------------------------
@@ -390,6 +390,7 @@ class Generator(metaclass=abc.ABCMeta):
         'noise': (0.0, 0.0, 0.0), 'patterns': [['CONSTANT', 'CONSTANT']], 'percofoverlappingclusts': 0.0,
         'percofoverlappingcolumns': 1.0, 'percofoverlappingcontexts': 1.0, 'percofoverlappingrows': 1.0,
         'plaidcoherency': 'NO_OVERLAPPING', 'realval': True, 'seed': -1, 'silenced': False, 'time_profile': None}
+
         """
 
         attributes = inspect.getmembers(self, lambda a: not (inspect.isroutine(a)))
@@ -500,6 +501,7 @@ class Generator(metaclass=abc.ABCMeta):
         >>> generator = BiclusterGenerator(silence=True)
         >>> generator.generate()
         >>> generator.save(file_name='BicFiles', single_file=False)
+
         """
         pass
 
@@ -519,6 +521,7 @@ class Generator(metaclass=abc.ABCMeta):
         -------
         numpy array
             Generated dataset as numpy array (dense tensor).
+            Shape: (ncontexts, nrows, ncols) or (nrows, ncols)
         """
         pass
 
@@ -540,6 +543,7 @@ class Generator(metaclass=abc.ABCMeta):
             Generated dataset as csr_matrix or COO tensor (sparse tensor).
             If dim = 2 then returns csr_matrix (from scipy.sparse).
             Else returns a COO tensor (from sparse).
+            Shape: (ncontexts, nrows, ncols) or (nrows, ncols)
         """
         pass
 
@@ -562,8 +566,10 @@ class Generator(metaclass=abc.ABCMeta):
         -------
         dense or sparse tensor
             Generated dataset as tensor.
+            Shape: (ncontexts, nrows, ncols) or (nrows, ncols)
         list
             Hidden cluster labels.
+            Shape: (nclusters, any)
 
         Examples
         --------
@@ -578,6 +584,7 @@ class Generator(metaclass=abc.ABCMeta):
                [-9.25, -9.15, -4.68, ...,  2.06, -6.19,  2.54],
                [ 2.63, -3.03,  3.8 , ...,  4.13, -4.17,  7.68],
                [-1.98,  8.02,  1.89, ...,  3.59,  4.27,  6.4 ]])
+
         """
 
         self.start_silencing()
@@ -637,6 +644,8 @@ class Generator(metaclass=abc.ABCMeta):
         -------
         heterograph object
             numpy array as n-partite dgl graph, where n==dim.
+            Shape: (nrows + ncols + ncontexts, nrows*ncols + nrows*ncontexts + ncols*ncontexts) or
+            (nrows + ncols, nrows * ncols)
         """
         pass
 
@@ -658,6 +667,8 @@ class Generator(metaclass=abc.ABCMeta):
         -------
         Graph object
             numpy array as n-partite networkx graph, where n==dim.
+            Shape: (nrows + ncols + ncontexts, nrows*ncols + nrows*ncontexts + ncols*ncontexts) or
+            (nrows + ncols, nrows * ncols)
         """
         pass
 
@@ -681,6 +692,8 @@ class Generator(metaclass=abc.ABCMeta):
         -------
         Graph object
             N-partite graph, where n==dim.
+            Shape: (nrows + ncols + ncontexts, nrows*ncols + nrows*ncontexts + ncols*ncontexts) or
+            (nrows + ncols, nrows * ncols)
 
         Examples
         --------
@@ -690,6 +703,7 @@ class Generator(metaclass=abc.ABCMeta):
         Graph(num_nodes={'col': 100, 'row': 100},
               num_edges={('row', 'elem', 'col'): 10000},
               metagraph=[('row', 'col', 'elem')])
+
         """
 
         if x is None:
@@ -860,8 +874,10 @@ class Generator(metaclass=abc.ABCMeta):
         -------
         dense or sparse tensor
             Generated dataset as tensor.
+            Shape: (ncontexts, nrows, ncols) or (nrows, ncols)
         list
             Hidden cluster labels.
+            Shape: (nclusters, any)
         None
             If no_return==True.
 
@@ -877,6 +893,7 @@ class Generator(metaclass=abc.ABCMeta):
                [-0.52,  0.38,  6.98, ..., -7.6 ,  5.71,  9.24],
                [-1.28, -3.55, -3.13, ..., -4.17, -6.05, -9.87],
                [-5.79, -6.05, -2.24, ...,  1.88,  1.97,  6.05]])
+
         """
 
         self.start_silencing()

@@ -77,6 +77,7 @@ class BiclusterGenerator(Generator):
           num_edges={('row', 'elem', 'col'): 5000},
           metagraph=[('row', 'col', 'elem')])
     >>> generator.save(file_name='example', single_file=True)
+
     """
 
     def __init__(self, *args, **kwargs):

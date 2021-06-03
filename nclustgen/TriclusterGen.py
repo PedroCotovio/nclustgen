@@ -313,6 +313,7 @@ class TriclusterGeneratorbyConfig(TriclusterGenerator):
             [ 4.2 ,  4.03, -9.11, ...,  5.28,  6.09,  1.19],
             [-0.31,  7.71,  7.57, ..., -3.57, -9.67, -9.89],
             [ 6.55,  4.69, -9.96, ..., -8.9 ,  7.31, -0.13]]])
+
     """
 
     def __init__(self, file_path=None):
