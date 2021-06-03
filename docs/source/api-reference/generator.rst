@@ -3,7 +3,6 @@
 ***************************
 
 .. module:: nclustgen.Generator
-   :synopsis: Generator
 
 Generator
 ----------------------------
@@ -13,5 +12,3 @@ Generator
     :undoc-members:
     :show-inheritance:
     :exclude-members:
-
-----------------------------

@@ -10,9 +10,11 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath('../../'))
+
 import sphinx_rtd_theme
 
 
@@ -22,7 +24,7 @@ project = 'Nclustgen'
 copyright = '2021, Pedro Cotovio'
 author = 'Pedro Cotovio'
 
-version = '1.0'
+version = '1.0.0'
 release = '1.0.0'
 
 
@@ -56,6 +58,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 master_doc = 'index'
 
+pygments_style = 'sphinx'
+
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -63,6 +67,13 @@ master_doc = 'index'
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
+
+html_sidebars = {
+    '**': [
+        'relations.html',  # needs 'show_related': True theme option to display
+        'searchbox.html',
+    ]
+}
 
 htmlhelp_basename = 'nclustgendoc'
 
