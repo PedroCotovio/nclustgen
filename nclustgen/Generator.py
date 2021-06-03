@@ -53,60 +53,86 @@ class Generator(metaclass=abc.ABCMeta):
             Patterns_Set: {CONSTANT, ADDITIVE, MULTIPLICATIVE, ORDER_PRESERVING, NONE}
             Numeric_Patterns_Set: {CONSTANT, ADDITIVE, MULTIPLICATIVE, ORDER_PRESERVING, NONE}
             Symbolic_Patterns_Set: {CONSTANT, ORDER_PRESERVING, NONE}
-            2D_Numeric_Patterns_Combinations:
-                [['Order Preserving', 'None'],
-                ['None', 'Order Preserving'],
-                ['Constant', 'Constant'],
-                ['None', 'Constant'],
-                ['Constant', 'None'],
-                ['Additive', 'Additive'],
-                ['Constant', 'Additive'],
-                ['Additive', 'Constant'],
-                ['Multiplicative', 'Multiplicative'],
-                ['Constant', 'Multiplicative'],
-                ['Multiplicative', 'Constant']]
-            2D_Symbolic_Patterns_Combinations:
-                [['Order Preserving', 'None'],
-                ['None', 'Order Preserving'],
-                ['Constant', 'Constant'],
-                ['None', 'Constant'],
-                ['Constant', 'None']]
-            3D_Numeric_Patterns_Combinations:
-            [['Order Preserving', 'None', 'None'],
-            ['None', 'Order Preserving', 'None'],
-            ['None', 'None', 'Order Preserving'],
-            ['Constant', 'Constant', 'Constant'],
-            ['None', 'Constant', 'Constant'],
-            ['Constant', 'Constant', 'None'],
-            ['Constant', 'None', 'Constant'],
-            ['Constant', 'None', 'None'],
-            ['None', 'Constant', 'None'],
-            ['None', 'None', 'Constant'],
-            ['Additive', 'Additive', 'Additive'],
-            ['Additive', 'Additive', 'Constant'],
-            ['Constant', 'Additive', 'Additive'],
-            ['Additive', 'Constant', 'Additive'],
-            ['Additive', 'Constant', 'Constant'],
-            ['Constant', 'Additive', 'Constant'],
-            ['Constant', 'Constant', 'Additive'],
-            ['Multiplicative', 'Multiplicative', 'Multiplicative'],
-            ['Multiplicative', 'Multiplicative', 'Constant'],
-            ['Constant', 'Multiplicative', 'Multiplicative'],
-            ['Multiplicative', 'Constant', 'Multiplicative'],
-            ['Multiplicative', 'Constant', 'Constant'],
-            ['Constant', 'Multiplicative', 'Constant'],
-            ['Constant', 'Constant', 'Multiplicative']]
-            3D_Symbolic_Patterns_Combinations:
-            [['Order Preserving', 'None', 'None'],
-            ['None', 'Order Preserving', 'None'],
-            ['None', 'None', 'Order Preserving'],
-            ['Constant', 'Constant', 'Constant'],
-            ['None', 'Constant', 'Constant'],
-            ['Constant', 'Constant', 'None'],
-            ['Constant', 'None', 'Constant'],
-            ['Constant', 'None', 'None'],
-            ['None', 'Constant', 'None'],
-            ['None', 'None', 'Constant']]
+            Pattern_Combinations:
+                
+                =========== ====================================
+                    2D Numeric Patterns Possible Combinations
+                ------------------------------------------------
+                index       pattern combination
+                =========== ====================================
+                0           ['Order Preserving', 'None']
+                1           ['None', 'Order Preserving']
+                2           ['Constant', 'Constant']
+                3           ['None', 'Constant']
+                4           ['Constant', 'None']
+                5           ['Additive', 'Additive']
+                6           ['Constant', 'Additive']
+                7           ['Additive', 'Constant']
+                8           ['Multiplicative', 'Multiplicative']
+                9           ['Constant', 'Multiplicative']
+                10          ['Multiplicative', 'Constant']
+                =========== ====================================
+
+                =========== ====================================
+                    2D Symbolic Patterns Possible Combinations
+                ------------------------------------------------
+                index       pattern combination
+                =========== ====================================
+                0           ['Order Preserving', 'None']
+                1           ['None', 'Order Preserving']
+                2           ['Constant', 'Constant']
+                3           ['None', 'Constant']
+                4           ['Constant', 'None']
+                =========== ====================================
+
+                =========== ======================================================
+                            3D Numeric Patterns Possible Combinations
+                ------------------------------------------------------------------
+                index       pattern combination
+                =========== ======================================================
+                0           ['Order Preserving', 'None', 'None']
+                1           ['None', 'Order Preserving', 'None']
+                2           ['None', 'None', 'Order Preserving']
+                3           ['Constant', 'Constant', 'Constant']
+                4           ['None', 'Constant', 'Constant']
+                5           ['Constant', 'Constant', 'None']
+                6           ['Constant', 'None', 'Constant']
+                7           ['Constant', 'None', 'None']
+                8           ['None', 'Constant', 'None']
+                9           ['None', 'None', 'Constant']
+                10          ['Additive', 'Additive', 'Additive']
+                11          ['Additive', 'Additive', 'Constant']
+                12          ['Constant', 'Additive', 'Additive']
+                13          ['Additive', 'Constant', 'Additive']
+                14          ['Additive', 'Constant', 'Constant']
+                15          ['Constant', 'Additive', 'Constant']
+                16          ['Constant', 'Constant', 'Additive']
+                17          ['Multiplicative', 'Multiplicative', 'Multiplicative']
+                18          ['Multiplicative', 'Multiplicative', 'Constant']
+                19          ['Constant', 'Multiplicative', 'Multiplicative']
+                20          ['Multiplicative', 'Constant', 'Multiplicative']
+                21          ['Multiplicative', 'Constant', 'Constant']
+                22          ['Constant', 'Multiplicative', 'Constant']
+                23          ['Constant', 'Constant', 'Multiplicative']
+                =========== ======================================================
+
+                =========== ======================================================
+                            3D Numeric Patterns Possible Combinations
+                ------------------------------------------------------------------
+                index       pattern combination
+                =========== ======================================================
+                0           ['Order Preserving', 'None', 'None']
+                1           ['None', 'Order Preserving', 'None']
+                2           ['None', 'None', 'Order Preserving']
+                3           ['Constant', 'Constant', 'Constant']
+                4           ['None', 'Constant', 'Constant']
+                5           ['Constant', 'Constant', 'None']
+                6           ['Constant', 'None', 'Constant']
+                7           ['Constant', 'None', 'None']
+                8           ['None', 'Constant', 'None']
+                9           ['None', 'None', 'Constant']
+                =========== ======================================================
+
         bktype: {'NORMAL', 'UNIFORM', 'DISCRETE', 'MISSING'}, default 'UNIFORM'
             Determines the distribution used to generate the background values.
         clusterdistribution: list or array, default [['UNIFORM', 4.0, 4.0], ['UNIFORM', 4.0, 4.0]]
