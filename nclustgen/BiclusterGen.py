@@ -33,6 +33,7 @@ from com.gbic.utils import IOUtils as io
 
 from java.util import ArrayList
 
+# helper function
 from .utils import tensor_value_check as tvc
 
 
@@ -42,8 +43,8 @@ class BiclusterGenerator(Generator):
     This class inherits from the Generator class, and provides an implementation for two-dimensional datasets with
     hidden biclusters.
 
-    Examples
-    --------
+    **Examples**
+
     >>> from nclustgen import BiclusterGenerator
     >>> generator = BiclusterGenerator(
     ...     dstype='NUMERIC',
@@ -239,8 +240,8 @@ class BiclusterGeneratorbyConfig(BiclusterGenerator):
     """
     This class inherits from the BiclusterGenerator class, and provides way to use it via a configuration file.
 
-    Examples
-    --------
+    **Examples**
+
     >>> from nclustgen import BiclusterGeneratorbyConfig
     >>> generator = BiclusterGeneratorbyConfig('example.json')
     >>> generator.get_params()
@@ -266,8 +267,7 @@ class BiclusterGeneratorbyConfig(BiclusterGenerator):
     def __init__(self, file_path=None):
 
         """
-        Parameters
-        ----------
+        **Parameters**
 
         file_path: str, default None
             Determines the path to the configuration file. If None then no parameters are passed to class.
