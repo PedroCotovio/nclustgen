@@ -237,7 +237,7 @@ class BiclusterGenerator(Generator):
 class BiclusterGeneratorbyConfig(BiclusterGenerator):
 
     """
-    This class iniciliazes the generator via configuration file.
+    This class initializes the generator via configuration file.
 
     **Examples**
 

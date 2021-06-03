@@ -20,6 +20,8 @@ Basic Usage
 Biclustering Dataset
 ^^^^^^^^^^^^^^^^^^^^
 
+.. seealso:: Detailed API at :doc:`/api-reference/bicluster`.
+
 .. code:: python
 
     ## Generate biclustering dataset
@@ -49,6 +51,8 @@ Biclustering Dataset
 
 Triclustering Dataset
 ^^^^^^^^^^^^^^^^^^^^^
+
+.. seealso:: Detailed API at :doc:`/api-reference/tricluster`.
 
 .. code:: python
 
