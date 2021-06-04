@@ -33,16 +33,16 @@ from com.gtric.utils import IOUtils as io
 
 from java.util import ArrayList
 
+# helper function
 from .utils import tensor_value_check as tvc
 
 
 class TriclusterGenerator(Generator):
     """
-        This class inherits from the Generator class, and provides an implementation for three-dimensional datasets with
-        hidden triclusters.
+        This class provides an implementation for three-dimensional datasets with hidden triclusters.
 
-        Examples
-        --------
+        **Examples**
+
         >>> from nclustgen import TriclusterGenerator
         >>> generator = TriclusterGenerator(
         ...     dstype='NUMERIC',
@@ -284,10 +284,10 @@ class TriclusterGenerator(Generator):
 class TriclusterGeneratorbyConfig(TriclusterGenerator):
 
     """
-    This class inherits from the TriclusterGenerator class, and provides way to use it via a configuration file.
+    This class initializes the generator via configuration file.
 
-    Examples
-    ________
+    **Examples**
+
     >>> from nclustgen import TriclusterGeneratorbyConfig
     >>> generator = TriclusterGeneratorbyConfig('example.json')
     >>> x, y = generator.generate(nrows=50, ncols=100, ncontexte=4, nclusters=2)
@@ -319,8 +319,7 @@ class TriclusterGeneratorbyConfig(TriclusterGenerator):
     def __init__(self, file_path=None):
 
         """
-        Parameters
-        ----------
+        **Parameters**
 
         file_path: str, default None
             Determines the path to the configuration file. If None then no parameters are passed to class.

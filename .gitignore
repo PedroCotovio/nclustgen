@@ -1,5 +1,12 @@
 venv/
+docs/_build
+build/
+dist/
 
 .DS_Store
 
 *.pyc
+
+nclustgen.egg-info/
+
+.eggs/

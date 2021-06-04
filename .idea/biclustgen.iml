@@ -3,6 +3,11 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/venv" />
+      <excludeFolder url="file://$MODULE_DIR$/docs/_build" />
+      <excludeFolder url="file://$MODULE_DIR$/build" />
+      <excludeFolder url="file://$MODULE_DIR$/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/nclustgen.egg-info" />
+      <excludeFolder url="file://$MODULE_DIR$/.eggs" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.8 (nclustgen)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

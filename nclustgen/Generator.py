@@ -3,31 +3,28 @@ import os
 import abc
 import warnings
 import json
-import numpy as np
 from sparse import COO
 
 import torch as th
 
-import jpype
-import jpype.imports
-from jpype.types import *
+# import jpype
+# import jpype.imports
 
-# Start JVM
-if jpype.isJVMStarted():
-    pass
-else:
-    # Loading G-Bic
-    jpype.startJVM(classpath=['nclustgen/jars/*'])
+# # Start JVM
+# if jpype.isJVMStarted():
+#     pass
+# else:
+#     # Loading G-Bic
+#     jpype.startJVM(classpath=['nclustgen/jars/*'])
 
 from java.lang import System
 from java.io import PrintStream
 
 
-# TODO docs
 class Generator(metaclass=abc.ABCMeta):
 
     """
-    Abstract class from where dimensional specific subclass should inherit. Should not be called directly.
+    Abstract class from where dimensional specific subclasses should inherit. Should not be called directly.
     This class abstracts dimensionality providing core implemented methods and abstract methods that should be
     implemented for any n-clustering generator.
     """
@@ -41,19 +38,24 @@ class Generator(metaclass=abc.ABCMeta):
                  seed=None, *args, **kwargs):
 
         """
-        Parameters
-        ----------
+        **Parameters**
+
         n: int, internal
             Determines dimensionality (e.g. Bi/Tri clustering). Should only be used by subclasses.
         dstype: {'NUMERIC', 'SYMBOLIC'}, default 'Numeric'
             Type of Dataset to be generated, numeric or symbolic(categorical).
         patterns: list or array, default [['CONSTANT', 'CONSTANT']]
             Defines the type of patterns that will be hidden in the data.
-            Shape: (number of patterns, number of dimensions)
-            Patterns_Set: {CONSTANT, ADDITIVE, MULTIPLICATIVE, ORDER_PRESERVING, NONE}
-            Numeric_Patterns_Set: {CONSTANT, ADDITIVE, MULTIPLICATIVE, ORDER_PRESERVING, NONE}
-            Symbolic_Patterns_Set: {CONSTANT, ORDER_PRESERVING, NONE}
-            Pattern_Combinations:
+
+            **Shape**: (number of patterns, number of dimensions)
+
+            **Patterns_Set**: {CONSTANT, ADDITIVE, MULTIPLICATIVE, ORDER_PRESERVING, NONE}
+
+            **Numeric_Patterns_Set**: {CONSTANT, ADDITIVE, MULTIPLICATIVE, ORDER_PRESERVING, NONE}
+
+            **Symbolic_Patterns_Set**: {CONSTANT, ORDER_PRESERVING, NONE}
+
+            **Pattern_Combinations**:
 
                 =========== ====================================
                     2D Numeric Patterns Possible Combinations
@@ -86,7 +88,7 @@ class Generator(metaclass=abc.ABCMeta):
                 =========== ====================================
 
                 =========== ======================================================
-                            3D Numeric Patterns Possible Combinations
+                        3D Numeric Patterns Possible Combinations
                 ------------------------------------------------------------------
                 index       pattern combination
                 =========== ======================================================
@@ -117,7 +119,7 @@ class Generator(metaclass=abc.ABCMeta):
                 =========== ======================================================
 
                 =========== ======================================================
-                            3D Numeric Patterns Possible Combinations
+                        3D Numeric Patterns Possible Combinations
                 ------------------------------------------------------------------
                 index       pattern combination
                 =========== ======================================================
@@ -137,84 +139,113 @@ class Generator(metaclass=abc.ABCMeta):
             Determines the distribution used to generate the background values.
         clusterdistribution: list or array, default [['UNIFORM', 4.0, 4.0], ['UNIFORM', 4.0, 4.0]]
             Distribution used to calculate the size of a cluster.
-            Shape: number of dimensions, 3 (distribution parameters) -> param1(str), param2(float), param3(float)
-                The first parameter(param1) is always the type of distribution {'NORMAL', 'UNIFORM'}.
-                If param1==UNIFORM, then param2 and param3 represents the min and max, respectively.
-                If param1==NORMAL, then param2 and param3 represents the mean and standard deviation, respectively.
+
+            **Shape**: number of dimensions, 3 -> param1(str), param2(float), param3(float)
+
+            The first parameter(param1) is always the type of distribution {'NORMAL', 'UNIFORM'}.
+            If param1==UNIFORM, then param2 and param3 represents the min and max, respectively.
+            If param1==NORMAL, then param2 and param3 represents the mean and standard deviation, respectively.
+
         contiguity: {'COLUMNS', 'CONTEXTS', 'NONE'}, default None
             Contiguity can occur on COLUMNS or CONTEXTS. To avoid contiguity use None.
+
             If dimensionality == 2 and contiguity == 'CONTEXTS' it defaults to None.
         plaidcoherency: {'ADDITIVE', 'MULTIPLICATIVE', 'INTERPOLED', 'NONE', 'NO_OVERLAPPING'}, default 'NO_OVERLAPPING'
             Enforces the type of plaid coherency. To avoid plaid coherency use NONE, to avoid any overlapping use
             'NO_OVERLAPPING'.
         percofoverlappingclusters: float, default 0.0
             Percentage of overlapping clusters. Defines how many clusters are allowed to overlap.
+
             Not used if plaidcoherency == 'NO_OVERLAPPING'.
-            Range: [0,1]
+
+            **Range**: [0,1]
         maxclustsperoverlappedarea: int, default 0
             Maximum number of clusters overlapped per area. Maximum number of clusters that can overlap together.
+
             Not used if plaidcoherency == 'NO_OVERLAPPING'.
-            Range: [0, nclusters]
+
+            **Range**: [0, nclusters]
         maxpercofoverlappingelements: float, default 0.0
             Maximum percentage of values shared by overlapped clusters.
+
             Not used if plaidcoherency == 'NO_OVERLAPPING'.
-            Range: [0,1]
+
+            **Range**: [0,1]
         percofoverlappingrows: float, default 1.0
             Percentage of allowed amount of overlaping across clusters rows.
+
             Not used if plaidcoherency == 'NO_OVERLAPPING'.
-            Range: [0,1]
+
+            **Range**: [0,1]
         percofoverlappingcolumns: float, default 1.0
             Percentage of allowed amount of overlaping across clusters columns.
+
             Not used if plaidcoherency == 'NO_OVERLAPPING'.
-            Range: [0,1]
+
+            **Range**: [0,1]
         percofoverlappingcontexts: float, default 1.0
             Percentage of allowed amount of overlaping across clusters contexts.
+
             Not used if plaidcoherency == 'NO_OVERLAPPING' or cuda >= 3.
-            Range: [0,1]
+
+            **Range**: [0,1]
         percmissingsonbackground: float, 0.0
             Percentage of missing values on the background, that is, values that do not belong to planted clusters.
-            Range: [0,1]
+
+            **Range**: [0,1]
         percmissingsonclusters: float, 0.0
             Maximum percentage of missing values on each cluster.
-            Range: [0,1]
+
+            **Range**: [0,1]
         percnoiseonbackground: float, 0.0
             Percentage of noisy values on background, that is, values with added noise.
-            Range: [0,1]
+
+            **Range**: [0,1]
         percnoiseonclusters: float, 0.0
             Maximum percentage of noisy values on each cluster.
-            Range: [0,1]
+
+            **Range**: [0,1]
         percnoisedeviation: int or float, 0.0
             Percentage of symbol on noisy values deviation, that is, the maximum difference between the current symbol
             on the matrix and the one that will replaced it to be considered noise.
+
             If dstype == Numeric then percnoisedeviation -> float else int.
-            Ex: Let Alphabet = [1,2,3,4,5] and CurrentSymbol = 3, if the noiseDeviation is '1', then CurrentSymbol will
-                be, randomly, replaced by either '2' or '4'. If noiseDeviation is '2', CurrentSymbol can be replaced by
-                either '1','2','4' or '5'.
+
+            **Ex**: Let Alphabet = [1,2,3,4,5] and CurrentSymbol = 3, if the noiseDeviation is '1', then CurrentSymbol
+            will be, randomly, replaced by either '2' or '4'. If noiseDeviation is '2', CurrentSymbol can be replaced by
+            either '1','2','4' or '5'.
         percerroesonbackground: float, 0.0
             Percentage of error values on background. Similar as noise, a new value is considered an error if the
             difference between it and the current value in the matrix is greater than noiseDeviation.
-            Ex: Alphabet = [1,2,3,4,5], If currentValue = 2, and errorDeviation = 2, to turn currentValue an error,
-                it's value must be replaced by '5', that is the only possible value that respects
-                abs(currentValue - newValue) > noiseDeviation
-            Range: [0,1]
+
+            **Ex**: Alphabet = [1,2,3,4,5], If currentValue = 2, and errorDeviation = 2, to turn currentValue an error,
+            it's value must be replaced by '5', that is the only possible value that respects
+            abs(currentValue - newValue) > noiseDeviation
+
+            **Range**: [0,1]
         percerrorsonclusters: float, 0.0
             Percentage of errors values on background. Similar as noise, a new value is considered an error if the
             difference between it and the current value in the matrix is greater than noiseDeviation.
-            Ex: Alphabet = [1,2,3,4,5], If currentValue = 2, and errorDeviation = 2, to turn currentValue an error,
-                it's value must be replaced by '5', that is the only possible value that respects
-                abs(currentValue - newValue) > noiseDeviation
-            Range: [0,1]
+
+            **Ex**: Alphabet = [1,2,3,4,5], If currentValue = 2, and errorDeviation = 2, to turn currentValue an error,
+            it's value must be replaced by '5', that is the only possible value that respects
+            abs(currentValue - newValue) > noiseDeviation
+
+            **Range**: [0,1]
         percerrorondeviation: int or float, 0.0
             Percentage of symbol on error values deviation, that is, the maximum difference between the current symbol
             on the matrix and the one that will replaced it to be considered error.
-             If dstype == Numeric then percnoisedeviation -> float else int.
+
+            If dstype == Numeric then percnoisedeviation -> float else int.
         silence: bool, default False
             If True them the class does not print to the console.
         seed: int, default -1
             Seed to initialize random objects.
+
             If seed is None or -1 then random objects are initialized without a seed.
         timeprofile: {'RANDOM', 'MONONICALLY_INCREASING', 'MONONICALLY_DECREASING', None}, default None
             It determines a time profile for the ORDER_PRESERVING pattern. Only used if ORDER_PRESERVING in patterns.
+
             If None and ORDER_PRESERVING in patterns it defaults to 'RANDOM'.
         realval: bool, default True
             Indicates if the dataset is real valued. Only used when dstype == 'NUMERIC'.
@@ -224,10 +255,12 @@ class Generator(metaclass=abc.ABCMeta):
             Dataset's maximum value. Only used when dstype == 'NUMERIC'.
         symbols: list or array of strings, default None
             Dataset's alphabet (list of possible values/symbols it can contain). Only used if dstype == 'SYMBOLIC'.
-            Shape: alphabets length
+
+            **Shape**: alphabets length
         nsymbols: int, default 10
             Defines the length of the alphabet, instead of defining specific symbols this parameter can be passed, and
             a list of strings will be create with range(1, cuda), where cuda represents this parameter.
+
             Only used if dstype == 'SYMBOLIC' and symbols is None.
         mean: int or float, default 14.0
             Mean for the background's distribution. Only used when bktype == 'NORMAL'.
@@ -236,13 +269,20 @@ class Generator(metaclass=abc.ABCMeta):
         probs: list or array of floats
             Background weighted distribution probabilities. Only used when bktype == 'DISCRETE'.
             No default probabilities, if probs is None and bktype == 'DISCRETE', bktype defaults to 'UNIFORM'.
-            Shape: Number of symbols or possible integers
-            Range: [0,1]
-            Math: sum(probs) == 1
+
+            **Shape**: Number of symbols or possible integers
+
+            **Range**: [0,1]
+
+            **Math**: sum(probs) == 1
         in_memory: bool, default None
             Determines if generated datasets return dense or sparse matrix (True/False).
+
             If None then if the generated dataset's size is larger then 10**5 it defaults to sparse, else outputs dense.
-            This parameter can be overwritten in the generate method.
+
+            **Note**: This parameter can be overwritten in the generate method.
+
+        **Methods**
         """
 
         # define dimensions
@@ -343,8 +383,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Starts silencing all java prints to terminal.
 
-        Parameters
-        ----------
+        **Parameters**
+
         silence: bool, default None
             If True all java prints to terminal are ignored.
             If None, defaults to class attribute's value.
@@ -374,13 +414,13 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Returns the classes attributes.
 
-        Returns
-        -------
+        **Returns**
+
         dict
             Values of class attributes.
 
-        Examples
-        --------
+        **Examples**
+
         >>> generator = BiclusterGenerator()
         >>> generator.get_params()
         {'X': None, 'Y': None, 'background': ['UNIFORM'], 'clusterdistribution': [['UNIFORM', 4.0, 4.0],
@@ -413,8 +453,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Builds a Background object, using the background attribute.
 
-        Returns
-        ------
+        **Returns**
+
         Background object
             Dataset's background.
         """
@@ -425,8 +465,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Builds the (Java)Generator object.
 
-        Parameters
-        ----------
+        **Parameters**
+
         class_call: {'NumericDatasetGenerator', 'SymbolicDatasetGenerator'}
             Name of generator to initialize.
         params: list
@@ -434,8 +474,8 @@ class Generator(metaclass=abc.ABCMeta):
         contexts_index: int
             Position of the ncontext param. Only used when dimensionality < 2.
 
-        Returns
-        -------
+        **Returns**
+
         (Java)Generator object
             Generator for data generation.
         """
@@ -447,8 +487,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Builds a list of pattern objects, using the patterns, time_profile, and dstype attributes.
 
-        Returns
-        -------
+        **Returns**
+
         ArrayList
             List of pattern objects.
         """
@@ -460,8 +500,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Builds a Structure object, using the clusterdistribution and contiguity attributes.
 
-        Returns
-        -------
+        **Returns**
+
         Structure object
             Dataset's structure.
         """
@@ -473,8 +513,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Builds an OverlappingSettings object.
 
-        Returns
-        -------
+        **Returns**
+
         OverlappingSettings object
             Dataset's overlapping settings.
         """
@@ -486,8 +526,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Saves data files to chosen path.
 
-        Parameters
-        ----------
+        **Parameters**
+
         file_name: str, default 'example_dataset'
             Saved files prefix.
         path: str, default None
@@ -496,8 +536,8 @@ class Generator(metaclass=abc.ABCMeta):
             If False dataset is saved in multiple data files. If None then if the dataset's size is larger then 10**5
             it defaults to False, else True.
 
-        Examples
-        --------
+        **Examples**
+
         >>> generator = BiclusterGenerator(silence=True)
         >>> generator.generate()
         >>> generator.save(file_name='BicFiles', single_file=False)
@@ -512,13 +552,13 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Extracts numpy array from Dataset object.
 
-        Parameters
-        ----------
+        **Parameters**
+
         generatedDataset: Dataset object
             Generated dataset (java object).
 
-        Returns
-        -------
+        **Returns**
+
         numpy array
             Generated dataset as numpy array (dense tensor).
             Shape: (ncontexts, nrows, ncols) or (nrows, ncols)
@@ -532,18 +572,20 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Extracts sparce tensor from Dataset object.
 
-        Parameters
-        ----------
+        **Parameters**
+
         generatedDataset: Dataset object
             Generated dataset (java object).
 
-        Returns
-        -------
+        **Returns**
+
         csr_matrix or COO tensor
             Generated dataset as csr_matrix or COO tensor (sparse tensor).
+
             If dim = 2 then returns csr_matrix (from scipy.sparse).
             Else returns a COO tensor (from sparse).
-            Shape: (ncontexts, nrows, ncols) or (nrows, ncols)
+
+            **Shape**: (ncontexts, nrows, ncols) or (nrows, ncols)
         """
         pass
 
@@ -552,24 +594,27 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Returns generated dataset as somekind of tensor and hidden cluster labels.
 
-        Parameters
-        ----------
+        **Parameters**
+
         generatedDataset: Dataset object
             Generated dataset (java object).
         in_memory: bool, default None
             Determines if generated datasets return dense or sparse matrix (True/False).
+
             If None then if the generated dataset's size is larger then 10**5 it defaults to sparse, else outputs dense.
         keys: list, default ['X', 'Y', 'Z']
             Axis keys. Do not overwrite, unless you are using a different dataset object.
 
-        Returns
-        -------
+        **Returns**
+
         dense or sparse tensor
             Generated dataset as tensor.
-            Shape: (ncontexts, nrows, ncols) or (nrows, ncols)
+
+            **Shape**: (ncontexts, nrows, ncols) or (nrows, ncols)
         list
             Hidden cluster labels.
-            Shape: (nclusters, any)
+
+            **Shape**: (nclusters, any)
 
         Examples
         --------
@@ -631,8 +676,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Extracts a partite dgl graph from numpy array
 
-        Parameters
-        ----------
+        **Parameters**
+
         x: numpy array
             Data array.
         device: {'cpu', 'gpu'}
@@ -640,11 +685,12 @@ class Generator(metaclass=abc.ABCMeta):
         cuda: int, default 0
             Index of cuda device to use. Only used if device==True.
 
-        Returns
-        -------
+        **Returns**
+
         heterograph object
             numpy array as n-partite dgl graph, where n==dim.
-            Shape: (nrows + ncols + ncontexts, nrows*ncols + nrows*ncontexts + ncols*ncontexts) or
+
+            **Shape**: (nrows + ncols + ncontexts, nrows*ncols + nrows*ncontexts + ncols*ncontexts) or
             (nrows + ncols, nrows * ncols)
         """
         pass
@@ -656,18 +702,19 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Extracts a partite networkx graph from numpy array
 
-        Parameters
-        ----------
+        **Parameters**
+
         x: numpy array
             Data array.
         **kwargs: any, default None
             Additional keywords have no effect but might be accepted for compatibility.
 
-        Returns
-        -------
+        **Returns**
+
         Graph object
             numpy array as n-partite networkx graph, where n==dim.
-            Shape: (nrows + ncols + ncontexts, nrows*ncols + nrows*ncontexts + ncols*ncontexts) or
+
+            **Shape**: (nrows + ncols + ncontexts, nrows*ncols + nrows*ncontexts + ncols*ncontexts) or
             (nrows + ncols, nrows * ncols)
         """
         pass
@@ -677,8 +724,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Returns a n-partite graph, where n==dim.
 
-        Parameters
-        ----------
+        **Parameters**
+
         x: numpy array
             Data array.
         framework: {networkx, dgl}, default 'networkx'
@@ -688,15 +735,16 @@ class Generator(metaclass=abc.ABCMeta):
         cuda: int, default 0
             Index of cuda device to use. Only used if device==True and framework==dgl.
 
-        Returns
-        -------
+        **Returns**
+
         Graph object
             N-partite graph, where n==dim.
-            Shape: (nrows + ncols + ncontexts, nrows*ncols + nrows*ncontexts + ncols*ncontexts) or
+
+            **Shape**: (nrows + ncols + ncontexts, nrows*ncols + nrows*ncontexts + ncols*ncontexts) or
             (nrows + ncols, nrows * ncols)
 
-        Examples
-        --------
+        **Examples**
+
         >>> generator = BiclusterGenerator(silence=True)
         >>> X, y = generator.generate()
         >>> g = generator.to_graph(X, framework='dgl')
@@ -757,8 +805,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Prepares parameters to initialize the generator.
 
-        Parameters
-        ----------
+        **Parameters**
+
         nrows: int
             Number of rows in generated dataset.
         ncols: int
@@ -770,8 +818,8 @@ class Generator(metaclass=abc.ABCMeta):
         background: Background object
             Dataset's background.
 
-        Returns
-        -------
+        **Returns**
+
         str
             Name of generator to initialize.
         list
@@ -802,17 +850,19 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Returns True if dataset should be saved in memory.
 
-        Parameters
-        ----------
+        **Parameters**
+
         in_memory: bool, default None
             Determines if dataset should be saved in memory.
+
             If None then if the gends > 10**5 it defaults to False.
         gends: Dataset object, default None
             Generated Dataset (java object).
+
             Only used if in_memory is None, in that case gends cannot be None.
 
-        Returns
-        -------
+        **Returns**
+
         bool
             True if dataset should be saved in memory, else False.
         """
@@ -839,8 +889,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Plants quality settings on generated dataset
 
-        Parameters
-        ----------
+        **Parameters**
+
         generatedDataset: Dataset object
             Generated dataset (java object).
         """
@@ -854,8 +904,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Generates dataset, and may return somekind of tensor and hidden cluster labels.
 
-        Parameters
-        ----------
+        **Parameters**
+
         nrows: int, default 100
             Number of rows in generated dataset.
         ncols: int, default 100
@@ -870,19 +920,21 @@ class Generator(metaclass=abc.ABCMeta):
         **kwargs: any, default None
             Additional keywords that are passed on.
 
-        Returns
-        -------
+        **Returns**
+
         dense or sparse tensor
             Generated dataset as tensor.
-            Shape: (ncontexts, nrows, ncols) or (nrows, ncols)
+
+            **Shape**: (ncontexts, nrows, ncols) or (nrows, ncols)
         list
             Hidden cluster labels.
-            Shape: (nclusters, any)
+
+            **Shape**: (nclusters, any)
         None
             If no_return==True.
 
-        Examples
-        --------
+        **Examples**
+
         >>> gen = BiclusterGenerator(silence=True)
         >>> x, y = gen.generate(nrows=100, ncols=200, nclusters=20, in_memory=True)
         >>> x
@@ -939,10 +991,13 @@ class Generator(metaclass=abc.ABCMeta):
 
         """
         Shuts down JVM.
-        NOTICE if the JVM is shutdown it cannot be restarted on the same session.
+
+        **NOTICE** if the JVM is shutdown it cannot be restarted on the same session.
         """
 
         try:
             jpype.shutdownJVM()
         except RuntimeError:
             pass
+
+
