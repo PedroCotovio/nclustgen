@@ -4,7 +4,7 @@ from nclustgen import TriclusterGenerator, BiclusterGenerator
 import torch as th
 import json
 from tqdm import tqdm
-from time import perf_counter as pc, sleep
+from time import perf_counter as pc
 from statistics import mean
 
 
