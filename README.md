@@ -85,5 +85,5 @@ generator.save(file_name='example', single_file=True)
 [GPLv3](LICENSE)
 
 ## Documentation
-The documentation is available at: http://nclustgen.readthedocs.org.
+The documentation is available at: https://nclustgen.readthedocs.org.
 
