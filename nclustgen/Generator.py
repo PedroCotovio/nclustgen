@@ -3,21 +3,19 @@ import os
 import abc
 import warnings
 import json
-import numpy as np
 from sparse import COO
 
 import torch as th
 
-import jpype
-import jpype.imports
-from jpype.types import *
+# import jpype
+# import jpype.imports
 
-# Start JVM
-if jpype.isJVMStarted():
-    pass
-else:
-    # Loading G-Bic
-    jpype.startJVM(classpath=['nclustgen/jars/*'])
+# # Start JVM
+# if jpype.isJVMStarted():
+#     pass
+# else:
+#     # Loading G-Bic
+#     jpype.startJVM(classpath=['nclustgen/jars/*'])
 
 from java.lang import System
 from java.io import PrintStream
