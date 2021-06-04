@@ -12,10 +12,17 @@
 #
 import os
 import sys
+import sphinx_rtd_theme
 
 sys.path.insert(0, os.path.abspath('../../'))
 
-import sphinx_rtd_theme
+import re
+
+v = ''
+with open(os.path.join(os.path.abspath('../../'),'nclustgen/__init__.py'), 'r') as fd:
+    content = fd.read()
+    v = re.search(
+        r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', content, re.MULTILINE).group(1)
 
 
 # -- Project information -----------------------------------------------------
@@ -24,8 +31,8 @@ project = 'Nclustgen'
 copyright = '2021, Pedro Cotovio'
 author = 'Pedro Cotovio'
 
-version = '1.0.0'
-release = '1.0.0'
+version = v
+release = v
 
 
 # -- General configuration ---------------------------------------------------
