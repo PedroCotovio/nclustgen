@@ -5,6 +5,5 @@ dependencies:
   - python=3.8
   - pip:
     - sphinx-rtd-theme
-    - sphinx-js
     - recommonmark
     - nclustgen

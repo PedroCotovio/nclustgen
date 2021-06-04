@@ -93,4 +93,4 @@ inheritance_node_attrs = dict(fontsize=18, height=1.25, style='filled')
 
 autoclass_content = 'both'
 autodoc_member_order = 'bysource'
-autodoc_mock_imports = ['com']
+#autodoc_mock_imports = ['com']
