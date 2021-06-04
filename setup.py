@@ -4,7 +4,7 @@ import re
 
 version = ''
 license = ''
-with open('pyforms_web/__init__.py', 'r') as fd:
+with open('nclustgen/__init__.py', 'r') as fd:
     content = fd.read()
     version = re.search(
         r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', content, re.MULTILINE).group(1)
@@ -33,12 +33,13 @@ setup(
     url="https://github.com/pepedro97/nclustgen",
     project_urls={
         "Bug Tracker": "https://github.com/pepedro97/nclustgen/issues",
+        "Documentation": "https://nclustgen.readthedocs.org",
     },
     install_requires=[
             'dgl>=0.6.1',
             'JPype1>=1.2.1',
             'networkx>=2.5.1',
-            'torch>=1.8.1'
+            'torch>=1.8.1',
             'numpy',
             'scipy',
             'sparse',
@@ -62,5 +63,6 @@ setup(
     ],
     packages=find_packages(),
     python_requires=">=3.8",
-    keywords='biclustring triclustering generator data nclustgen'
+    keywords='biclustring triclustering generator data nclustgen',
+    test_suite='tests',
 )
