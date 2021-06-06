@@ -586,8 +586,9 @@ class BicsGenTest(TestCaseBase):
 
     def test_graph(self):
 
-        datasets = ['Numeric', 'Numeric', 'Numeric',
-                    'Symbolic', 'Symbolic', 'Symbolic']
+        datasets = ['Numeric', 'Numeric', 'Numeric', 'Numeric',
+                    'Symbolic', 'Symbolic', 'Symbolic', 'Symbolic',
+                    'Numeric', 'Numeric']
 
         generate_params = [
             [100, 100, 2, False, True, 'networkx', 'cpu'],
@@ -598,6 +599,8 @@ class BicsGenTest(TestCaseBase):
             [100, 100, 2, False, True, 'networkx', 'gpu'],
             [100, 100, 2, False, True, 'dgl', 'cpu'],
             [100, 100, 2, False, True, 'dgl', 'gpu'],
+            [100, 100, 2, False, False, 'dgl', 'cpu'],
+            [100, 100, 2, False, False, 'networkx', 'cpu'],
         ]
 
         expected_params = [
@@ -609,6 +612,8 @@ class BicsGenTest(TestCaseBase):
             [100, 100, 2, False, True, 'networkx', 'gpu'],
             [100, 100, 2, False, True, 'dgl', 'cpu'],
             [100, 100, 2, False, True, 'dgl', 'gpu'],
+            [100, 100, 2, False, False, 'dgl', 'cpu'],
+            [100, 100, 2, False, False, 'networkx', 'cpu']
         ]
 
         for i, (ds, params, expected) in enumerate(zip(datasets, generate_params, expected_params)):
@@ -1139,11 +1144,11 @@ class TricsGenTest(TestCaseBase):
                 except FileNotFoundError:
                     pass
 
-    # TODO check Bipartite
     def test_graph(self):
 
-        datasets = ['Numeric', 'Numeric', 'Numeric',
-                    'Symbolic', 'Symbolic', 'Symbolic']
+        datasets = ['Numeric', 'Numeric', 'Numeric', 'Numeric',
+                    'Symbolic', 'Symbolic', 'Symbolic', 'Symbolic',
+                    'Numeric', 'Numeric']
 
         generate_params = [
             [100, 100, 50, 2, False, True, 'networkx', 'cpu'],
@@ -1154,6 +1159,8 @@ class TricsGenTest(TestCaseBase):
             [100, 100, 50, 2, False, True, 'networkx', 'gpu'],
             [100, 100, 50, 2, False, True, 'dgl', 'cpu'],
             [100, 100, 50, 2, False, True, 'dgl', 'gpu'],
+            [100, 100, 50, 2, False, False, 'dgl', 'cpu'],
+            [100, 100, 50, 2, False, False, 'networkx', 'cpu']
         ]
 
         expected_params = [
@@ -1165,6 +1172,8 @@ class TricsGenTest(TestCaseBase):
             [100, 100, 50, 2, False, True, 'networkx', 'gpu'],
             [100, 100, 50, 2, False, True, 'dgl', 'cpu'],
             [100, 100, 50, 2, False, True, 'dgl', 'gpu'],
+            [100, 100, 50, 2, False, False, 'dgl', 'cpu'],
+            [100, 100, 50, 2, False, False, 'networkx', 'cpu']
         ]
 
         for i, (ds, params, expected) in enumerate(zip(datasets, generate_params, expected_params)):
