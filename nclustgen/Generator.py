@@ -3,19 +3,12 @@ import os
 import abc
 import warnings
 import json
+
+import numpy as np
 from sparse import COO
+from scipy.sparse import csr_matrix
 
 import torch as th
-
-# import jpype
-# import jpype.imports
-
-# # Start JVM
-# if jpype.isJVMStarted():
-#     pass
-# else:
-#     # Loading G-Bic
-#     jpype.startJVM(classpath=['nclustgen/jars/*'])
 
 from java.lang import System
 from java.io import PrintStream
@@ -775,8 +768,11 @@ class Generator(metaclass=abc.ABCMeta):
         if x is not None:
 
             # if sparse matrix then transform into dense
-            if isinstance(x, COO):
+            if isinstance(x, COO) or isinstance(x, csr_matrix):
                 x = x.todense()
+
+                if isinstance(x, np.matrix):
+                    x = np.array(x)
 
             if device == 'gpu' and not th.cuda.is_available():
 
