@@ -643,11 +643,15 @@ class BicsGenTest(TestCaseBase):
                 shape = (len(instance.graph.nodes), len(instance.graph.edges))
                 self.assertTrue(networkx.is_bipartite(instance.graph))
 
+                # define 0,0 weight
+                w00 = instance.graph.edges.get(('row-0', 'col-0'))['weight']
+
             else:
 
                 # assert class and  define shape for dgl
                 self.assertTrue(isinstance(instance.graph, dgl.DGLGraph))
                 shape = (instance.graph.num_nodes(), instance.graph.num_edges())
+                w00 = instance.graph.edata['w'][0]
 
                 if params[6] == 'gpu':
 
@@ -667,6 +671,12 @@ class BicsGenTest(TestCaseBase):
 
             # assert shape
             self.assertEqual(expected_shape, shape)
+
+            # assert weight
+            try:
+                self.assertEqual(float(w00), float(instance.X[0][0]))
+            except TypeError:
+                self.assertEqual(float(w00), float(numpy.array(instance.X.todense())[0][0]))
 
     def test_configfile(self):
 
@@ -1212,12 +1222,21 @@ class TricsGenTest(TestCaseBase):
                 self.assertTrue(isinstance(instance.graph, Graph))
                 shape = (len(instance.graph.nodes), len(instance.graph.edges))
 
+                # define 0,0,0 weight
+                w00_ = instance.graph.edges.get(('row-0', 'col-0'))['weight']
+                w0_0 = instance.graph.edges.get(('row-0', 'ctx-0'))['weight']
+                w_00 = instance.graph.edges.get(('col-0', 'ctx-0'))['weight']
+
             else:
 
                 # assert class and  define shape for dgl
                 self.assertTrue(isinstance(instance.graph, dgl.DGLGraph))
                 shape = (instance.graph.num_nodes(), instance.graph.num_edges())
-                
+
+                # define 0,0,0 weight
+                w00_ = instance.graph.edges[('row', 'elem', 'col')].data['w'][0]
+                w0_0 = instance.graph.edges[('row', 'elem', 'ctx')].data['w'][0]
+                w_00 = instance.graph.edges[('col', 'elem', 'ctx')].data['w'][0]
 
                 if params[7] == 'gpu':
 
@@ -1237,6 +1256,11 @@ class TricsGenTest(TestCaseBase):
 
             # assert shape
             self.assertEqual(expected_shape, shape)
+
+            # assert weight
+            self.assertTrue(w00_ == w0_0 == w_00)
+            w000 = w00_
+            self.assertEqual(float(w000), float(instance.X[0][0]))
 
     def test_configfile(self):
 
