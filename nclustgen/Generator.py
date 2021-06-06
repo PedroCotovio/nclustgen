@@ -62,8 +62,8 @@ class Generator(metaclass=abc.ABCMeta):
                 ------------------------------------------------
                 index       pattern combination
                 =========== ====================================
-                0           ['Order Preserving', 'None']
-                1           ['None', 'Order Preserving']
+                0           ['Order_Preserving', 'None']
+                1           ['None', 'Order_Preserving']
                 2           ['Constant', 'Constant']
                 3           ['None', 'Constant']
                 4           ['Constant', 'None']
@@ -80,8 +80,8 @@ class Generator(metaclass=abc.ABCMeta):
                 ------------------------------------------------
                 index       pattern combination
                 =========== ====================================
-                0           ['Order Preserving', 'None']
-                1           ['None', 'Order Preserving']
+                0           ['Order_Preserving', 'None']
+                1           ['None', 'Order_Preserving']
                 2           ['Constant', 'Constant']
                 3           ['None', 'Constant']
                 4           ['Constant', 'None']
@@ -92,9 +92,9 @@ class Generator(metaclass=abc.ABCMeta):
                 ------------------------------------------------------------------
                 index       pattern combination
                 =========== ======================================================
-                0           ['Order Preserving', 'None', 'None']
-                1           ['None', 'Order Preserving', 'None']
-                2           ['None', 'None', 'Order Preserving']
+                0           ['Order_Preserving', 'None', 'None']
+                1           ['None', 'Order_Preserving', 'None']
+                2           ['None', 'None', 'Order_Preserving']
                 3           ['Constant', 'Constant', 'Constant']
                 4           ['None', 'Constant', 'Constant']
                 5           ['Constant', 'Constant', 'None']
@@ -123,9 +123,9 @@ class Generator(metaclass=abc.ABCMeta):
                 ------------------------------------------------------------------
                 index       pattern combination
                 =========== ======================================================
-                0           ['Order Preserving', 'None', 'None']
-                1           ['None', 'Order Preserving', 'None']
-                2           ['None', 'None', 'Order Preserving']
+                0           ['Order_Preserving', 'None', 'None']
+                1           ['None', 'Order_Preserving', 'None']
+                2           ['None', 'None', 'Order_Preserving']
                 3           ['Constant', 'Constant', 'Constant']
                 4           ['None', 'Constant', 'Constant']
                 5           ['Constant', 'Constant', 'None']
