@@ -150,12 +150,48 @@ class BiclusterGenerator(Generator):
     @staticmethod
     def java_to_numpy(generatedDataset):
 
+        """
+        Extracts numpy array from Dataset object.
+
+        Parameters
+        ----------
+
+        generatedDataset: Dataset object
+            Generated dataset (java object).
+
+        Returns
+        -------
+
+        numpy array
+            Generated dataset as numpy array.
+            Shape: (nrows, ncols)
+
+        """
+
         tensor = str(io.matrixToStringColOriented(generatedDataset, generatedDataset.getNumRows(), 0, False))
 
         return np.array([[tvc(val) for val in row.split('\t')[1:]] for row in tensor.split('\n')][:-1])
 
     @staticmethod
     def java_to_sparse(generatedDataset):
+
+        """
+        Extracts sparce tensor from Dataset object.
+
+        Parameters
+        ----------
+
+        generatedDataset: Dataset object
+            Generated dataset (java object).
+
+        Returns
+        -------
+
+        csr_matrix
+            Generated dataset as csr_matrix.
+
+            **Shape**: (nrows, ncols)
+        """
 
         threshold = int(generatedDataset.getNumRows() / 10)
         steps = [i for i in range(int(generatedDataset.getNumRows() / threshold))]
@@ -172,6 +208,29 @@ class BiclusterGenerator(Generator):
 
     @staticmethod
     def dense_to_dgl(x, device, cuda=0):
+
+        """
+        Extracts a bipartite dgl graph from a numpy array
+
+        Parameters
+        ----------
+
+        x: numpy array
+            Data array.
+        device: {'cpu', 'gpu'}
+            Type of device for storing the tensor.
+        cuda: int, default 0
+            Index of cuda device to use. Only used if device==True.
+
+        Returns
+        -------
+
+        heterograph object
+            numpy array as bipartite dgl graph.
+
+            **Shape**: (nrows + ncols, nrows * ncols)
+
+        """
 
         # set (u,v)
 
@@ -201,6 +260,27 @@ class BiclusterGenerator(Generator):
     @staticmethod
     def dense_to_networkx(x, **kwargs):
 
+        """
+        Extracts a bipartite networkx graph from numpy array
+
+        Parameters
+        ----------
+
+        x: numpy array
+            Data array.
+        **kwargs: any, default None
+            Additional keywords have no effect but might be accepted for compatibility.
+
+        Returns
+        -------
+
+        Graph object
+            numpy array as bipartite networkx graph.
+
+            **Shape**: (nrows + ncols, nrows * ncols)
+
+        """
+
         G = nx.Graph()
 
         for n, axis in enumerate(['row', 'col']):
@@ -216,6 +296,29 @@ class BiclusterGenerator(Generator):
         return G
 
     def save(self, file_name='example', path=None, single_file=None):
+
+        """
+        Saves data files to chosen path.
+
+        Parameters
+        ----------
+
+        file_name: str, default 'example_dataset'
+            Saved files prefix.
+        path: str, default None
+            Path to save files. If None then files are saved in the current working directory.
+        single_file: Bool, default None.
+            If False dataset is saved in multiple data files. If None then if the dataset's size is larger then 10**5
+            it defaults to False, else True.
+
+        Examples
+        --------
+
+        >>> generator = BiclusterGenerator(silence=True)
+        >>> generator.generate()
+        >>> generator.save(file_name='BicFiles', single_file=False)
+
+        """
 
         self.start_silencing()
 

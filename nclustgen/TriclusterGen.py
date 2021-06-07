@@ -173,6 +173,24 @@ class TriclusterGenerator(Generator):
     @staticmethod
     def java_to_numpy(generatedDataset):
 
+        """
+        Extracts numpy array from Dataset object.
+
+        Parameters
+        ----------
+
+        generatedDataset: Dataset object
+            Generated dataset (java object).
+
+        Returns
+        -------
+
+        numpy array
+            Generated dataset as numpy array.
+            Shape: (ncontexts, nrows, ncols)
+
+        """
+
         tensor = str(io.matrixToStringColOriented(generatedDataset, generatedDataset.getNumRows(), 0, False))
 
         tensor = np.array(
@@ -186,6 +204,25 @@ class TriclusterGenerator(Generator):
 
     @staticmethod
     def java_to_sparse(generatedDataset):
+
+        """
+        Extracts sparce tensor from Dataset object.
+
+        Parameters
+        ----------
+
+        generatedDataset: Dataset object
+            Generated dataset (java object).
+
+        Returns
+        -------
+
+        COO tensor
+            Generated dataset as COO tensor.
+
+            **Shape**: (ncontexts, nrows, ncols)
+
+        """
 
         threshold = int(generatedDataset.getNumRows() / 10)
         steps = [i for i in range(int(generatedDataset.getNumRows() / threshold))]
@@ -207,6 +244,28 @@ class TriclusterGenerator(Generator):
 
     @staticmethod
     def dense_to_dgl(x, device, cuda=0):
+
+        """
+        Extracts a tripartite dgl graph from a numpy array
+
+        Parameters
+        ----------
+
+        x: numpy array
+            Data array.
+        device: {'cpu', 'gpu'}
+            Type of device for storing the tensor.
+        cuda: int, default 0
+            Index of cuda device to use. Only used if device==True.
+
+        Returns
+        -------
+
+        heterograph object
+            numpy array as tripartite dgl graph.
+
+            **Shape**: (nrows + ncols + ncontexts, nrows * ncols * ncontexts * 3)
+        """
 
         # set (u,v)
 
@@ -242,6 +301,27 @@ class TriclusterGenerator(Generator):
     @staticmethod
     def dense_to_networkx(x, **kwargs):
 
+        """
+        Extracts a tripartite networkx graph from numpy array
+
+        Parameters
+        ----------
+
+        x: numpy array
+            Data array.
+        **kwargs: any, default None
+            Additional keywords have no effect but might be accepted for compatibility.
+
+        Returns
+        -------
+
+        Graph object
+            numpy array as tripartite networkx graph.
+
+            **Shape**: (nrows + ncols + ncontexts, nrows * ncols * ncontexts * 3)
+
+        """
+
         G = nx.MultiGraph()
 
         edges = np.array(
@@ -272,6 +352,29 @@ class TriclusterGenerator(Generator):
         serv.saveResult(self.generatedDataset, file_name + '_cluster_data', file_name + '_dataset')
 
         self.stop_silencing()
+
+        """
+        Saves data files to chosen path.
+
+        Parameters
+        ----------
+
+        file_name: str, default 'example_dataset'
+            Saved files prefix.
+        path: str, default None
+            Path to save files. If None then files are saved in the current working directory.
+        single_file: Bool, default None.
+            If False dataset is saved in multiple data files. If None then if the dataset's size is larger then 10**5
+            it defaults to False, else True.
+
+        Examples
+        --------
+
+        >>> generator = TriclusterGenerator(silence=True)
+        >>> generator.generate()
+        >>> generator.save(file_name='TricFiles', single_file=False)
+
+        """
 
 
 class TriclusterGeneratorbyConfig(TriclusterGenerator):

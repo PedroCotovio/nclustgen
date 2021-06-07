@@ -608,13 +608,6 @@ class Generator(metaclass=abc.ABCMeta):
             If False dataset is saved in multiple data files. If None then if the dataset's size is larger then 10**5
             it defaults to False, else True.
 
-        Examples
-        --------
-
-        >>> generator = BiclusterGenerator(silence=True)
-        >>> generator.generate()
-        >>> generator.save(file_name='BicFiles', single_file=False)
-
         """
         pass
 
@@ -636,7 +629,7 @@ class Generator(metaclass=abc.ABCMeta):
 
         numpy array
             Generated dataset as numpy array (dense tensor).
-            Shape: (ncontexts, nrows, ncols) or (nrows, ncols)
+
         """
         pass
 
@@ -656,13 +649,9 @@ class Generator(metaclass=abc.ABCMeta):
         Returns
         -------
 
-        csr_matrix or COO tensor
-            Generated dataset as csr_matrix or COO tensor (sparse tensor).
+        Sparse tensor
+            Generated dataset as sparse tensor.
 
-            If dim = 2 then returns csr_matrix (from scipy.sparse).
-            Else returns a COO tensor (from sparse).
-
-            **Shape**: (ncontexts, nrows, ncols) or (nrows, ncols)
         """
         pass
 
@@ -753,7 +742,7 @@ class Generator(metaclass=abc.ABCMeta):
     def dense_to_dgl(x, device, cuda=0):
 
         """
-        Extracts a partite dgl graph from numpy array
+        Extracts a partite dgl graph from a numpy array
 
         Parameters
         ----------
@@ -771,8 +760,6 @@ class Generator(metaclass=abc.ABCMeta):
         heterograph object
             numpy array as n-partite dgl graph, where n==dim.
 
-            **Shape**: (nrows + ncols + ncontexts, nrows * ncols * ncontexts * 3(dim)) or
-            (nrows + ncols, nrows * ncols)
         """
         pass
 
@@ -797,8 +784,6 @@ class Generator(metaclass=abc.ABCMeta):
         Graph object
             numpy array as n-partite networkx graph, where n==dim.
 
-            **Shape**: (nrows + ncols + ncontexts, nrows * ncols * ncontexts * 3(dim)) or
-            (nrows + ncols, nrows * ncols)
         """
         pass
 
