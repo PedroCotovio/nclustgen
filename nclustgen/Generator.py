@@ -285,7 +285,66 @@ class Generator(metaclass=abc.ABCMeta):
         ----------
 
         _n: int
-            Dimensionality
+            Dimensionality.
+        _stdout: System object (java)
+            default System.out
+        dstype: {'NUMERIC', 'SYMBOLIC'}
+            Type of Dataset to be generated, numeric or symbolic(categorical).
+        patterns: list
+            Type of patterns that will be hidden in the data.
+        clusterdistribution: list
+            Distribution used to calculate the size of a cluster.
+        contiguity: {'COLUMNS', 'CONTEXTS', 'NONE'}
+            Data contiguity.
+        time_profile: {'RANDOM', 'MONONICALLY_INCREASING', 'MONONICALLY_DECREASING', None}
+            Time profile for the ORDER_PRESERVING pattern.
+        seed: int
+            Seed to initialize random objects.
+        realval: bool
+            If the dataset is real valued.
+        minval: float
+            Dataset's minimum value.
+        maxval: float
+             Dataset's maximum value.
+        noise: tuple
+            Dataset's noise settings.
+        errors: tuple
+            Dataset's error settings.
+        missing: tuple
+            Dataset's missing settings.
+        symbols: list
+            Dataset's alphabet.
+        nsymbols: int
+            Length of the alphabet.
+        plaidcoherency: {'ADDITIVE', 'MULTIPLICATIVE', 'INTERPOLED', 'NONE', 'NO_OVERLAPPING'}
+            Type of plaid coherency.
+        percofoverlappingclusts: float
+            Percentage of overlapping clusters.
+        maxclustsperoverlappedarea: int
+            Maximum number of clusters overlapped per area.
+        maxpercofoverlappingelements: float
+            Maximum percentage of values shared by overlapped clusters.
+        percofoverlappingrows: float
+            Percentage of allowed amount of overlaping across clusters rows.
+        percofoverlappingcolumns: float
+            Percentage of allowed amount of overlaping across clusters columns.
+        percofoverlappingcontexts: float
+            Percentage of allowed amount of overlaping across clusters contexts.
+        background: list
+            Dataset's background settings
+        generatedDataset: Dataset object (java)
+            Generated dataset.
+        X: dense or sparse tensor
+            Generated dataset as tensor.
+        Y: list
+            Hidden cluster labels.
+        graph: Graph object
+            N-partite graph
+        in_memory: bool
+            If dataset should be saved in memory (dense format)
+        silenced: bool
+            If prints to the console.
+
         """
 
         # define dimensions
