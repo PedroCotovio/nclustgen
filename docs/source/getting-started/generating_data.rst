@@ -283,11 +283,11 @@ The datasets shape will be transformed in the following way:
 
 **number of nodes** = *nrows + ncols (+ ncontexts)*
 
-**number of edges** = *nrows * ncols (+ nrows * ncontexts + ncols * ncontexts)*
+**number of edges** = *nrows * ncols (* ncontexts * 3)*
 
 The graphs can be outputted in two different formats as a
-`NetworkX graph <https://networkx.org/documentation/latest/reference/introduction.html#graphs>`_, or as a
-`DGL graph <https://docs.dgl.ai/api/python/dgl.DGLGraph.html>`_ with a
+`NetworkX Multigraph <https://networkx.org/documentation/stable/tutorial.html#multigraphs>`_, or as a
+`DGL heterograph <https://docs.dgl.ai/api/python/dgl.DGLGraph.html>`_ with a
 `pytorch <https://pytorch.org/docs/stable/tensors.html>`_ backend.
 
 The `networkX <https://networkx.org/>`_ is a very well known framework to deal with graph data, while

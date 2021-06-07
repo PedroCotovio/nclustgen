@@ -1207,9 +1207,7 @@ class TricsGenTest(TestCaseBase):
 
             expected_shape = (
                 expected[0] + expected[1] + expected[2],
-                (expected[0] * expected[1]) +
-                (expected[0] * expected[2]) +
-                (expected[1] * expected[2])
+                expected[0] * expected[1] * expected[2] * 3
             )
 
             # check method logic
@@ -1223,9 +1221,9 @@ class TricsGenTest(TestCaseBase):
                 shape = (len(instance.graph.nodes), len(instance.graph.edges))
 
                 # define 0,0,0 weight
-                w00_ = instance.graph.edges.get(('row-0', 'col-0'))['weight']
-                w0_0 = instance.graph.edges.get(('row-0', 'ctx-0'))['weight']
-                w_00 = instance.graph.edges.get(('col-0', 'ctx-0'))['weight']
+                w00_ = instance.graph.edges.get(('row-0', 'col-0', 0))['weight']
+                w0_0 = instance.graph.edges.get(('row-0', 'ctx-0', 0))['weight']
+                w_00 = instance.graph.edges.get(('col-0', 'ctx-0', 0))['weight']
 
             else:
 
@@ -1260,7 +1258,7 @@ class TricsGenTest(TestCaseBase):
             # assert weight
             self.assertTrue(w00_ == w0_0 == w_00)
             w000 = w00_
-            self.assertEqual(float(w000), float(instance.X[0][0]))
+            self.assertEqual(float(w000), float(instance.X[0][0][0]))
 
     def test_configfile(self):
 
