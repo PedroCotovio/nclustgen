@@ -10,6 +10,9 @@ from scipy.sparse import csr_matrix
 
 import torch as th
 
+import jpype
+import jpype.imports
+
 from java.lang import System
 from java.io import PrintStream
 
@@ -31,7 +34,8 @@ class Generator(metaclass=abc.ABCMeta):
                  seed=None, *args, **kwargs):
 
         """
-        **Parameters**
+        Parameters
+        ----------
 
         n: int, internal
             Determines dimensionality (e.g. Bi/Tri clustering). Should only be used by subclasses.
@@ -273,9 +277,15 @@ class Generator(metaclass=abc.ABCMeta):
 
             If None then if the generated dataset's size is larger then 10**5 it defaults to sparse, else outputs dense.
 
-            **Note**: This parameter can be overwritten in the generate method.
+            Note
+            ----
+                This parameter can be overwritten in the generate method.
 
-        **Methods**
+        Attributes
+        ----------
+
+        _n: int
+            Dimensionality
         """
 
         # define dimensions
@@ -376,7 +386,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Starts silencing all java prints to terminal.
 
-        **Parameters**
+        Parameters
+        ----------
 
         silence: bool, default None
             If True all java prints to terminal are ignored.
@@ -407,12 +418,14 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Returns the classes attributes.
 
-        **Returns**
+        Returns
+        -------
 
         dict
             Values of class attributes.
 
-        **Examples**
+        Examples
+        --------
 
         >>> generator = BiclusterGenerator()
         >>> generator.get_params()
@@ -446,7 +459,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Builds a Background object, using the background attribute.
 
-        **Returns**
+        Returns
+        -------
 
         Background object
             Dataset's background.
@@ -458,7 +472,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Builds the (Java)Generator object.
 
-        **Parameters**
+        Parameters
+        ----------
 
         class_call: {'NumericDatasetGenerator', 'SymbolicDatasetGenerator'}
             Name of generator to initialize.
@@ -467,7 +482,8 @@ class Generator(metaclass=abc.ABCMeta):
         contexts_index: int
             Position of the ncontext param. Only used when dimensionality < 2.
 
-        **Returns**
+        Returns
+        -------
 
         (Java)Generator object
             Generator for data generation.
@@ -480,7 +496,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Builds a list of pattern objects, using the patterns, time_profile, and dstype attributes.
 
-        **Returns**
+        Returns
+        -------
 
         ArrayList
             List of pattern objects.
@@ -493,7 +510,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Builds a Structure object, using the clusterdistribution and contiguity attributes.
 
-        **Returns**
+        Returns
+        -------
 
         Structure object
             Dataset's structure.
@@ -506,7 +524,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Builds an OverlappingSettings object.
 
-        **Returns**
+        Returns
+        -------
 
         OverlappingSettings object
             Dataset's overlapping settings.
@@ -519,7 +538,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Saves data files to chosen path.
 
-        **Parameters**
+        Parameters
+        ----------
 
         file_name: str, default 'example_dataset'
             Saved files prefix.
@@ -529,7 +549,8 @@ class Generator(metaclass=abc.ABCMeta):
             If False dataset is saved in multiple data files. If None then if the dataset's size is larger then 10**5
             it defaults to False, else True.
 
-        **Examples**
+        Examples
+        --------
 
         >>> generator = BiclusterGenerator(silence=True)
         >>> generator.generate()
@@ -545,12 +566,14 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Extracts numpy array from Dataset object.
 
-        **Parameters**
+        Parameters
+        ----------
 
         generatedDataset: Dataset object
             Generated dataset (java object).
 
-        **Returns**
+        Returns
+        -------
 
         numpy array
             Generated dataset as numpy array (dense tensor).
@@ -565,12 +588,14 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Extracts sparce tensor from Dataset object.
 
-        **Parameters**
+        Parameters
+        ----------
 
         generatedDataset: Dataset object
             Generated dataset (java object).
 
-        **Returns**
+        Returns
+        -------
 
         csr_matrix or COO tensor
             Generated dataset as csr_matrix or COO tensor (sparse tensor).
@@ -587,7 +612,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Returns generated dataset as somekind of tensor and hidden cluster labels.
 
-        **Parameters**
+        Parameters
+        ----------
 
         generatedDataset: Dataset object
             Generated dataset (java object).
@@ -598,7 +624,8 @@ class Generator(metaclass=abc.ABCMeta):
         keys: list, default ['X', 'Y', 'Z']
             Axis keys. Do not overwrite, unless you are using a different dataset object.
 
-        **Returns**
+        Returns
+        -------
 
         dense or sparse tensor
             Generated dataset as tensor.
@@ -669,7 +696,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Extracts a partite dgl graph from numpy array
 
-        **Parameters**
+        Parameters
+        ----------
 
         x: numpy array
             Data array.
@@ -678,12 +706,13 @@ class Generator(metaclass=abc.ABCMeta):
         cuda: int, default 0
             Index of cuda device to use. Only used if device==True.
 
-        **Returns**
+        Returns
+        -------
 
         heterograph object
             numpy array as n-partite dgl graph, where n==dim.
 
-            **Shape**: (nrows + ncols + ncontexts, nrows*ncols + nrows*ncontexts + ncols*ncontexts) or
+            **Shape**: (nrows + ncols + ncontexts, nrows * ncols * ncontexts * 3(dim)) or
             (nrows + ncols, nrows * ncols)
         """
         pass
@@ -695,19 +724,21 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Extracts a partite networkx graph from numpy array
 
-        **Parameters**
+        Parameters
+        ----------
 
         x: numpy array
             Data array.
         **kwargs: any, default None
             Additional keywords have no effect but might be accepted for compatibility.
 
-        **Returns**
+        Returns
+        -------
 
         Graph object
             numpy array as n-partite networkx graph, where n==dim.
 
-            **Shape**: (nrows + ncols + ncontexts, nrows*ncols + nrows*ncontexts + ncols*ncontexts) or
+            **Shape**: (nrows + ncols + ncontexts, nrows * ncols * ncontexts * 3(dim)) or
             (nrows + ncols, nrows * ncols)
         """
         pass
@@ -717,7 +748,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Returns a n-partite graph, where n==dim.
 
-        **Parameters**
+        Parameters
+        ----------
 
         x: numpy array
             Data array.
@@ -728,15 +760,17 @@ class Generator(metaclass=abc.ABCMeta):
         cuda: int, default 0
             Index of cuda device to use. Only used if device==True and framework==dgl.
 
-        **Returns**
+        Returns
+        -------
 
         Graph object
             N-partite graph, where n==dim.
 
-            **Shape**: (nrows + ncols + ncontexts, nrows*ncols + nrows*ncontexts + ncols*ncontexts) or
+            **Shape**: (nrows + ncols + ncontexts, nrows * ncols * ncontexts * 3(dim)) or
             (nrows + ncols, nrows * ncols)
 
-        **Examples**
+        Examples
+        --------
 
         >>> generator = BiclusterGenerator(silence=True)
         >>> X, y = generator.generate()
@@ -801,7 +835,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Prepares parameters to initialize the generator.
 
-        **Parameters**
+        Parameters
+        ----------
 
         nrows: int
             Number of rows in generated dataset.
@@ -814,7 +849,8 @@ class Generator(metaclass=abc.ABCMeta):
         background: Background object
             Dataset's background.
 
-        **Returns**
+        Returns
+        -------
 
         str
             Name of generator to initialize.
@@ -846,7 +882,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Returns True if dataset should be saved in memory.
 
-        **Parameters**
+        Parameters
+        ----------
 
         in_memory: bool, default None
             Determines if dataset should be saved in memory.
@@ -857,7 +894,8 @@ class Generator(metaclass=abc.ABCMeta):
 
             Only used if in_memory is None, in that case gends cannot be None.
 
-        **Returns**
+        Returns
+        -------
 
         bool
             True if dataset should be saved in memory, else False.
@@ -885,7 +923,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Plants quality settings on generated dataset
 
-        **Parameters**
+        Parameters
+        ----------
 
         generatedDataset: Dataset object
             Generated dataset (java object).
@@ -900,7 +939,8 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Generates dataset, and may return somekind of tensor and hidden cluster labels.
 
-        **Parameters**
+        Parameters
+        ----------
 
         nrows: int, default 100
             Number of rows in generated dataset.
@@ -916,7 +956,8 @@ class Generator(metaclass=abc.ABCMeta):
         **kwargs: any, default None
             Additional keywords that are passed on.
 
-        **Returns**
+        Returns
+        -------
 
         dense or sparse tensor
             Generated dataset as tensor.
@@ -929,7 +970,8 @@ class Generator(metaclass=abc.ABCMeta):
         None
             If no_return==True.
 
-        **Examples**
+        Examples
+        --------
 
         >>> gen = BiclusterGenerator(silence=True)
         >>> x, y = gen.generate(nrows=100, ncols=200, nclusters=20, in_memory=True)
@@ -988,7 +1030,9 @@ class Generator(metaclass=abc.ABCMeta):
         """
         Shuts down JVM.
 
-        **NOTICE** if the JVM is shutdown it cannot be restarted on the same session.
+        Caution
+        -------
+            If the JVM is shutdown it cannot be restarted on the same session.
         """
 
         try:
