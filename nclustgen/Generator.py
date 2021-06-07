@@ -504,6 +504,49 @@ class Generator(metaclass=abc.ABCMeta):
                 for a in attributes if not (a[0].startswith('__') and a[0].endswith('__') or a[0].startswith('_'))
                 }
 
+    def get_cluster_info(self, generatedDataset=None):
+
+        """
+        Returns clusters info.
+
+        Parameters
+        ----------
+
+        generatedDataset: Dataset object
+            Generated dataset (java object).
+
+        Returns
+        -------
+
+        dict
+            Hidden cluster info.
+
+        Examples
+        --------
+        >>> generator = BiclusterGenerator(silence=True)
+        >>> generator.generate(no_return=True)
+        >>> generator.get_cluster_info()
+        {'0': {'%Errors': '0', 'Type': 'Numeric', '%Missings': '0', '%Noise': '0', 'X': [15, 51, 63, 92],
+        'Y': [7, 29, 35, 94], 'RowPattern': 'Constant', 'ColumnPattern': 'Constant',
+        'Data': [['-8.61', '-8.61', '-8.61', '-8.61'], ['-8.61', '-8.61', '-8.61', '-8.61'],
+        ['-8.61', '-8.61', '-8.61', '-8.61'], ['-8.61', '-8.61', '-8.61', '-8.61']],
+        'PlaidCoherency': 'No Overlapping', '#rows': 4, '#columns': 4}}
+
+        """
+
+        if generatedDataset is None:
+            generatedDataset = self.generatedDataset
+
+        cluster_type = {2: 'bi', 3: 'Tri'}[self._n]
+        geninfo_params = {2: [generatedDataset, False], 3: [generatedDataset]}[self._n]
+
+        js = json.loads(
+            str(getattr(generatedDataset, 'get{}csInfoJSON'.format(cluster_type.capitalize()))
+                (*geninfo_params).getJSONObject('{}clusters'.format(cluster_type)).toString())
+        )
+
+        return js
+
     @abc.abstractmethod
     def initialize_seed(self):
 
@@ -721,15 +764,9 @@ class Generator(metaclass=abc.ABCMeta):
 
         # Get clusters
 
+        js = self.get_cluster_info()
+
         keys = keys[:self._n]
-
-        cluster_type = {2: 'bi', 3: 'Tri'}[self._n]
-        geninfo_params = {2: [generatedDataset, False], 3: [generatedDataset]}[self._n]
-
-        js = json.loads(
-            str(getattr(generatedDataset, 'get{}csInfoJSON'.format(cluster_type.capitalize()))
-                (*geninfo_params).getJSONObject('{}clusters'.format(cluster_type)).toString())
-        )
 
         self.Y = [[js[i][key] for key in keys] for i in js.keys()]
 
