@@ -233,8 +233,6 @@ class TriclusterGenerator(Generator):
         G.nodes['col'].data['c'] = th.zeros(x.shape[2])
         G.nodes['ctx'].data['c'] = th.zeros(x.shape[0])
 
-        # remove duplicate edges
-        G = dgl.to_simple(G)
 
         if device == 'gpu':
             G = G.to('cuda:{}'.format(cuda))
@@ -244,12 +242,7 @@ class TriclusterGenerator(Generator):
     @staticmethod
     def dense_to_networkx(x, **kwargs):
 
-        G = nx.Graph()
-
-        for n, axis in enumerate(['ctx', 'row', 'col']):
-
-            G.add_nodes_from(
-                (('{}-{}'.format(axis, i), {'cluster': 0}) for i in range(x.shape[n])), bipartite=n)
+        G = nx.MultiGraph()
 
         edges = np.array(
             [[('row-{}'.format(i), 'col-{}'.format(j), elem),
