@@ -5,9 +5,9 @@ Generating Data
 Generators
 ----------
 
-This tool provides data generators for bi-clustering and tri-clustering, both generators are based on a (dimensions)
-abstract class: :doc:`/api-reference/generator`. A complete explanation of the parameters of the generator can be found in
-the API reference.
+This tool provides data generators for bi-clustering and tri-clustering, both generators are based on
+:class:`nclustgen.Generator.Generator`, a (dimensions) abstract class. A complete explanation of the parameters of the
+generator can be found in the API reference.
 
 It can generate real-valued, integer, and categorical datasets, with different settings for cluster patterns,
 distributions, cluster overlapping, noise, missing values, and other parameters.
@@ -57,8 +57,8 @@ A seed argument can also be used to ensure reproducibility:
     x, y = generator.generate()
     x
 
-To generate a dataset, the :meth:`nclustgen.Generator.Generator.generate` method can be called. This method receives as input the dataset's shape and number
-of hidden clusters:
+To generate a dataset, the :meth:`nclustgen.Generator.Generator.generate` method can be called. This method receives as
+input the dataset's shape and number of hidden clusters:
 
 .. code:: python
 
@@ -211,7 +211,7 @@ index       pattern combination
 Dense Tensors
 -------------
 
-If the generator's *in_memory* parameter is True, then a dense tensor will be generated, in this case
+If :attr:`nclustgen.Generator.Generator.in_memory` is True, then a dense tensor will be generated, in this case
 `numpy <https://numpy.org/>`_ is used. If you are not familiar with numpy follow this link to learn more about it:
 https://numpy.org/doc/stable/user/quickstart.html
 
@@ -246,7 +246,7 @@ On the other hand, when the generator's output is a dense tensor, it will be of 
 Sparse Tensors
 --------------
 
-If the generator's *in_memory* parameter is False, then a sparse tensor will be generated, in this case different packages
+If :attr:`nclustgen.Generator.Generator.in_memory` parameter is False, then a sparse tensor will be generated, in this case different packages
 are used depending on the dimensionality of the dataset. But the shape follows the standard set by the dense option.
 
 Matrix
@@ -276,7 +276,7 @@ On the other hand, when the generator's output is a sparse tensor a
 Graphs
 ------
 
-The generator's :meth:`nclustgen.Generator.Generator.to_graph` method allows for either a bipartite or tripartite
+The :meth:`nclustgen.Generator.Generator.to_graph` method allows for either a bipartite or tripartite
 graph to be generated, depending on the datasets dimension.
 
 The datasets shape will be transformed in the following way:
