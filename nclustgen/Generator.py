@@ -635,7 +635,7 @@ class Generator(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def save(self, file_name='example_dataset', path=None, single_file=None):
+    def save(self, extension='default', file_name='example_dataset', path=None, single_file=None, **kwargs):
 
         """
         Saves data files to chosen path.
@@ -643,13 +643,17 @@ class Generator(metaclass=abc.ABCMeta):
         Parameters
         ----------
 
+        extension: {'default', 'csv'}, default 'default'
+            Extension of saved data file.
         file_name: str, default 'example_dataset'
             Saved files prefix.
         path: str, default None
             Path to save files. If None then files are saved in the current working directory.
         single_file: Bool, default None.
             If False dataset is saved in multiple data files. If None then if the dataset's size is larger then 10**5
-            it defaults to False, else True.
+            it defaults to False, else True. Only used if extension=='default'.
+        **kwargs: any, default None
+            Additional keywords that are passed on.
 
         """
         pass

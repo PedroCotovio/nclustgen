@@ -3,6 +3,7 @@ from .Generator import Generator
 import os
 import json
 import sys
+import csv
 import numpy as np
 from scipy.sparse import csr_matrix, vstack
 
@@ -295,7 +296,7 @@ class BiclusterGenerator(Generator):
 
         return G
 
-    def save(self, file_name='example', path=None, single_file=None):
+    def save(self, extension='default', file_name='example', path=None, single_file=None, **kwargs):
 
         """
         Saves data files to chosen path.
@@ -303,13 +304,18 @@ class BiclusterGenerator(Generator):
         Parameters
         ----------
 
+        extension: {'default', 'csv'}, default 'default'
+            Extension of saved data file. If default, uses Java class default. Else it returns a single data file and a
+            labels file only.
         file_name: str, default 'example_dataset'
             Saved files prefix.
         path: str, default None
             Path to save files. If None then files are saved in the current working directory.
         single_file: Bool, default None.
             If False dataset is saved in multiple data files. If None then if the dataset's size is larger then 10**5
-            it defaults to False, else True.
+            it defaults to False, else True. Only used if extension=='default'.
+        **kwargs: any, default None
+            Additional keywords that are passed on.
 
         Examples
         --------
@@ -317,22 +323,45 @@ class BiclusterGenerator(Generator):
         >>> generator = BiclusterGenerator(silence=True)
         >>> generator.generate()
         >>> generator.save(file_name='BicFiles', single_file=False)
+        >>> generator.save(extension='csv', file_name='BicFiles', delimiter=';')
 
         """
-
-        self.start_silencing()
-
-        serv = GBicService()
 
         if path is None:
             path = os.getcwd() + '/'
 
-        serv.setPath(path)
-        serv.setSingleFileOutput(self.asses_memory(single_file, gends=self.generatedDataset))
+        self.start_silencing()
 
-        getattr(serv, 'save{}Result'.format(self.dstype.capitalize()))(
-            self.generatedDataset, file_name + '_cluster_data', file_name + '_dataset'
-        )
+        if extension == 'csv':
+            # check if dense exists
+            if self.generatedDataset is None:
+                raise AttributeError('No generated dataset exists. '
+                                     'Data must first be generated using the .generate() method.')
+
+            elif self.X is None:
+                self.X, self.Y = self.to_tensor(in_memory=False)
+
+            elif isinstance(self.X, csr_matrix):
+                self.X = self.java_to_numpy(self.generatedDataset)
+
+            # save data
+            np.savetxt('{}_data.csv'.format(os.path.join(path, file_name)), self.X, fmt="%d", **kwargs)
+
+            # save labels
+            with open('{}_labels.csv'.format(os.path.join(path, file_name)), 'w', newline='') as fp:
+                writer = csv.writer(fp, quoting=csv.QUOTE_NONNUMERIC, **kwargs)
+                writer.writerows(self.Y)
+
+        else:
+
+            serv = GBicService()
+
+            serv.setPath(path)
+            serv.setSingleFileOutput(self.asses_memory(single_file, gends=self.generatedDataset))
+
+            getattr(serv, 'save{}Result'.format(self.dstype.capitalize()))(
+                self.generatedDataset, file_name + '_cluster_data', file_name + '_dataset'
+            )
 
         self.stop_silencing()
 

@@ -4,6 +4,7 @@ from .Generator import Generator
 import os
 import json
 import sys
+import csv
 import numpy as np
 from sparse import concatenate, COO
 
@@ -338,20 +339,7 @@ class TriclusterGenerator(Generator):
 
         return G
 
-    def save(self, file_name='example', path=None, single_file=None):
-
-        self.start_silencing()
-
-        serv = GTricService()
-
-        if path is None:
-            path = os.getcwd() + '/'
-
-        serv.setPath(path)
-        serv.setSingleFileOutput(self.asses_memory(single_file, gends=self.generatedDataset))
-        serv.saveResult(self.generatedDataset, file_name + '_cluster_data', file_name + '_dataset')
-
-        self.stop_silencing()
+    def save(self, extension='default', file_name='example', path=None, single_file=None, **kwargs):
 
         """
         Saves data files to chosen path.
@@ -359,13 +347,18 @@ class TriclusterGenerator(Generator):
         Parameters
         ----------
 
+        extension: {'default', 'csv'}, default 'default'
+            Extension of saved data file. If default, uses Java class default. Else it returns a data file per context
+            plus a labels file.
         file_name: str, default 'example_dataset'
             Saved files prefix.
         path: str, default None
             Path to save files. If None then files are saved in the current working directory.
         single_file: Bool, default None.
             If False dataset is saved in multiple data files. If None then if the dataset's size is larger then 10**5
-            it defaults to False, else True.
+            it defaults to False, else True. Only used if extension=='default'.
+        **kwargs: any, default None
+            Additional keywords that are passed on.
 
         Examples
         --------
@@ -373,8 +366,45 @@ class TriclusterGenerator(Generator):
         >>> generator = TriclusterGenerator(silence=True)
         >>> generator.generate()
         >>> generator.save(file_name='TricFiles', single_file=False)
+        >>> generator.save(extension='csv', file_name='TricFiles', delimiter=';')
 
         """
+
+        if path is None:
+            path = os.getcwd() + '/'
+
+        self.start_silencing()
+
+        if extension == 'csv':
+            # check if dense exists
+            if self.generatedDataset is None:
+                raise AttributeError('No generated dataset exists. '
+                                     'Data must first be generated using the .generate() method.')
+
+            elif self.X is None:
+                self.X, self.Y = self.to_tensor(in_memory=False)
+
+            elif isinstance(self.X, COO):
+                self.X = self.java_to_numpy(self.generatedDataset)
+
+            # save data
+            for i, arr in enumerate(self.X):
+                np.savetxt('{}_data_ctx{}.csv'.format(os.path.join(path, file_name), i), arr, fmt="%d", **kwargs)
+
+            # save labels
+            with open('{}_labels.csv'.format(os.path.join(path, file_name)), 'w', newline='') as fp:
+                writer = csv.writer(fp, quoting=csv.QUOTE_NONNUMERIC, **kwargs)
+                writer.writerows(self.Y)
+
+        else:
+
+            serv = GTricService()
+
+            serv.setPath(path)
+            serv.setSingleFileOutput(self.asses_memory(single_file, gends=self.generatedDataset))
+            serv.saveResult(self.generatedDataset, file_name + '_cluster_data', file_name + '_dataset')
+
+        self.stop_silencing()
 
 
 class TriclusterGeneratorbyConfig(TriclusterGenerator):
