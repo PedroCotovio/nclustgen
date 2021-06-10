@@ -1071,6 +1071,13 @@ class Generator(metaclass=abc.ABCMeta):
 
         """
 
+        # Enforce Types
+        nrows = int(nrows)
+        ncols = int(ncols)
+        ncontexts = int(ncontexts)
+        nclusters = int(nclusters)
+        no_return = bool(no_return)
+        
         self.start_silencing()
 
         # initialize random seed
