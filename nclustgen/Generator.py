@@ -547,6 +547,36 @@ class Generator(metaclass=abc.ABCMeta):
 
         return js
 
+    def get_coverage(self, generatedDataset=None):
+
+        """
+        Returns clusters dataset coverage.
+
+        Parameters
+        ----------
+
+        generatedDataset: Dataset object
+            Generated dataset (java object).
+
+        Returns
+        -------
+
+        float
+            Percentage of cluster coverage.
+
+        Examples
+        --------
+        >>> generator = BiclusterGenerator(silence=True)
+        >>> generator.generate(no_return=True)
+        >>> generator.get_coverage()
+
+        """
+
+        if generatedDataset is None:
+            generatedDataset = self.generatedDataset
+
+        return ((generatedDataset.getSize() - generatedDataset.getBackgroundSize()) / generatedDataset.getSize()) * 100
+
     @abc.abstractmethod
     def initialize_seed(self):
 
