@@ -536,6 +536,7 @@ class BicsGenTest(TestCaseBase):
                 self.assertFalse(numpy.array_equal(x1, x2))
                 self.assertNotEqual(y1, y2)
 
+    # TODO add csv test
     def test_save(self):
 
         save_params = [
@@ -1106,6 +1107,7 @@ class TricsGenTest(TestCaseBase):
                 self.assertFalse(numpy.array_equal(x1, x2))
                 self.assertNotEqual(y1, y2)
 
+    # TODO add csv test
     def test_save(self):
 
         save_params = [
