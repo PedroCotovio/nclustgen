@@ -348,8 +348,7 @@ class TriclusterGenerator(Generator):
         ----------
 
         extension: {'default', 'csv'}, default 'default'
-            Extension of saved data file. If default, uses Java class default. Else it returns a data file per context
-            plus a labels file.
+            Extension of saved data file. If default, uses Java class default. Else it returns a data file per context.
         file_name: str, default 'example_dataset'
             Saved files prefix.
         path: str, default None
@@ -382,7 +381,7 @@ class TriclusterGenerator(Generator):
                                      'Data must first be generated using the .generate() method.')
 
             elif self.X is None:
-                self.X, self.Y = self.to_tensor(in_memory=False)
+                _, _ = self.to_tensor(in_memory=False)
 
             elif isinstance(self.X, COO):
                 self.X = self.java_to_numpy(self.generatedDataset)
@@ -391,10 +390,14 @@ class TriclusterGenerator(Generator):
             for i, arr in enumerate(self.X):
                 np.savetxt('{}_data_ctx{}.csv'.format(os.path.join(path, file_name), i), arr, fmt="%d", **kwargs)
 
-            # save labels
-            with open('{}_labels.csv'.format(os.path.join(path, file_name)), 'w', newline='') as fp:
-                writer = csv.writer(fp, quoting=csv.QUOTE_NONNUMERIC, **kwargs)
-                writer.writerows(self.Y)
+            # save json
+
+            with open('{}_cluster_data.json'.format(os.path.join(path, file_name)), 'w') as outfile:
+                json.dump(self.get_cluster_info(), outfile)
+
+            # save txt
+            with open('{}_cluster_data.txt'.format(os.path.join(path, file_name)), 'w') as outfile:
+                outfile.write(str(self.generatedDataset.getTricsInfo()))
 
         else:
 

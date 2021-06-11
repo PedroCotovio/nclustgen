@@ -305,15 +305,14 @@ class BiclusterGenerator(Generator):
         ----------
 
         extension: {'default', 'csv'}, default 'default'
-            Extension of saved data file. If default, uses Java class default. Else it returns a single data file and a
-            labels file only.
+            Extension of saved data file. If default, uses Java class default.
         file_name: str, default 'example_dataset'
             Saved files prefix.
         path: str, default None
             Path to save files. If None then files are saved in the current working directory.
         single_file: Bool, default None.
             If False dataset is saved in multiple data files. If None then if the dataset's size is larger then 10**5
-            it defaults to False, else True. Only used if extension=='default'.
+            it defaults to False, else True.
         **kwargs: any, default None
             Additional keywords that are passed on.
 
@@ -339,18 +338,30 @@ class BiclusterGenerator(Generator):
                                      'Data must first be generated using the .generate() method.')
 
             elif self.X is None:
-                self.X, self.Y = self.to_tensor(in_memory=False)
+                _, _ = self.to_tensor(in_memory=False)
 
             elif isinstance(self.X, csr_matrix):
                 self.X = self.java_to_numpy(self.generatedDataset)
 
-            # save data
-            np.savetxt('{}_data.csv'.format(os.path.join(path, file_name)), self.X, fmt="%d", **kwargs)
+            # define number of files
+            split = 1
 
-            # save labels
-            with open('{}_labels.csv'.format(os.path.join(path, file_name)), 'w', newline='') as fp:
-                writer = csv.writer(fp, quoting=csv.QUOTE_NONNUMERIC, **kwargs)
-                writer.writerows(self.Y)
+            if not self.asses_memory(single_file, gends=self.generatedDataset):
+                split = 10
+
+            # save data
+
+            for i, array in enumerate(np.split(self.X, split)):
+                np.savetxt('{}_data_{}.csv'.format(os.path.join(path, file_name), i), array, fmt="%d", **kwargs)
+
+            # save json
+
+            with open('{}_cluster_data.json'.format(os.path.join(path, file_name)), 'w') as outfile:
+                json.dump(self.get_cluster_info(), outfile)
+
+            # save txt
+            with open('{}_cluster_data.txt'.format(os.path.join(path, file_name)), 'w') as outfile:
+                outfile.write(str(self.generatedDataset.getBicsInfo()))
 
         else:
 
