@@ -53,6 +53,7 @@ setup(
     ],
     classifiers=[
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.7",
 
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
 
@@ -71,7 +72,7 @@ setup(
     include_package_data=True,
     packages=find_packages(),
     package_data={'nclustgen': list(find_files('nclustgen', 'jars/', '*.*'))},
-    python_requires=">=3.8",
+    python_requires=">=3.7",
     keywords='biclustring triclustering generator data nclustgen',
     test_suite='tests',
 )
