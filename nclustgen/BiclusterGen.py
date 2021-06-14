@@ -84,11 +84,11 @@ class BiclusterGenerator(Generator):
     def __init__(self, *args, **kwargs):
         super().__init__(n=2, *args, **kwargs)
 
-    def initialize_seed(self):
+    def _initialize_seed(self):
 
         RandomObject.initialization(self.seed)
 
-    def build_background(self):
+    def _build_background(self):
 
         try:
             self.background[0] = getattr(BackgroundType, self.background[0])
@@ -97,13 +97,13 @@ class BiclusterGenerator(Generator):
 
         return Background(*self.background)
 
-    def build_generator(self, class_call, params, contexts_index):
+    def _build_generator(self, class_call, params, contexts_index):
 
         del params[contexts_index]
 
         return getattr(gen, class_call)(*params)
 
-    def build_patterns(self):
+    def _build_patterns(self):
 
         patterns = ArrayList()
 
@@ -119,7 +119,7 @@ class BiclusterGenerator(Generator):
 
         return patterns
 
-    def build_structure(self):
+    def _build_structure(self):
 
         structure = BiclusterStructure()
         structure.setRowsSettings(
@@ -136,7 +136,7 @@ class BiclusterGenerator(Generator):
 
         return structure
 
-    def build_overlapping(self):
+    def _build_overlapping(self):
 
         overlapping = OverlappingSettings()
         overlapping.setPlaidCoherency(getattr(PlaidCoherency, self.plaidcoherency))
@@ -149,7 +149,7 @@ class BiclusterGenerator(Generator):
         return overlapping
 
     @staticmethod
-    def java_to_numpy(generatedDataset):
+    def _java_to_numpy(generatedDataset):
 
         """
         Extracts numpy array from Dataset object.
@@ -174,7 +174,7 @@ class BiclusterGenerator(Generator):
         return np.array([[tvc(val) for val in row.split('\t')[1:]] for row in tensor.split('\n')][:-1])
 
     @staticmethod
-    def java_to_sparse(generatedDataset):
+    def _java_to_sparse(generatedDataset):
 
         """
         Extracts sparce tensor from Dataset object.
@@ -208,7 +208,7 @@ class BiclusterGenerator(Generator):
         return vstack(tensors)
 
     @staticmethod
-    def dense_to_dgl(x, device, cuda=0):
+    def _dense_to_dgl(x, device, cuda=0):
 
         """
         Extracts a bipartite dgl graph from a numpy array
@@ -259,7 +259,7 @@ class BiclusterGenerator(Generator):
         return G
 
     @staticmethod
-    def dense_to_networkx(x, **kwargs):
+    def _dense_to_networkx(x, **kwargs):
 
         """
         Extracts a bipartite networkx graph from numpy array
@@ -329,7 +329,7 @@ class BiclusterGenerator(Generator):
         if path is None:
             path = os.getcwd() + '/'
 
-        self.start_silencing()
+        self._start_silencing()
 
         if extension == 'csv':
             # check if dense exists
@@ -341,12 +341,12 @@ class BiclusterGenerator(Generator):
                 _, _ = self.to_tensor(in_memory=False)
 
             elif isinstance(self.X, csr_matrix):
-                self.X = self.java_to_numpy(self.generatedDataset)
+                self.X = self._java_to_numpy(self.generatedDataset)
 
             # define number of files
             split = 1
 
-            if not self.asses_memory(single_file, gends=self.generatedDataset):
+            if not self._asses_memory(single_file, gends=self.generatedDataset):
                 split = 10
 
             # save data
@@ -368,13 +368,13 @@ class BiclusterGenerator(Generator):
             serv = GBicService()
 
             serv.setPath(path)
-            serv.setSingleFileOutput(self.asses_memory(single_file, gends=self.generatedDataset))
+            serv.setSingleFileOutput(self._asses_memory(single_file, gends=self.generatedDataset))
 
             getattr(serv, 'save{}Result'.format(self.dstype.capitalize()))(
                 self.generatedDataset, file_name + '_cluster_data', file_name + '_dataset'
             )
 
-        self.stop_silencing()
+        self._stop_silencing()
 
 
 class BiclusterGeneratorbyConfig(BiclusterGenerator):

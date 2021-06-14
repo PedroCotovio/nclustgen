@@ -440,7 +440,7 @@ class Generator(metaclass=abc.ABCMeta):
         self.silenced = silence
         self._stdout = System.out
 
-    def start_silencing(self, silence=None):
+    def _start_silencing(self, silence=None):
 
         """
         Starts silencing all java prints to terminal.
@@ -459,7 +459,7 @@ class Generator(metaclass=abc.ABCMeta):
         if bool(silence):
             System.setOut(PrintStream('logs'))
 
-    def stop_silencing(self):
+    def _stop_silencing(self):
 
         """
         Stops silencing all java prints to terminal.
@@ -578,7 +578,7 @@ class Generator(metaclass=abc.ABCMeta):
         return ((generatedDataset.getSize() - generatedDataset.getBackgroundSize()) / generatedDataset.getSize()) * 100
 
     @abc.abstractmethod
-    def initialize_seed(self):
+    def _initialize_seed(self):
 
         """
         Uses seed attribute to initialize random object.
@@ -586,7 +586,7 @@ class Generator(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def build_background(self):
+    def _build_background(self):
 
         """
         Builds a Background object, using the background attribute.
@@ -600,7 +600,7 @@ class Generator(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def build_generator(self, class_call, params, contexts_index):
+    def _build_generator(self, class_call, params, contexts_index):
         """
         Builds the (Java)Generator object.
 
@@ -623,7 +623,7 @@ class Generator(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def build_patterns(self):
+    def _build_patterns(self):
 
         """
         Builds a list of pattern objects, using the patterns, time_profile, and dstype attributes.
@@ -637,7 +637,7 @@ class Generator(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def build_structure(self):
+    def _build_structure(self):
 
         """
         Builds a Structure object, using the clusterdistribution and contiguity attributes.
@@ -651,7 +651,7 @@ class Generator(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def build_overlapping(self):
+    def _build_overlapping(self):
 
         """
         Builds an OverlappingSettings object.
@@ -690,7 +690,7 @@ class Generator(metaclass=abc.ABCMeta):
 
     @staticmethod
     @abc.abstractmethod
-    def java_to_numpy(generatedDataset):
+    def _java_to_numpy(generatedDataset):
 
         """
         Extracts numpy array from Dataset object.
@@ -712,7 +712,7 @@ class Generator(metaclass=abc.ABCMeta):
 
     @staticmethod
     @abc.abstractmethod
-    def java_to_sparse(generatedDataset):
+    def _java_to_sparse(generatedDataset):
 
         """
         Extracts sparce tensor from Dataset object.
@@ -777,13 +777,13 @@ class Generator(metaclass=abc.ABCMeta):
 
         """
 
-        self.start_silencing()
+        self._start_silencing()
 
         if generatedDataset is None:
             generatedDataset = self.generatedDataset
 
         if in_memory is None:
-            in_memory = self.asses_memory(gends=generatedDataset)
+            in_memory = self._asses_memory(gends=generatedDataset)
 
         if keys is None:
             keys = ['X', 'Y', 'Z']
@@ -791,10 +791,10 @@ class Generator(metaclass=abc.ABCMeta):
         # Get Tensor
 
         if bool(in_memory):
-            self.X = self.java_to_numpy(generatedDataset)
+            self.X = self._java_to_numpy(generatedDataset)
 
         else:
-            self.X = self.java_to_sparse(generatedDataset)
+            self.X = self._java_to_sparse(generatedDataset)
 
         # Get clusters
 
@@ -804,13 +804,13 @@ class Generator(metaclass=abc.ABCMeta):
 
         self.Y = [[js[i][key] for key in keys] for i in js.keys()]
 
-        self.stop_silencing()
+        self._stop_silencing()
 
         return self.X, self.Y
 
     @staticmethod
     @abc.abstractmethod
-    def dense_to_dgl(x, device, cuda=0):
+    def _dense_to_dgl(x, device, cuda=0):
 
         """
         Extracts a partite dgl graph from a numpy array
@@ -836,7 +836,7 @@ class Generator(metaclass=abc.ABCMeta):
 
     @staticmethod
     @abc.abstractmethod
-    def dense_to_networkx(x, **kwargs):
+    def _dense_to_networkx(x, **kwargs):
 
         """
         Extracts a partite networkx graph from numpy array
@@ -945,7 +945,7 @@ class Generator(metaclass=abc.ABCMeta):
             raise AttributeError('No generated dataset exists. '
                                  'Data must first be generated using the .generate() method.')
 
-    def get_dstype_vars(self, nrows, ncols, ncontexts, nclusters, background):
+    def _get_dstype_vars(self, nrows, ncols, ncontexts, nclusters, background):
 
         """
         Prepares parameters to initialize the generator.
@@ -992,7 +992,7 @@ class Generator(metaclass=abc.ABCMeta):
 
         return class_call, params, contexts_index
 
-    def asses_memory(self, in_memory=None, **kwargs):
+    def _asses_memory(self, in_memory=None, **kwargs):
 
         """
         Returns True if dataset should be saved in memory.
@@ -1033,7 +1033,7 @@ class Generator(metaclass=abc.ABCMeta):
 
             return count < 10**5
 
-    def plant_quality_settings(self, generatedDataset):
+    def _plant_quality_settings(self, generatedDataset):
 
         """
         Plants quality settings on generated dataset
@@ -1108,38 +1108,38 @@ class Generator(metaclass=abc.ABCMeta):
         nclusters = int(nclusters)
         no_return = bool(no_return)
         
-        self.start_silencing()
+        self._start_silencing()
 
         # initialize random seed
-        self.initialize_seed()
+        self._initialize_seed()
 
         # define background
-        background = self.build_background()
+        background = self._build_background()
 
         # initialise data generator
-        params = self.get_dstype_vars(nrows, ncols, ncontexts, nclusters, background)
+        params = self._get_dstype_vars(nrows, ncols, ncontexts, nclusters, background)
 
-        generator = self.build_generator(*params)
+        generator = self._build_generator(*params)
 
         # get patterns
-        patterns = self.build_patterns()
+        patterns = self._build_patterns()
 
         # get structure
-        structure = self.build_structure()
+        structure = self._build_structure()
 
         # get overlapping
-        overlapping = self.build_overlapping()
+        overlapping = self._build_overlapping()
 
         # generate dataset
         generatedDataset = generator.generate(patterns, structure, overlapping)
 
         # plant missing values, noise & errors
-        self.plant_quality_settings(generatedDataset)
+        self._plant_quality_settings(generatedDataset)
 
         # return
         self.generatedDataset = generatedDataset
 
-        self.stop_silencing()
+        self._stop_silencing()
 
         if no_return:
             return None, None

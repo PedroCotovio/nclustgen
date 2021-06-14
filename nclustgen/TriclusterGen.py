@@ -112,11 +112,11 @@ class TriclusterGenerator(Generator):
     def __init__(self, *args, **kwargs):
         super().__init__(n=3, *args, **kwargs)
 
-    def initialize_seed(self):
+    def _initialize_seed(self):
 
         RandomObject.initialization(self.seed)
 
-    def build_background(self):
+    def _build_background(self):
 
         try:
             self.background[0] = getattr(BackgroundType, self.background[0])
@@ -125,11 +125,11 @@ class TriclusterGenerator(Generator):
 
         return Background(*self.background)
 
-    def build_generator(self, class_call, params, contexts_index):
+    def _build_generator(self, class_call, params, contexts_index):
 
         return getattr(gen, class_call)(*params)
 
-    def build_patterns(self):
+    def _build_patterns(self):
 
         patterns = ArrayList()
 
@@ -142,7 +142,7 @@ class TriclusterGenerator(Generator):
 
         return patterns
 
-    def build_structure(self):
+    def _build_structure(self):
 
         structure = TriclusterStructure()
         structure.setRowsSettings(
@@ -158,7 +158,7 @@ class TriclusterGenerator(Generator):
 
         return structure
 
-    def build_overlapping(self):
+    def _build_overlapping(self):
 
         overlapping = OverlappingSettings()
         overlapping.setPlaidCoherency(getattr(PlaidCoherency, self.plaidcoherency))
@@ -172,7 +172,7 @@ class TriclusterGenerator(Generator):
         return overlapping
 
     @staticmethod
-    def java_to_numpy(generatedDataset):
+    def _java_to_numpy(generatedDataset):
 
         """
         Extracts numpy array from Dataset object.
@@ -204,7 +204,7 @@ class TriclusterGenerator(Generator):
         )
 
     @staticmethod
-    def java_to_sparse(generatedDataset):
+    def _java_to_sparse(generatedDataset):
 
         """
         Extracts sparce tensor from Dataset object.
@@ -244,7 +244,7 @@ class TriclusterGenerator(Generator):
         return concatenate(tensors, axis=1)
 
     @staticmethod
-    def dense_to_dgl(x, device, cuda=0):
+    def _dense_to_dgl(x, device, cuda=0):
 
         """
         Extracts a tripartite dgl graph from a numpy array
@@ -300,7 +300,7 @@ class TriclusterGenerator(Generator):
         return G
 
     @staticmethod
-    def dense_to_networkx(x, **kwargs):
+    def _dense_to_networkx(x, **kwargs):
 
         """
         Extracts a tripartite networkx graph from numpy array
@@ -372,7 +372,7 @@ class TriclusterGenerator(Generator):
         if path is None:
             path = os.getcwd() + '/'
 
-        self.start_silencing()
+        self._start_silencing()
 
         if extension == 'csv':
             # check if dense exists
@@ -384,7 +384,7 @@ class TriclusterGenerator(Generator):
                 _, _ = self.to_tensor(in_memory=False)
 
             elif isinstance(self.X, COO):
-                self.X = self.java_to_numpy(self.generatedDataset)
+                self.X = self._java_to_numpy(self.generatedDataset)
 
             # save data
             for i, arr in enumerate(self.X):
@@ -404,10 +404,10 @@ class TriclusterGenerator(Generator):
             serv = GTricService()
 
             serv.setPath(path)
-            serv.setSingleFileOutput(self.asses_memory(single_file, gends=self.generatedDataset))
+            serv.setSingleFileOutput(self._asses_memory(single_file, gends=self.generatedDataset))
             serv.saveResult(self.generatedDataset, file_name + '_cluster_data', file_name + '_dataset')
 
-        self.stop_silencing()
+        self._stop_silencing()
 
 
 class TriclusterGeneratorbyConfig(TriclusterGenerator):
