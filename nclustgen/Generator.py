@@ -569,6 +569,7 @@ class Generator(metaclass=abc.ABCMeta):
         >>> generator = BiclusterGenerator(silence=True)
         >>> generator.generate(no_return=True)
         >>> generator.get_coverage()
+        0.16
 
         """
 
