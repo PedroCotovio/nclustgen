@@ -343,16 +343,15 @@ class BiclusterGenerator(Generator):
             elif isinstance(self.X, csr_matrix):
                 self.X = self._java_to_numpy(self.generatedDataset)
 
-            # define number of files
-            split = 1
-
-            if not self._asses_memory(single_file, gends=self.generatedDataset):
-                split = 10
-
             # save data
 
-            for i, array in enumerate(np.split(self.X, split)):
-                np.savetxt('{}_data_{}.csv'.format(os.path.join(path, file_name), i), array, fmt="%d", **kwargs)
+            if not self._asses_memory(single_file, gends=self.generatedDataset):
+
+                for i, array in enumerate(np.split(self.X, 10)):
+                    np.savetxt('{}_dataset_{}.csv'.format(os.path.join(path, file_name), i), array, fmt="%d", **kwargs)
+
+            else:
+                np.savetxt('{}_dataset.csv'.format(os.path.join(path, file_name)), self.X, fmt="%d", **kwargs)
 
             # save json
 

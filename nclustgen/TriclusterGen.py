@@ -388,7 +388,7 @@ class TriclusterGenerator(Generator):
 
             # save data
             for i, arr in enumerate(self.X):
-                np.savetxt('{}_data_ctx{}.csv'.format(os.path.join(path, file_name), i), arr, fmt="%d", **kwargs)
+                np.savetxt('{}_dataset_ctx{}.csv'.format(os.path.join(path, file_name), i), arr, fmt="%d", **kwargs)
 
             # save json
 
