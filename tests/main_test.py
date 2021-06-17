@@ -537,13 +537,16 @@ class BicsGenTest(TestCaseBase):
                 self.assertFalse(numpy.array_equal(x1, x2))
                 self.assertNotEqual(y1, y2)
 
-    # TODO add csv test
     def test_save(self):
 
         save_params = [
-            ['example', None, None],
-            ['example', os.getcwd() + '/', True],
-            ['example', os.getcwd() + '/', False]
+            ['default', 'example', None, None],
+            ['default', 'example', os.getcwd() + '/', True],
+            ['default', 'example', os.getcwd() + '/', False],
+            ['csv', 'example', None, None],
+            ['csv', 'example', os.getcwd() + '/', True],
+            ['csv', 'example', os.getcwd() + '/', False],
+
         ]
 
         for i, params in enumerate(save_params):
@@ -554,22 +557,30 @@ class BicsGenTest(TestCaseBase):
             instance.generate()
             instance.save(*params)
 
-            if params[1] is None:
-                params[1] = os.getcwd() + '/'
+            if params[2] is None:
+                params[2] = os.getcwd() + '/'
 
             # Assert data files were created
-            if instance._asses_memory(params[2], gends=instance.generatedDataset):
-                suffix = '.tsv'
-            else:
-                suffix = '_0.txt'
+            if instance._asses_memory(params[3], gends=instance.generatedDataset):
 
-            self.assertIsFile(os.path.join(params[1], '{}_dataset{}'.format(params[0], suffix)))
+                if params[0] == 'default':
+                    suffix = '.tsv'
+                else:
+                    suffix = '.csv'
+            else:
+
+                if params[0] == 'default':
+                    suffix = '_0.txt'
+                else:
+                    suffix = '_0.csv'
+
+            self.assertIsFile(os.path.join(params[2], '{}_dataset{}'.format(params[1], suffix)))
 
             # Assert descriptive files were also created
 
             for kind in ['json', 'txt']:
-                file = '{}_cluster_data.{}'.format(params[0], kind)
-                path = os.path.join(params[1], file)
+                file = '{}_cluster_data.{}'.format(params[1], kind)
+                path = os.path.join(params[2], file)
 
                 self.assertIsFile(path)
 
@@ -577,12 +588,16 @@ class BicsGenTest(TestCaseBase):
                 os.remove(path)
 
             # Remove data files
-            if suffix == '.tsv':
-                os.remove(os.path.join(params[1], '{}_dataset.tsv'.format(params[0])))
+            if suffix in ['.tsv', '.csv']:
+                os.remove(os.path.join(params[2], '{}_dataset{}'.format(params[1], suffix)))
             else:
                 try:
-                    for j in range(100):
-                        os.remove(os.path.join(params[1], '{}_dataset_{}.txt'.format(params[0], j)))
+                    if params[0] == 'default':
+                        for j in range(1000):
+                            os.remove(os.path.join(params[2], '{}_dataset_{}.txt'.format(params[1], j)))
+                    else:
+                        for j in range(1000):
+                            os.remove(os.path.join(params[2], '{}_dataset_{}.csv'.format(params[1], j)))
                 except FileNotFoundError:
                     pass
 
@@ -1108,13 +1123,16 @@ class TricsGenTest(TestCaseBase):
                 self.assertFalse(numpy.array_equal(x1, x2))
                 self.assertNotEqual(y1, y2)
 
-    # TODO add csv test
     def test_save(self):
 
         save_params = [
-            ['example', None, None],
-            ['example', os.getcwd() + '/', True],
-            ['example', os.getcwd() + '/', False]
+            ['default', 'example', None, None],
+            ['default', 'example', os.getcwd() + '/', True],
+            ['default', 'example', os.getcwd() + '/', False],
+            ['csv', 'example', None, None],
+            ['csv', 'example', os.getcwd() + '/', True],
+            ['csv', 'example', os.getcwd() + '/', False],
+
         ]
 
         for i, params in enumerate(save_params):
@@ -1125,22 +1143,29 @@ class TricsGenTest(TestCaseBase):
             instance.generate()
             instance.save(*params)
 
-            if params[1] is None:
-                params[1] = os.getcwd() + '/'
+            if params[2] is None:
+                params[2] = os.getcwd() + '/'
 
             # Assert data files were created
-            if instance._asses_memory(params[2], gends=instance.generatedDataset):
-                suffix = '.tsv'
-            else:
-                suffix = '_0.txt'
+            if instance._asses_memory(params[3], gends=instance.generatedDataset):
 
-            self.assertIsFile(os.path.join(params[1], '{}_dataset{}'.format(params[0], suffix)))
+                if params[0] == 'default':
+                    suffix = '.tsv'
+                else:
+                    suffix = '_ctx0.csv'
+            else:
+                if params[0] == 'default':
+                    suffix = '_0.txt'
+                else:
+                    suffix = '_ctx0.csv'
+
+            self.assertIsFile(os.path.join(params[2], '{}_dataset{}'.format(params[1], suffix)))
 
             # Assert descriptive files were also created
 
             for kind in ['json', 'txt']:
-                file = '{}_cluster_data.{}'.format(params[0], kind)
-                path = os.path.join(params[1], file)
+                file = '{}_cluster_data.{}'.format(params[1], kind)
+                path = os.path.join(params[2], file)
 
                 self.assertIsFile(path)
 
@@ -1149,11 +1174,15 @@ class TricsGenTest(TestCaseBase):
 
             # Remove data files
             if suffix == '.tsv':
-                os.remove(os.path.join(params[1], '{}_dataset.tsv'.format(params[0])))
+                os.remove(os.path.join(params[2], '{}_dataset{}'.format(params[1], suffix)))
             else:
                 try:
-                    for j in range(100):
-                        os.remove(os.path.join(params[1], '{}_dataset_{}.txt'.format(params[0], j)))
+                    if params[0] == 'default':
+                        for j in range(1000):
+                            os.remove(os.path.join(params[2], '{}_dataset_{}.txt'.format(params[1], j)))
+                    else:
+                        for j in range(1000):
+                            os.remove(os.path.join(params[2], '{}_dataset_ctx{}.csv'.format(params[1], j)))
                 except FileNotFoundError:
                     pass
 
