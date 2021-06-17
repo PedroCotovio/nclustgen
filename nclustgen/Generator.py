@@ -937,7 +937,7 @@ class Generator(metaclass=abc.ABCMeta):
                               'DGL will be used instead.')
 
             # call private method
-            self.graph = getattr(self, 'dense_to_{}'.format(framework))(x, device=device, cuda=cuda)
+            self.graph = getattr(self, '_dense_to_{}'.format(framework))(x, device=device, cuda=cuda)
 
             return self.graph
 
