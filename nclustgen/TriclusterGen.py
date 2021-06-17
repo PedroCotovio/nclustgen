@@ -4,6 +4,7 @@ from .Generator import Generator
 import os
 import json
 import sys
+import csv
 import numpy as np
 from sparse import concatenate, COO
 
@@ -111,11 +112,11 @@ class TriclusterGenerator(Generator):
     def __init__(self, *args, **kwargs):
         super().__init__(n=3, *args, **kwargs)
 
-    def initialize_seed(self):
+    def _initialize_seed(self):
 
         RandomObject.initialization(self.seed)
 
-    def build_background(self):
+    def _build_background(self):
 
         try:
             self.background[0] = getattr(BackgroundType, self.background[0])
@@ -124,11 +125,11 @@ class TriclusterGenerator(Generator):
 
         return Background(*self.background)
 
-    def build_generator(self, class_call, params, contexts_index):
+    def _build_generator(self, class_call, params, contexts_index):
 
         return getattr(gen, class_call)(*params)
 
-    def build_patterns(self):
+    def _build_patterns(self):
 
         patterns = ArrayList()
 
@@ -141,7 +142,7 @@ class TriclusterGenerator(Generator):
 
         return patterns
 
-    def build_structure(self):
+    def _build_structure(self):
 
         structure = TriclusterStructure()
         structure.setRowsSettings(
@@ -157,7 +158,7 @@ class TriclusterGenerator(Generator):
 
         return structure
 
-    def build_overlapping(self):
+    def _build_overlapping(self):
 
         overlapping = OverlappingSettings()
         overlapping.setPlaidCoherency(getattr(PlaidCoherency, self.plaidcoherency))
@@ -171,7 +172,7 @@ class TriclusterGenerator(Generator):
         return overlapping
 
     @staticmethod
-    def java_to_numpy(generatedDataset):
+    def _java_to_numpy(generatedDataset):
 
         """
         Extracts numpy array from Dataset object.
@@ -203,7 +204,7 @@ class TriclusterGenerator(Generator):
         )
 
     @staticmethod
-    def java_to_sparse(generatedDataset):
+    def _java_to_sparse(generatedDataset):
 
         """
         Extracts sparce tensor from Dataset object.
@@ -243,7 +244,7 @@ class TriclusterGenerator(Generator):
         return concatenate(tensors, axis=1)
 
     @staticmethod
-    def dense_to_dgl(x, device, cuda=0):
+    def _dense_to_dgl(x, device, cuda=0):
 
         """
         Extracts a tripartite dgl graph from a numpy array
@@ -299,7 +300,7 @@ class TriclusterGenerator(Generator):
         return G
 
     @staticmethod
-    def dense_to_networkx(x, **kwargs):
+    def _dense_to_networkx(x, **kwargs):
 
         """
         Extracts a tripartite networkx graph from numpy array
@@ -338,20 +339,7 @@ class TriclusterGenerator(Generator):
 
         return G
 
-    def save(self, file_name='example', path=None, single_file=None):
-
-        self.start_silencing()
-
-        serv = GTricService()
-
-        if path is None:
-            path = os.getcwd() + '/'
-
-        serv.setPath(path)
-        serv.setSingleFileOutput(self.asses_memory(single_file, gends=self.generatedDataset))
-        serv.saveResult(self.generatedDataset, file_name + '_cluster_data', file_name + '_dataset')
-
-        self.stop_silencing()
+    def save(self, extension='default', file_name='example', path=None, single_file=None, **kwargs):
 
         """
         Saves data files to chosen path.
@@ -359,13 +347,17 @@ class TriclusterGenerator(Generator):
         Parameters
         ----------
 
+        extension: {'default', 'csv'}, default 'default'
+            Extension of saved data file. If default, uses Java class default. Else it returns a data file per context.
         file_name: str, default 'example_dataset'
             Saved files prefix.
         path: str, default None
             Path to save files. If None then files are saved in the current working directory.
         single_file: Bool, default None.
             If False dataset is saved in multiple data files. If None then if the dataset's size is larger then 10**5
-            it defaults to False, else True.
+            it defaults to False, else True. Only used if extension=='default'.
+        **kwargs: any, default None
+            Additional keywords that are passed on.
 
         Examples
         --------
@@ -373,8 +365,49 @@ class TriclusterGenerator(Generator):
         >>> generator = TriclusterGenerator(silence=True)
         >>> generator.generate()
         >>> generator.save(file_name='TricFiles', single_file=False)
+        >>> generator.save(extension='csv', file_name='TricFiles', delimiter=';')
 
         """
+
+        if path is None:
+            path = os.getcwd() + '/'
+
+        self._start_silencing()
+
+        if extension == 'csv':
+            # check if dense exists
+            if self.generatedDataset is None:
+                raise AttributeError('No generated dataset exists. '
+                                     'Data must first be generated using the .generate() method.')
+
+            elif self.X is None:
+                _, _ = self.to_tensor(in_memory=False)
+
+            elif isinstance(self.X, COO):
+                self.X = self._java_to_numpy(self.generatedDataset)
+
+            # save data
+            for i, arr in enumerate(self.X):
+                np.savetxt('{}_dataset_ctx{}.csv'.format(os.path.join(path, file_name), i), arr, fmt="%d", **kwargs)
+
+            # save json
+
+            with open('{}_cluster_data.json'.format(os.path.join(path, file_name)), 'w') as outfile:
+                json.dump(self.get_cluster_info(), outfile)
+
+            # save txt
+            with open('{}_cluster_data.txt'.format(os.path.join(path, file_name)), 'w') as outfile:
+                outfile.write(str(self.generatedDataset.getTricsInfo()))
+
+        else:
+
+            serv = GTricService()
+
+            serv.setPath(path)
+            serv.setSingleFileOutput(self._asses_memory(single_file, gends=self.generatedDataset))
+            serv.saveResult(self.generatedDataset, file_name + '_cluster_data', file_name + '_dataset')
+
+        self._stop_silencing()
 
 
 class TriclusterGeneratorbyConfig(TriclusterGenerator):

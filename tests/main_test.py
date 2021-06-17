@@ -42,7 +42,6 @@ from com.gbic import generator as gen_bic
 from com.gtric import generator as gen_tric
 
 
-
 class TestCaseBase(unittest.TestCase):
 
     @staticmethod
@@ -55,6 +54,8 @@ class TestCaseBase(unittest.TestCase):
         if pl.Path(path).resolve().is_file():
             raise AssertionError("File exists: %s" % str(path))
 
+
+# TODO test getters
 class GenTest(TestCaseBase):
 
     def test_silence(self):
@@ -75,18 +76,18 @@ class GenTest(TestCaseBase):
 
         # check method logic
 
-        instance_T.start_silencing()
+        instance_T._start_silencing()
         self.assertIsFile('logs')
 
-        instance_T.stop_silencing()
+        instance_T._stop_silencing()
         self.assertIsNotFile('logs')
         self.assertEqual(System.out, instance_T._stdout)
 
-        instance_T.start_silencing(silence=False)
+        instance_T._start_silencing(silence=False)
         self.assertIsNotFile('logs')
         self.assertEqual(System.out, instance_T._stdout)
 
-        instance_F.start_silencing()
+        instance_F._start_silencing()
         self.assertIsNotFile('logs')
         self.assertEqual(System.out, instance_T._stdout)
 
@@ -120,28 +121,37 @@ class GenTest(TestCaseBase):
         gends_F = gends((1000, 1000))
 
         # check method logic
-        self.assertTrue(instance_T.asses_memory())
-        self.assertTrue(instance_T.asses_memory(in_memory=True))
-        self.assertFalse(instance_T.asses_memory(in_memory=False))
+        self.assertTrue(instance_T._asses_memory())
+        self.assertTrue(instance_T._asses_memory(in_memory=True))
+        self.assertFalse(instance_T._asses_memory(in_memory=False))
 
-        self.assertTrue(instance_T.asses_memory(gends=gends_T))
-        self.assertTrue(instance_T.asses_memory(gends=gends_F))
+        self.assertTrue(instance_T._asses_memory(gends=gends_T))
+        self.assertTrue(instance_T._asses_memory(gends=gends_F))
 
-        self.assertFalse(instance_F.asses_memory())
-        self.assertTrue(instance_F.asses_memory(in_memory=True))
-        self.assertFalse(instance_F.asses_memory(in_memory=False))
+        self.assertFalse(instance_F._asses_memory())
+        self.assertTrue(instance_F._asses_memory(in_memory=True))
+        self.assertFalse(instance_F._asses_memory(in_memory=False))
 
-        self.assertFalse(instance_F.asses_memory(gends=gends_T))
-        self.assertFalse(instance_F.asses_memory(gends=gends_F))
+        self.assertFalse(instance_F._asses_memory(gends=gends_T))
+        self.assertFalse(instance_F._asses_memory(gends=gends_F))
 
         with self.assertRaises(AttributeError):
-            instance_N.asses_memory()
+            instance_N._asses_memory()
 
-        self.assertTrue(instance_N.asses_memory(in_memory=True))
-        self.assertFalse(instance_N.asses_memory(in_memory=False))
+        self.assertTrue(instance_N._asses_memory(in_memory=True))
+        self.assertFalse(instance_N._asses_memory(in_memory=False))
 
-        self.assertTrue(instance_N.asses_memory(gends=gends_T))
-        self.assertFalse(instance_N.asses_memory(gends=gends_F))
+        self.assertTrue(instance_N._asses_memory(gends=gends_T))
+        self.assertFalse(instance_N._asses_memory(gends=gends_F))
+
+    def test_getters(self):
+
+        instance = bg(silence=True)
+        instance.generate()
+
+        self.assertTrue(isinstance(instance.get_params(), dict))
+        self.assertTrue(isinstance(instance.get_cluster_info(), dict))
+        self.assertTrue(isinstance(instance.get_coverage(), float))
 
 
 class BicsGenTest(TestCaseBase):
@@ -182,16 +192,16 @@ class BicsGenTest(TestCaseBase):
 
         # test method
 
-        self.assertTrue(isinstance(instance_numeric_uniform.build_background(), bic_background))
-        self.assertTrue(isinstance(instance_numeric_missing.build_background(), bic_background))
-        self.assertTrue(isinstance(instance_numeric_discrete.build_background(), bic_background))
-        self.assertTrue(isinstance(instance_numeric_normal.build_background(), bic_background))
+        self.assertTrue(isinstance(instance_numeric_uniform._build_background(), bic_background))
+        self.assertTrue(isinstance(instance_numeric_missing._build_background(), bic_background))
+        self.assertTrue(isinstance(instance_numeric_discrete._build_background(), bic_background))
+        self.assertTrue(isinstance(instance_numeric_normal._build_background(), bic_background))
 
-        self.assertTrue(isinstance(instance_symbolic_uniform.build_background(), bic_background))
-        self.assertTrue(isinstance(instance_symbolic_missing.build_background(), bic_background))
-        self.assertTrue(isinstance(instance_symbolic_discrete.build_background(), bic_background))
-        self.assertTrue(isinstance(instance_symbolic_discrete_noprobs.build_background(), bic_background))
-        self.assertTrue(isinstance(instance_symbolic_normal.build_background(), bic_background))
+        self.assertTrue(isinstance(instance_symbolic_uniform._build_background(), bic_background))
+        self.assertTrue(isinstance(instance_symbolic_missing._build_background(), bic_background))
+        self.assertTrue(isinstance(instance_symbolic_discrete._build_background(), bic_background))
+        self.assertTrue(isinstance(instance_symbolic_discrete_noprobs._build_background(), bic_background))
+        self.assertTrue(isinstance(instance_symbolic_normal._build_background(), bic_background))
 
         # integration
 
@@ -230,7 +240,7 @@ class BicsGenTest(TestCaseBase):
 
             # build instance and tester
             instance = bg(dstype=pattern[0], patterns=pattern[1], timeprofile=pattern[2], silence=True)
-            builts = instance.build_patterns()
+            builts = instance._build_patterns()
 
             for built, expect in zip(builts, expected[1]):
 
@@ -271,7 +281,7 @@ class BicsGenTest(TestCaseBase):
 
             # build instance and tester
             instance = bg(clusterdistribution=dist[0], contiguity=dist[1], silence=True)
-            built = instance.build_structure()
+            built = instance._build_structure()
 
             # check class
             self.assertTrue(isinstance(built, BiclusterStructure))
@@ -346,11 +356,11 @@ class BicsGenTest(TestCaseBase):
             # build instance
             instance = bg(**params)
 
-            background = instance.build_background()
+            background = instance._build_background()
             generate_params = [100, 100, 1, 5, background]
 
-            parameters = instance.get_dstype_vars(*generate_params)
-            built = instance.build_generator(*parameters)
+            parameters = instance._get_dstype_vars(*generate_params)
+            built = instance._build_generator(*parameters)
 
             generate_params.remove(1)
 
@@ -404,7 +414,7 @@ class BicsGenTest(TestCaseBase):
                 silence=True
             )
 
-            built = instance.build_overlapping()
+            built = instance._build_overlapping()
 
             # check class
             self.assertTrue(isinstance(built, overlap_bic))
@@ -539,9 +549,13 @@ class BicsGenTest(TestCaseBase):
     def test_save(self):
 
         save_params = [
-            ['example', None, None],
-            ['example', os.getcwd() + '/', True],
-            ['example', os.getcwd() + '/', False]
+            ['default', 'example', None, None],
+            ['default', 'example', os.getcwd() + '/', True],
+            ['default', 'example', os.getcwd() + '/', False],
+            ['csv', 'example', None, None],
+            ['csv', 'example', os.getcwd() + '/', True],
+            ['csv', 'example', os.getcwd() + '/', False],
+
         ]
 
         for i, params in enumerate(save_params):
@@ -552,22 +566,30 @@ class BicsGenTest(TestCaseBase):
             instance.generate()
             instance.save(*params)
 
-            if params[1] is None:
-                params[1] = os.getcwd() + '/'
+            if params[2] is None:
+                params[2] = os.getcwd() + '/'
 
             # Assert data files were created
-            if instance.asses_memory(params[2], gends=instance.generatedDataset):
-                suffix = '.tsv'
-            else:
-                suffix = '_0.txt'
+            if instance._asses_memory(params[3], gends=instance.generatedDataset):
 
-            self.assertIsFile(os.path.join(params[1], '{}_dataset{}'.format(params[0], suffix)))
+                if params[0] == 'default':
+                    suffix = '.tsv'
+                else:
+                    suffix = '.csv'
+            else:
+
+                if params[0] == 'default':
+                    suffix = '_0.txt'
+                else:
+                    suffix = '_0.csv'
+
+            self.assertIsFile(os.path.join(params[2], '{}_dataset{}'.format(params[1], suffix)))
 
             # Assert descriptive files were also created
 
             for kind in ['json', 'txt']:
-                file = '{}_cluster_data.{}'.format(params[0], kind)
-                path = os.path.join(params[1], file)
+                file = '{}_cluster_data.{}'.format(params[1], kind)
+                path = os.path.join(params[2], file)
 
                 self.assertIsFile(path)
 
@@ -575,12 +597,16 @@ class BicsGenTest(TestCaseBase):
                 os.remove(path)
 
             # Remove data files
-            if suffix == '.tsv':
-                os.remove(os.path.join(params[1], '{}_dataset.tsv'.format(params[0])))
+            if suffix in ['.tsv', '.csv']:
+                os.remove(os.path.join(params[2], '{}_dataset{}'.format(params[1], suffix)))
             else:
                 try:
-                    for j in range(100):
-                        os.remove(os.path.join(params[1], '{}_dataset_{}.txt'.format(params[0], j)))
+                    if params[0] == 'default':
+                        for j in range(1000):
+                            os.remove(os.path.join(params[2], '{}_dataset_{}.txt'.format(params[1], j)))
+                    else:
+                        for j in range(1000):
+                            os.remove(os.path.join(params[2], '{}_dataset_{}.csv'.format(params[1], j)))
                 except FileNotFoundError:
                     pass
 
@@ -749,16 +775,16 @@ class TricsGenTest(TestCaseBase):
 
         # test method
 
-        self.assertTrue(isinstance(instance_numeric_uniform.build_background(), tric_background))
-        self.assertTrue(isinstance(instance_numeric_missing.build_background(), tric_background))
-        self.assertTrue(isinstance(instance_numeric_discrete.build_background(), tric_background))
-        self.assertTrue(isinstance(instance_numeric_normal.build_background(), tric_background))
+        self.assertTrue(isinstance(instance_numeric_uniform._build_background(), tric_background))
+        self.assertTrue(isinstance(instance_numeric_missing._build_background(), tric_background))
+        self.assertTrue(isinstance(instance_numeric_discrete._build_background(), tric_background))
+        self.assertTrue(isinstance(instance_numeric_normal._build_background(), tric_background))
 
-        self.assertTrue(isinstance(instance_symbolic_uniform.build_background(), tric_background))
-        self.assertTrue(isinstance(instance_symbolic_missing.build_background(), tric_background))
-        self.assertTrue(isinstance(instance_symbolic_discrete.build_background(), tric_background))
-        self.assertTrue(isinstance(instance_symbolic_discrete_noprobs.build_background(), tric_background))
-        self.assertTrue(isinstance(instance_symbolic_normal.build_background(), tric_background))
+        self.assertTrue(isinstance(instance_symbolic_uniform._build_background(), tric_background))
+        self.assertTrue(isinstance(instance_symbolic_missing._build_background(), tric_background))
+        self.assertTrue(isinstance(instance_symbolic_discrete._build_background(), tric_background))
+        self.assertTrue(isinstance(instance_symbolic_discrete_noprobs._build_background(), tric_background))
+        self.assertTrue(isinstance(instance_symbolic_normal._build_background(), tric_background))
 
         # integration
 
@@ -796,7 +822,7 @@ class TricsGenTest(TestCaseBase):
             # print(i)
 
             instance = tg(dstype=pattern[0], patterns=pattern[1], timeprofile=pattern[2], silence=True)
-            builts = instance.build_patterns()
+            builts = instance._build_patterns()
 
             for built, expect in zip(builts, expected[1]):
 
@@ -831,7 +857,7 @@ class TricsGenTest(TestCaseBase):
         for i, (dist, expected) in enumerate(zip(distribution, expected_distribution)):
             # build instance and tester
             instance = tg(clusterdistribution=dist[0], contiguity=dist[1], silence=True)
-            built = instance.build_structure()
+            built = instance._build_structure()
 
             # check class
             self.assertTrue(isinstance(built, TriclusterStructure))
@@ -911,11 +937,11 @@ class TricsGenTest(TestCaseBase):
             # build instance
             instance = tg(**params)
 
-            background = instance.build_background()
+            background = instance._build_background()
             generate_params = [100, 100, 3, 5, background]
 
-            parameters = instance.get_dstype_vars(*generate_params)
-            built = instance.build_generator(*parameters)
+            parameters = instance._get_dstype_vars(*generate_params)
+            built = instance._build_generator(*parameters)
 
             self.assertTrue(isinstance(built, getattr(gen_tric, parameters[0])))
 
@@ -968,7 +994,7 @@ class TricsGenTest(TestCaseBase):
                 silence=True
             )
 
-            built = instance.build_overlapping()
+            built = instance._build_overlapping()
 
             # check class
             self.assertTrue(isinstance(built, overlap_tric))
@@ -1109,9 +1135,13 @@ class TricsGenTest(TestCaseBase):
     def test_save(self):
 
         save_params = [
-            ['example', None, None],
-            ['example', os.getcwd() + '/', True],
-            ['example', os.getcwd() + '/', False]
+            ['default', 'example', None, None],
+            ['default', 'example', os.getcwd() + '/', True],
+            ['default', 'example', os.getcwd() + '/', False],
+            ['csv', 'example', None, None],
+            ['csv', 'example', os.getcwd() + '/', True],
+            ['csv', 'example', os.getcwd() + '/', False],
+
         ]
 
         for i, params in enumerate(save_params):
@@ -1122,22 +1152,29 @@ class TricsGenTest(TestCaseBase):
             instance.generate()
             instance.save(*params)
 
-            if params[1] is None:
-                params[1] = os.getcwd() + '/'
+            if params[2] is None:
+                params[2] = os.getcwd() + '/'
 
             # Assert data files were created
-            if instance.asses_memory(params[2], gends=instance.generatedDataset):
-                suffix = '.tsv'
-            else:
-                suffix = '_0.txt'
+            if instance._asses_memory(params[3], gends=instance.generatedDataset):
 
-            self.assertIsFile(os.path.join(params[1], '{}_dataset{}'.format(params[0], suffix)))
+                if params[0] == 'default':
+                    suffix = '.tsv'
+                else:
+                    suffix = '_ctx0.csv'
+            else:
+                if params[0] == 'default':
+                    suffix = '_0.txt'
+                else:
+                    suffix = '_ctx0.csv'
+
+            self.assertIsFile(os.path.join(params[2], '{}_dataset{}'.format(params[1], suffix)))
 
             # Assert descriptive files were also created
 
             for kind in ['json', 'txt']:
-                file = '{}_cluster_data.{}'.format(params[0], kind)
-                path = os.path.join(params[1], file)
+                file = '{}_cluster_data.{}'.format(params[1], kind)
+                path = os.path.join(params[2], file)
 
                 self.assertIsFile(path)
 
@@ -1146,11 +1183,15 @@ class TricsGenTest(TestCaseBase):
 
             # Remove data files
             if suffix == '.tsv':
-                os.remove(os.path.join(params[1], '{}_dataset.tsv'.format(params[0])))
+                os.remove(os.path.join(params[2], '{}_dataset{}'.format(params[1], suffix)))
             else:
                 try:
-                    for j in range(100):
-                        os.remove(os.path.join(params[1], '{}_dataset_{}.txt'.format(params[0], j)))
+                    if params[0] == 'default':
+                        for j in range(1000):
+                            os.remove(os.path.join(params[2], '{}_dataset_{}.txt'.format(params[1], j)))
+                    else:
+                        for j in range(1000):
+                            os.remove(os.path.join(params[2], '{}_dataset_ctx{}.csv'.format(params[1], j)))
                 except FileNotFoundError:
                     pass
 
