@@ -144,6 +144,15 @@ class GenTest(TestCaseBase):
         self.assertTrue(instance_N._asses_memory(gends=gends_T))
         self.assertFalse(instance_N._asses_memory(gends=gends_F))
 
+    def test_getters(self):
+
+        instance = bg(silence=True)
+        instance.generate()
+
+        self.assertTrue(isinstance(instance.get_params(), dict))
+        self.assertTrue(isinstance(instance.get_cluster_info(), dict))
+        self.assertTrue(isinstance(instance.get_coverage(), float))
+
 
 class BicsGenTest(TestCaseBase):
 
