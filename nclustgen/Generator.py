@@ -472,7 +472,8 @@ class Generator(metaclass=abc.ABCMeta):
         except FileNotFoundError:
             pass
 
-    def get_params(self):
+    @property
+    def params(self):
 
         """
         Returns the classes attributes.
@@ -487,7 +488,7 @@ class Generator(metaclass=abc.ABCMeta):
         --------
 
         >>> generator = BiclusterGenerator()
-        >>> generator.get_params()
+        >>> generator.params
         {'X': None, 'Y': None, 'background': ['UNIFORM'], 'clusterdistribution': [['UNIFORM', 4.0, 4.0],
         ['UNIFORM', 4.0, 4.0]], 'contiguity': 'NONE', 'dstype': 'NUMERIC', 'errors': (0.0, 0.0, 0.0),
         'generatedDataset': None, 'graph': None, 'in_memory': None, 'maxclustsperoverlappedarea': 0,
@@ -504,16 +505,11 @@ class Generator(metaclass=abc.ABCMeta):
                 for a in attributes if not (a[0].startswith('__') and a[0].endswith('__') or a[0].startswith('_'))
                 }
 
-    def get_cluster_info(self, generatedDataset=None):
+    @property
+    def cluster_info(self):
 
         """
         Returns clusters info.
-
-        Parameters
-        ----------
-
-        generatedDataset: Dataset object
-            Generated dataset (java object).
 
         Returns
         -------
@@ -525,7 +521,7 @@ class Generator(metaclass=abc.ABCMeta):
         --------
         >>> generator = BiclusterGenerator(silence=True)
         >>> generator.generate(no_return=True)
-        >>> generator.get_cluster_info()
+        >>> generator.cluster_info
         {'0': {'%Errors': '0', 'Type': 'Numeric', '%Missings': '0', '%Noise': '0', 'X': [15, 51, 63, 92],
         'Y': [7, 29, 35, 94], 'RowPattern': 'Constant', 'ColumnPattern': 'Constant',
         'Data': [['-8.61', '-8.61', '-8.61', '-8.61'], ['-8.61', '-8.61', '-8.61', '-8.61'],
@@ -534,29 +530,24 @@ class Generator(metaclass=abc.ABCMeta):
 
         """
 
-        if generatedDataset is None:
-            generatedDataset = self.generatedDataset
+        if self.generatedDataset is None:
+            return None
 
         cluster_type = {2: 'bi', 3: 'Tri'}[self._n]
-        geninfo_params = {2: [generatedDataset, False], 3: [generatedDataset]}[self._n]
+        geninfo_params = {2: [self.generatedDataset, False], 3: [self.generatedDataset]}[self._n]
 
         js = json.loads(
-            str(getattr(generatedDataset, 'get{}csInfoJSON'.format(cluster_type.capitalize()))
+            str(getattr(self.generatedDataset, 'get{}csInfoJSON'.format(cluster_type.capitalize()))
                 (*geninfo_params).getJSONObject('{}clusters'.format(cluster_type)).toString())
         )
 
         return js
 
-    def get_coverage(self, generatedDataset=None):
+    @property
+    def coverage(self):
 
         """
         Returns clusters dataset coverage.
-
-        Parameters
-        ----------
-
-        generatedDataset: Dataset object
-            Generated dataset (java object).
 
         Returns
         -------
@@ -568,15 +559,15 @@ class Generator(metaclass=abc.ABCMeta):
         --------
         >>> generator = BiclusterGenerator(silence=True)
         >>> generator.generate(no_return=True)
-        >>> generator.get_coverage()
+        >>> generator.coverage
         0.16
 
         """
+        if self.generatedDataset is None:
+            return None
 
-        if generatedDataset is None:
-            generatedDataset = self.generatedDataset
-
-        return ((generatedDataset.getSize() - generatedDataset.getBackgroundSize()) / generatedDataset.getSize()) * 100
+        return ((self.generatedDataset.getSize() - self.generatedDataset.getBackgroundSize()) /
+                self.generatedDataset.getSize()) * 100
 
     @abc.abstractmethod
     def _initialize_seed(self):
@@ -799,7 +790,7 @@ class Generator(metaclass=abc.ABCMeta):
 
         # Get clusters
 
-        js = self.get_cluster_info()
+        js = self.cluster_info
 
         keys = keys[:self._n]
 
