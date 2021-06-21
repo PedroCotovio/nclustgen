@@ -36,15 +36,15 @@ from nclustgen import BiclusterGenerator
 
 # Initialize generator
 generator = BiclusterGenerator(
-     dstype='NUMERIC',
-     patterns=[['CONSTANT', 'CONSTANT'], ['CONSTANT', 'NONE']],
-     bktype='UNIFORM',
-     in_memory=True,
-     silence=True
+    dstype='NUMERIC',
+    patterns=[['CONSTANT', 'CONSTANT'], ['CONSTANT', 'NONE']],
+    bktype='UNIFORM',
+    in_memory=True,
+    silence=True
 )
 
 # Get parameters
-generator.params
+generator.get_params()
 
 # Generate dataset
 x, y = generator.generate(nrows=50, ncols=100, nclusters=3)
@@ -61,15 +61,15 @@ from nclustgen import TriclusterGenerator
 
 # Initialize generator
 generator = TriclusterGenerator(
-     dstype='NUMERIC',
-     patterns=[['CONSTANT', 'CONSTANT', 'CONSTANT'], ['CONSTANT', 'NONE', 'NONE']],
-     bktype='UNIFORM',
-     in_memory=True,
-     silence=True
+    dstype='NUMERIC',
+    patterns=[['CONSTANT', 'CONSTANT', 'CONSTANT'], ['CONSTANT', 'NONE', 'NONE']],
+    bktype='UNIFORM',
+    in_memory=True,
+    silence=True
 )
 
 # Get parameters
-generator.params
+generator.get_params()
 
 # Generate dataset
 x, y = generator.generate(nrows=50, ncols=100, ncontexts=10, nclusters=25)

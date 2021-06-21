@@ -149,7 +149,7 @@ class GenTest(TestCaseBase):
         instance = bg(silence=True)
         instance.generate()
 
-        self.assertTrue(isinstance(instance.params, dict))
+        self.assertTrue(isinstance(instance.get_params(), dict))
         self.assertTrue(isinstance(instance.cluster_info, dict))
         self.assertTrue(isinstance(instance.coverage, float))
 

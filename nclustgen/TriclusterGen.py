@@ -52,7 +52,7 @@ class TriclusterGenerator(Generator):
         ...     in_memory=True,
         ...     silence=True
         ... )
-        >>> generator.params
+        >>> generator.get_params()
         {'X': None, 'Y': None, 'background': ['UNIFORM'], 'clusterdistribution': [['UNIFORM', 4, 4], ['UNIFORM', 4, 4],
         ['UNIFORM', 4, 4]], 'contiguity': 'NONE', 'dstype': 'NUMERIC', 'errors': (0.0, 0.0, 0.0),
         'generatedDataset': None, 'graph': None, 'in_memory': 'True', 'maxclustsperoverlappedarea': 0,

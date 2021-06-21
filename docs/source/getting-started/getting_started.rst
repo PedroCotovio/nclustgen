@@ -38,7 +38,7 @@ Biclustering Dataset
     )
 
     # Get parameters
-    generator.params
+    generator.get_params()
 
     # Generate dataset
     x, y = generator.generate(nrows=50, ncols=100, nclusters=3)
@@ -70,7 +70,7 @@ Triclustering Dataset
     )
 
     # Get parameters
-    generator.params
+    generator.get_params()
 
     # Generate dataset
     x, y = generator.generate(nrows=50, ncols=100, ncontexts=10, nclusters=25)

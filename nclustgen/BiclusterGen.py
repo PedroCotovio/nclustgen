@@ -53,7 +53,7 @@ class BiclusterGenerator(Generator):
     ...     in_memory=True,
     ...     silence=True
     ... )
-    >>> generator.params
+    >>> generator.get_params()
     {'X': None, 'Y': None, 'background': ['UNIFORM'], 'clusterdistribution': [['UNIFORM', 4, 4], ['UNIFORM', 4, 4]],
     'contiguity': 'NONE', 'dstype': 'NUMERIC', 'errors': (0.0, 0.0, 0.0), 'generatedDataset': None, 'graph': None,
     'in_memory': 'True', 'maxclustsperoverlappedarea': 0, 'maxpercofoverlappingelements': 0.0, 'maxval': 10.0,
@@ -385,7 +385,7 @@ class BiclusterGeneratorbyConfig(BiclusterGenerator):
 
     >>> from nclustgen import BiclusterGeneratorbyConfig
     >>> generator = BiclusterGeneratorbyConfig('example.json')
-    >>> generator.params
+    >>> generator.get_params()
     {'X': None, 'Y': None, 'background': ['UNIFORM'], 'clusterdistribution': [['UNIFORM', 4, 4], ['UNIFORM', 4, 4]],
     'contiguity': 'NONE', 'dstype': 'NUMERIC', 'errors': (0.0, 0.0, 0.0), 'generatedDataset': None, 'graph': None,
     'in_memory': 'True', 'maxclustsperoverlappedarea': 0, 'maxpercofoverlappingelements': 0.0, 'maxval': 10.0,

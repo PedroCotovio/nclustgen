@@ -472,8 +472,7 @@ class Generator(metaclass=abc.ABCMeta):
         except FileNotFoundError:
             pass
 
-    @property
-    def params(self):
+    def get_params(self):
 
         """
         Returns the classes attributes.
@@ -488,7 +487,7 @@ class Generator(metaclass=abc.ABCMeta):
         --------
 
         >>> generator = BiclusterGenerator()
-        >>> generator.params
+        >>> generator.get_params()
         {'X': None, 'Y': None, 'background': ['UNIFORM'], 'clusterdistribution': [['UNIFORM', 4.0, 4.0],
         ['UNIFORM', 4.0, 4.0]], 'contiguity': 'NONE', 'dstype': 'NUMERIC', 'errors': (0.0, 0.0, 0.0),
         'generatedDataset': None, 'graph': None, 'in_memory': None, 'maxclustsperoverlappedarea': 0,
