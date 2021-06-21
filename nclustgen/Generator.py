@@ -531,7 +531,7 @@ class Generator(metaclass=abc.ABCMeta):
         """
 
         if self.generatedDataset is None:
-            return None
+            return dict()
 
         cluster_type = {2: 'bi', 3: 'Tri'}[self._n]
         geninfo_params = {2: [self.generatedDataset, False], 3: [self.generatedDataset]}[self._n]
@@ -564,7 +564,7 @@ class Generator(metaclass=abc.ABCMeta):
 
         """
         if self.generatedDataset is None:
-            return None
+            return float(0)
 
         return ((self.generatedDataset.getSize() - self.generatedDataset.getBackgroundSize()) /
                 self.generatedDataset.getSize()) * 100
