@@ -393,7 +393,7 @@ class TriclusterGenerator(Generator):
             # save json
 
             with open('{}_cluster_data.json'.format(os.path.join(path, file_name)), 'w') as outfile:
-                json.dump(self.get_cluster_info(), outfile)
+                json.dump(self.cluster_info, outfile)
 
             # save txt
             with open('{}_cluster_data.txt'.format(os.path.join(path, file_name)), 'w') as outfile:
