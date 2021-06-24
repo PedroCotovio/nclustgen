@@ -250,8 +250,8 @@ class BiclusterGenerator(Generator):
         G.edata['w'] = weights
 
         # set cluster members
-        G.nodes['row'].data['c'] = th.zeros(x.shape[0])
-        G.nodes['col'].data['c'] = th.zeros(x.shape[1])
+        G.nodes['row'].data['c'] = th.zeros(x.shape[0], dtype=th.int16)
+        G.nodes['col'].data['c'] = th.zeros(x.shape[1], dtype=th.int16)
 
         if device == 'gpu':
             G = G.to('cuda:{}'.format(cuda))

@@ -289,9 +289,9 @@ class TriclusterGenerator(Generator):
         G.edges[('col', 'elem', 'ctx')].data['w'] = tensor[3]
 
         # set cluster members
-        G.nodes['row'].data['c'] = th.zeros(x.shape[1])
-        G.nodes['col'].data['c'] = th.zeros(x.shape[2])
-        G.nodes['ctx'].data['c'] = th.zeros(x.shape[0])
+        G.nodes['row'].data['c'] = th.zeros(x.shape[1], dtype=th.int16)
+        G.nodes['col'].data['c'] = th.zeros(x.shape[2], dtype=th.int16)
+        G.nodes['ctx'].data['c'] = th.zeros(x.shape[0], dtype=th.int16)
 
 
         if device == 'gpu':
