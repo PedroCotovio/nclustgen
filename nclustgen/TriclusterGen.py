@@ -35,7 +35,7 @@ from com.gtric.utils import IOUtils as io
 from java.util import ArrayList
 
 # helper function
-from .utils import tensor_value_check as tvc
+from .utils import tensor_value_check as tvc, loader
 
 
 class TriclusterGenerator(Generator):
@@ -244,7 +244,7 @@ class TriclusterGenerator(Generator):
         return concatenate(tensors, axis=1)
 
     @staticmethod
-    def _dense_to_dgl(x, device, cuda=0):
+    def _dense_to_dgl(x, device, cuda=0, nclusters=1, clust_init='zeros'):
 
         """
         Extracts a tripartite dgl graph from a numpy array
@@ -258,6 +258,11 @@ class TriclusterGenerator(Generator):
             Type of device for storing the tensor.
         cuda: int, default 0
             Index of cuda device to use. Only used if device==True.
+        nclusters: int, default 1
+            Number of clusters to be initialized in graph.
+        clust_init: str or function, default 'zeros'
+            Function to initialize clusters. If string it should be a function available in torch. Else it should point
+            to a function with inputs in form (shape, dtype).
 
         Returns
         -------
@@ -269,6 +274,7 @@ class TriclusterGenerator(Generator):
         """
 
         # set (u,v)
+        clust_init = loader(th, clust_init)
 
         tensor = th.tensor(
             [[i, j, z, elem] for z, ctx in enumerate(x) for i, row in enumerate(ctx) for j, elem in enumerate(row)]
@@ -289,10 +295,9 @@ class TriclusterGenerator(Generator):
         G.edges[('col', 'elem', 'ctx')].data['w'] = tensor[3]
 
         # set cluster members
-        G.nodes['row'].data['c'] = th.zeros(x.shape[1], dtype=th.int16)
-        G.nodes['col'].data['c'] = th.zeros(x.shape[2], dtype=th.int16)
-        G.nodes['ctx'].data['c'] = th.zeros(x.shape[0], dtype=th.int16)
-
+        for n, axis in enumerate(['ctx', 'row', 'col']):
+            for i in range(nclusters):
+                G.nodes[axis].data[i] = clust_init(x.shape[n], dtype=th.int16)
 
         if device == 'gpu':
             G = G.to('cuda:{}'.format(cuda))

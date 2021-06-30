@@ -801,7 +801,7 @@ class Generator(metaclass=abc.ABCMeta):
 
     @staticmethod
     @abc.abstractmethod
-    def _dense_to_dgl(x, device, cuda=0):
+    def _dense_to_dgl(x, device, cuda=0, nclusters=1, clust_init='zeros'):
 
         """
         Extracts a partite dgl graph from a numpy array
@@ -849,7 +849,7 @@ class Generator(metaclass=abc.ABCMeta):
         """
         pass
 
-    def to_graph(self, x=None, framework='networkx', device='cpu', cuda=0):
+    def to_graph(self, x=None, framework='networkx', device='cpu', **kwargs):
 
         """
         Returns a n-partite graph, where n==dim.
@@ -863,8 +863,8 @@ class Generator(metaclass=abc.ABCMeta):
             Backend to use to build graph.
         device: {'cpu', 'gpu'}, default 'cpu'
             Type of device for storing the tensor. Only used if framework==dgl.
-        cuda: int, default 0
-            Index of cuda device to use. Only used if device==True and framework==dgl.
+        **kwargs: any, default None
+            Additional keywords that are passed on.
 
         Returns
         -------
@@ -928,7 +928,7 @@ class Generator(metaclass=abc.ABCMeta):
                               'DGL will be used instead.')
 
             # call private method
-            self.graph = getattr(self, '_dense_to_{}'.format(framework))(x, device=device, cuda=cuda)
+            self.graph = getattr(self, '_dense_to_{}'.format(framework))(x, device=device, **kwargs)
 
             return self.graph
 

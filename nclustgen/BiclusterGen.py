@@ -35,7 +35,7 @@ from com.gbic.utils import IOUtils as io
 from java.util import ArrayList
 
 # helper function
-from .utils import tensor_value_check as tvc
+from .utils import tensor_value_check as tvc, loader
 
 
 class BiclusterGenerator(Generator):
@@ -208,7 +208,7 @@ class BiclusterGenerator(Generator):
         return vstack(tensors)
 
     @staticmethod
-    def _dense_to_dgl(x, device, cuda=0):
+    def _dense_to_dgl(x, device, cuda=0, nclusters=1, clust_init='zeros'):
 
         """
         Extracts a bipartite dgl graph from a numpy array
@@ -222,7 +222,11 @@ class BiclusterGenerator(Generator):
             Type of device for storing the tensor.
         cuda: int, default 0
             Index of cuda device to use. Only used if device==True.
-
+        nclusters: int, default 1
+            Number of clusters to be initialized in graph.
+        clust_init: str or function, default 'zeros'
+            Function to initialize clusters. If string it should be a function available in torch. Else it should point
+            to a function with inputs in form (shape, dtype).
         Returns
         -------
 
@@ -234,6 +238,7 @@ class BiclusterGenerator(Generator):
         """
 
         # set (u,v)
+        clust_init = loader(th, clust_init)
 
         tensor = th.tensor([[i, j, elem] for i, row in enumerate(x) for j, elem in enumerate(row)]).T
 
@@ -250,8 +255,10 @@ class BiclusterGenerator(Generator):
         G.edata['w'] = weights
 
         # set cluster members
-        G.nodes['row'].data['c'] = th.zeros(x.shape[0], dtype=th.int16)
-        G.nodes['col'].data['c'] = th.zeros(x.shape[1], dtype=th.int16)
+
+        for n, axis in enumerate(['row', 'col']):
+            for i in range(nclusters):
+                G.nodes[axis].data[i] = clust_init(x.shape[n], dtype=th.int16)
 
         if device == 'gpu':
             G = G.to('cuda:{}'.format(cuda))
