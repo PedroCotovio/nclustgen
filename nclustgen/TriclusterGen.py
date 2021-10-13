@@ -297,7 +297,7 @@ class TriclusterGenerator(Generator):
         # set cluster members
         for n, axis in enumerate(['ctx', 'row', 'col']):
             for i in range(nclusters):
-                G.nodes[axis].data[i] = clust_init(x.shape[n], dtype=th.int16)
+                G.nodes[axis].data[i] = clust_init(x.shape[n], dtype=th.bool)
 
         if device == 'gpu':
             G = G.to('cuda:{}'.format(cuda))
