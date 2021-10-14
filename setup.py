@@ -37,9 +37,9 @@ setup(
     description="Tool to generate biclustering and triclustering datasets",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/pepedro97/nclustgen",
+    url="https://github.com/PedroCotovio/nclustgen",
     project_urls={
-        "Bug Tracker": "https://github.com/pepedro97/nclustgen/issues",
+        "Bug Tracker": "https://github.com/PedroCotovio/nclustgen/issues",
         "Documentation": "https://nclustgen.readthedocs.org",
     },
     install_requires=[
