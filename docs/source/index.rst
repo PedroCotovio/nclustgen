@@ -20,7 +20,7 @@ This tool adds some functionalities to the original packages, for a more fluid i
 
 Source Code
 ^^^^^^^^^^^
-The source code is available at: https://github.com/pepedro97/nclustgen.
+The source code is available at: https://github.com/PedroCotovio/nclustgen.
 
 .. toctree::
    :maxdepth: 4
