@@ -55,7 +55,6 @@ class TestCaseBase(unittest.TestCase):
             raise AssertionError("File exists: %s" % str(path))
 
 
-# TODO test getters
 class GenTest(TestCaseBase):
 
     def test_silence(self):
