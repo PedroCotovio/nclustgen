@@ -3,7 +3,7 @@
 
 __author__      = "Pedro Cotovio"
 __license__     = 'GNU GPLv3'
-__version__ = "1.0.1"
+__version__ = "1.0.3"
 
 import os
 import jpype
