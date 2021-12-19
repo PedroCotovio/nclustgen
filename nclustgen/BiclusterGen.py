@@ -250,9 +250,7 @@ class BiclusterGenerator(Generator):
         G = dgl.heterograph(graph_data)
 
         # set weights
-        weights = tensor[2]
-
-        G.edata['w'] = weights
+        G.edata['w'] = tensor[2].float()
 
         # set cluster members
 
