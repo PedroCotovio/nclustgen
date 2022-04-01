@@ -1,5 +1,5 @@
 
-# Nclustgen
+# NclustGen
 
 Nclustgen is a python tool to generate biclustering and triclustering datasets programmatically.
 
