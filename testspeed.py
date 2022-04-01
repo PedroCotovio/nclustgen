@@ -5,7 +5,7 @@ import torch as th
 import json
 from tqdm import tqdm
 from time import perf_counter as pc
-from statistics import mean
+from statistics import mean, stdev
 
 
 @click.command()
@@ -169,7 +169,7 @@ def speedtest(shape=None, hidden=1, grid=None, i=10):
     for array in results.keys():
         for test in results[array].keys():
             try:
-                results[array][test] = mean(results[array][test])
+                results[array][test] = [mean(results[array][test]), stdev(results[array][test])]
             except TypeError:
                 results[array][test] = None
 

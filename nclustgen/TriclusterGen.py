@@ -290,9 +290,9 @@ class TriclusterGenerator(Generator):
         G = dgl.heterograph(graph_data)
 
         # set weights
-        G.edges[('row', 'elem', 'col')].data['w'] = tensor[3]
-        G.edges[('row', 'elem', 'ctx')].data['w'] = tensor[3]
-        G.edges[('col', 'elem', 'ctx')].data['w'] = tensor[3]
+        G.edges[('row', 'elem', 'col')].data['w'] = tensor[3].float()
+        G.edges[('row', 'elem', 'ctx')].data['w'] = tensor[3].float()
+        G.edges[('col', 'elem', 'ctx')].data['w'] = tensor[3].float()
 
         # set cluster members
         for n, axis in enumerate(['ctx', 'row', 'col']):
